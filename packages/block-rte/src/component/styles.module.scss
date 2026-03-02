@@ -1,0 +1,19 @@
+.rte_container {
+	position: relative;
+}
+
+.placeholder {
+	position: absolute;
+	color: rgb(156 163 175 / 1);
+	user-select: none;
+	pointer-events: none;
+	top: 0;
+	left: 0;
+}
+
+.content_editable {
+	outline: none;
+	p {
+		margin: 0;
+	}
+}

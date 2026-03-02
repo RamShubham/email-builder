@@ -1,0 +1,32 @@
+{
+	"id": "/",
+	"name": "Email Builder",
+	"short_name": "Email Builder",
+	"description": "A powerful email builder application for creating beautiful emails",
+	"icons": [
+		{
+			"src": "favicon.ico",
+			"sizes": "16x16 24x24 32x32 64x64",
+			"type": "image/x-icon"
+		},
+		{
+			"src": "logo192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "logo512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	],
+	"start_url": "/",
+	"display": "standalone",
+	"orientation": "portrait-primary",
+	"theme_color": "#000000",
+	"background_color": "#ffffff",
+	"categories": ["productivity", "utilities"],
+	"lang": "en"
+}

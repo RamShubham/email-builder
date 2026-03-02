@@ -1,0 +1,30 @@
+{
+	"name": "@usewaypoint/block-spacer",
+	"version": "0.0.3",
+	"description": "@usewaypoint/document compatible Spacer component",
+	"main": "./src/index.tsx",
+	"module": "./src/index.tsx",
+	"types": "./src/index.tsx",
+	"exports": {
+		".": {
+			"require": "./src/index.tsx",
+			"import": "./src/index.tsx",
+			"types": "./src/index.tsx"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "carlos@usewaypoint.com",
+	"license": "MIT",
+	"peerDependencies": {
+		"react": "^16 || ^17 || ^18",
+		"zod": "^1 || ^2 || ^3"
+	},
+	"devDependencies": {
+		"@testing-library/react": "^14.2.1"
+	}
+}

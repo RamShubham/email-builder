@@ -1,0 +1,46 @@
+.container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
+	background: rgba(38, 50, 56, 0.1);
+	backdrop-filter: blur(4px);
+	cursor: default;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.loader_container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+}
+
+.loader {
+	width: 50px;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background:
+		radial-gradient(farthest-side, #212121 94%, #0000) top/8px 8px no-repeat,
+		conic-gradient(#0000 30%, #212121);
+	-webkit-mask: radial-gradient(
+		farthest-side,
+		#0000 calc(100% - 8px),
+		#000 0
+	);
+	animation: l13 1s infinite linear;
+}
+
+@keyframes l13 {
+	100% {
+		transform: rotate(1turn);
+	}
+}
+
+.loading_text {
+	text-align: center;
+}

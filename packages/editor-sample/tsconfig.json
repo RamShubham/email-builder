@@ -1,0 +1,12 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"target": "es2015",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"outDir": "dist",
+		"lib": ["esnext", "dom"],
+		"jsx": "react-jsx"
+	},
+	"exclude": ["dist"]
+}

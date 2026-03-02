@@ -1,0 +1,47 @@
+.container:hover {
+	outline: 2px solid rgba(0, 121, 204, 0.3);
+
+	> .drag {
+		display: unset;
+	}
+}
+
+.drag {
+	display: none;
+	cursor: grab;
+	position: absolute;
+	z-index: 10;
+	right: -12px;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 0.5rem;
+	background: #2196f3;
+
+	> svg {
+		vertical-align: sub;
+	}
+}
+
+.rte_block {
+	z-index: 2 !important;
+}
+
+// Success animation for successful drops
+.success_animation {
+	animation: successPulse 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes successPulse {
+	0% {
+		transform: scale(1.1);
+		box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+	}
+	50% {
+		transform: scale(1.02);
+		box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.4);
+	}
+	100% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+	}
+}

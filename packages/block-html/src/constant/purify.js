@@ -1,0 +1,73 @@
+const ALLOWED_TAGS = [
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'p',
+	'div',
+	'span',
+	'strong',
+	'em',
+	'u',
+	's',
+	'mark',
+	'a',
+	'img',
+	'br',
+	'hr',
+	'ul',
+	'ol',
+	'li',
+	'table',
+	'thead',
+	'tbody',
+	'tr',
+	'th',
+	'td',
+	'blockquote',
+	'pre',
+	'code',
+	'b',
+];
+
+const ALLOWED_ATTR = [
+	'href',
+	'target',
+	'rel',
+	'title',
+	'alt',
+	'src',
+	'class',
+	'id',
+	'style',
+	'width',
+	'height',
+	'border',
+	'cellpadding',
+	'cellspacing',
+	'colspan',
+	'rowspan',
+];
+
+const FORBID_TAGS = [
+	'script',
+	'object',
+	'embed',
+	// 'form',
+	// 'input',
+	'button',
+	'style',
+];
+
+const FORBID_ATTR = [
+	'onerror',
+	'onload',
+	'onclick',
+	'onmouseover',
+	'onfocus',
+	'onblur',
+];
+
+export { ALLOWED_TAGS, ALLOWED_ATTR, FORBID_TAGS, FORBID_ATTR };

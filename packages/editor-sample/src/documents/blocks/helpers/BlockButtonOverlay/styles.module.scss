@@ -1,0 +1,24 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0.75rem;
+	cursor: grabbing;
+}
+
+.icon_container {
+	margin-bottom: 0.375rem;
+	width: 100%;
+	background-color: #f2f5f7;
+	display: flex;
+	justify-content: center;
+	padding: 0.5rem;
+	border: 1px solid;
+	border-color: #dce4ea;
+}
+
+.text {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	margin: 0;
+}
