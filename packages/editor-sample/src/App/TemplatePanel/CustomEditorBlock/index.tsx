@@ -1,12 +1,8 @@
-import isEmpty from 'lodash/isEmpty';
 import React from 'react';
 
-import { Send } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import EditorBlock from '../../../documents/editor/EditorBlock';
-
-import useTemplate from './useTemplate';
 
 function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSProperties }) {
   return (
@@ -22,38 +18,40 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
 
 export default CustomEditorBlock;
 
-export function AiPromptIsland() {
-  const { loading: templateLoading, prompt, setPrompt, onSubmitHandler } =
-    useTemplate();
+interface AiPromptIslandProps {
+  onActivate: (text?: string) => void;
+}
+
+export function AiPromptIsland({ onActivate }: AiPromptIslandProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const value = (e.target as HTMLInputElement).value;
+      onActivate(value || undefined);
+      (e.target as HTMLInputElement).value = '';
+    }
+  };
 
   return (
-    <div className="island flex-shrink-0" data-testid="prompt-island">
-      <div className="p-3" data-testid="prompt-field-container">
-        <div className="relative">
-          <textarea
-            placeholder="Describe your email template or enter a prompt for AI to generate..."
-            value={prompt}
-            rows={2}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                onSubmitHandler();
-              }
-            }}
-            className="w-full resize-none rounded-xl border-0 bg-gray-50/80 px-4 py-3 pr-12 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+    <div
+      className="island flex-shrink-0 cursor-text"
+      data-testid="prompt-island"
+      onClick={() => onActivate()}
+    >
+      <div className="px-3 py-2.5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+          </div>
+          <input
+            type="text"
+            placeholder="Ask AI to build your email..."
+            className="flex-1 bg-transparent border-0 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            onFocus={() => onActivate()}
             data-testid="prompt-text-field"
           />
-          <Button
-            size="icon"
-            variant="ghost"
-            disabled={templateLoading || isEmpty(prompt)}
-            onClick={onSubmitHandler}
-            className="absolute right-2 bottom-2 h-8 w-8 rounded-xl hover:bg-gray-200/60"
-            data-testid="prompt-submit-icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>

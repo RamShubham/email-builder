@@ -1,18 +1,28 @@
 # Email Builder JS (Oute Email Editor)
 
 ## Overview
-A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages.
+A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages. Features a conversational AI assistant that helps users design email templates through natural chat.
 
 ## Project Structure
 ```
+server/                   # Express AI backend (port 3001)
+  index.ts                # Express server entry point
+  ai/
+    templateAgent.ts      # OpenAI-powered conversational agent
+    systemPrompt.ts       # System prompt with block schema + examples
 packages/
-  editor-sample/        # Main React/Vite frontend app (port 5000)
-    src/                # New Tailwind+shadcn UI (rebuilt)
-    src_legacy/         # Archived legacy MUI/ODS code (do not delete)
-  email-builder/        # Core email builder library (Reader component)
-  document-core/        # Document model and block schema infrastructure
-  block-*/              # Individual email block components (pure rendering)
-  block-rte/            # Rich text editor block (FloatingMenu rebuilt)
+  editor-sample/          # Main React/Vite frontend app (port 5000)
+    src/                  # New Tailwind+shadcn UI (rebuilt)
+      App/AiChat/         # AI chat overlay components
+        AiChatOverlay.tsx  # Full-screen chat overlay
+        ChatMessage.tsx    # Message bubble component
+        ChatInput.tsx      # Chat input component
+        useAiChat.ts       # Chat state management hook
+    src_legacy/           # Archived legacy MUI/ODS code (do not delete)
+  email-builder/          # Core email builder library (Reader component)
+  document-core/          # Document model and block schema infrastructure
+  block-*/                # Individual email block components (pure rendering)
+  block-rte/              # Rich text editor block (FloatingMenu rebuilt)
 ```
 
 ## Tech Stack
@@ -24,14 +34,29 @@ packages/
 - **Toast**: Sonner
 - **Drag & Drop**: @dnd-kit
 - **Color Picker**: react-colorful
+- **AI Backend**: Express + OpenAI (via Replit AI Integrations, gpt-4.1)
+- **AI Packages**: openai, express, cors
 
 ## Running the App
-```
-pnpm --filter @usewaypoint/editor-sample run vitedev
-```
-Runs on port 5000 at `0.0.0.0`.
+Two workflows run simultaneously:
+1. **Start application**: `pnpm --filter @usewaypoint/editor-sample run vitedev` — Vite dev server on port 5000
+2. **AI Server**: `npx tsx server/index.ts` — Express AI backend on port 3001
+
+Vite proxies `/api` requests to the Express server on port 3001.
 
 For development testing, navigate to `/dev` to bypass auth.
+
+## AI Chat System
+- **Prompt Bar**: Single-row input island at bottom of canvas with sparkle icon
+- **Chat Overlay**: Full-screen frosted-glass overlay that slides up from the prompt bar
+- **Conversational Flow**: AI greets → ideates → clarifies → user confirms → template generated → "Apply to canvas" button
+- **Endpoints**:
+  - `POST /api/chat` — synchronous chat (returns full response)
+  - `POST /api/chat/stream` — streaming SSE chat (real-time chunks)
+  - `POST /api/chat/reset` — reset conversation session
+  - `GET /api/health` — health check
+- **Template Generation**: AI outputs templates wrapped in `|||TEMPLATE_START|||...|||TEMPLATE_END|||` markers, parsed by the agent
+- **OpenAI**: Uses Replit AI Integrations (env vars `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`)
 
 ## App Routes
 - `/template?q=<encoded-params>` - Edit/create email template (production auth flow)
@@ -52,6 +77,7 @@ The UI uses a floating "island" layout where each major panel is a distinct card
 - **Layout**: `p-2.5 gap-2.5` spacing (10px gaps); `h-screen w-screen` viewport container
 - **Panels**: Navbar (top), Navigator (left), Canvas (center), Inspector (right), AI Prompt (bottom of canvas) — all floating
 - **AI Prompt**: Separate floating island below the canvas (`AiPromptIsland` component), only visible on editor tab
+- **Chat Overlay**: Frosted glass overlay within the canvas island, violet gradient accents
 - **Tabs & selections**: macOS segmented control style — `bg-gray-100/80` pill container with white active pill + `shadow-sm`, `rounded-[10px]` inner pills
 - **Block library cards**: Borderless, `rounded-xl`, background-only (`bg-gray-50/80`), hover lifts with shadow
 - **Block wrappers**: Soft blue outline with `outlineOffset`, rounded corners
@@ -81,6 +107,8 @@ The `packages/block-rte/src/component/plugin/FloatingMenu/` has been rebuilt to 
 Key variables in `packages/editor-sample/.env`:
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
+- `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key (managed by Replit)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI base URL (managed by Replit)
 
 ## Deployment
 Static site deployment:
