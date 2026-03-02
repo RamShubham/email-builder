@@ -19,6 +19,7 @@ function AppRouter() {
 	return (
 		<BrowserRouter>
 			<Routes>
+				<Route path="/" element={<AuthRoute component={App} />} />
 				<Route path="/template" element={<AuthRoute component={App} />} />
 				<Route path="/asset" element={<AuthRoute component={App} />} />
 				<Route path="/dev" element={<App />} />
