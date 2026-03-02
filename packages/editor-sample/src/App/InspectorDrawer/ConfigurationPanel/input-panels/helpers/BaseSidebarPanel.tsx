@@ -1,29 +1,17 @@
 import React from 'react';
 
-import { Box, Stack, Typography } from '@mui/material';
+  type SidebarPanelProps = {
+    title: string;
+    children: React.ReactNode;
+    dataTestId?: string;
+  };
 
-type SidebarPanelProps = {
-	title: string;
-	children: React.ReactNode;
-	dataTestId?: string;
-};
-export default function BaseSidebarPanel({
-	title,
-	children,
-	dataTestId,
-}: SidebarPanelProps) {
-	return (
-		<Box p={2} data-testid={dataTestId}>
-			<Typography
-				variant="overline"
-				color="text.secondary"
-				sx={{ display: 'block', mb: 2 }}
-			>
-				{title}
-			</Typography>
-			<Stack spacing={5} mb={3}>
-				{children}
-			</Stack>
-		</Box>
-	);
-}
+  export default function BaseSidebarPanel({ title, children, dataTestId }: SidebarPanelProps) {
+    return (
+      <div className="p-4" data-testid={dataTestId}>
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">{title}</p>
+        <div className="flex flex-col gap-5 mb-4">{children}</div>
+      </div>
+    );
+  }
+  

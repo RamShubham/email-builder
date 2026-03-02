@@ -1,26 +1,29 @@
 # Email Builder JS (Oute Email Editor)
 
 ## Overview
-A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package from the email-builder-js project, customized for the Oute platform.
+A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages.
 
 ## Project Structure
 ```
 packages/
   editor-sample/        # Main React/Vite frontend app (port 5000)
-  email-builder/        # Core email builder library
-  document-core/        # Document model
-  block-*/              # Individual email block components
-  block-rte/            # Rich text editor block
-  stub-oute-tiny-auth/  # Local stub for private @oute/oute-ds.common.molecule.tiny-auth
-  stub-oute-image-picker/ # Local stub for private @oute/oute-ds.atom.image-picker
+    src/                # New Tailwind+shadcn UI (rebuilt)
+    src_legacy/         # Archived legacy MUI/ODS code (do not delete)
+  email-builder/        # Core email builder library (Reader component)
+  document-core/        # Document model and block schema infrastructure
+  block-*/              # Individual email block components (pure rendering)
+  block-rte/            # Rich text editor block (FloatingMenu rebuilt)
 ```
 
 ## Tech Stack
 - **Package Manager**: pnpm with workspaces
-- **Frontend**: React 18, Vite 5, TypeScript, Material UI
-- **State**: Zustand
+- **Frontend**: React 18, Vite 5, TypeScript
+- **UI Library**: Tailwind CSS v3 + shadcn/ui (Radix UI primitives) + Lucide React
+- **State**: Zustand (EditorContext)
 - **Routing**: React Router v7
-- **Styling**: Emotion, Sass
+- **Toast**: Sonner
+- **Drag & Drop**: @dnd-kit
+- **Color Picker**: react-colorful
 
 ## Running the App
 ```
@@ -28,32 +31,43 @@ pnpm --filter @usewaypoint/editor-sample run vitedev
 ```
 Runs on port 5000 at `0.0.0.0`.
 
-## Important Notes
+For development testing, navigate to `/dev` to bypass auth.
 
-### Private Packages (Stubs)
-Two private `@oute/` packages are not available on npm and have been replaced with local stubs:
-- `@oute/oute-ds.common.molecule.tiny-auth` → `packages/stub-oute-tiny-auth`
-- `@oute/oute-ds.atom.image-picker` → `packages/stub-oute-image-picker`
+## App Routes
+- `/template?q=<encoded-params>` - Edit/create email template (production auth flow)
+- `/asset?q=<encoded-params>` - Edit existing asset (production auth flow)
+- `/dev` - Direct access bypassing auth (development only)
+- `*` - Shows "Page not found" message
 
-The auth stub provides a no-op auth context (no actual authentication).
+## Path Aliases
+Vite and tsconfig are configured with `@` pointing to `src/`:
+- `@/components/ui/*` → `src/components/ui/*`
+- All shadcn components live in `src/components/ui/`
+- Utilities in `src/lib/utils.ts` (cn helper)
 
-### App Behavior
-This app is designed to be embedded in the Oute platform. It requires specific URL query parameters (`?q=...`) to work properly:
-- `/template?q=<encoded-params>` - Edit/create email template
-- `/asset?q=<encoded-params>` - Edit existing asset
+## Key Architectural Notes
 
-Without valid params, it redirects to `REACT_APP_WC_LANDING_URL`.
+### No MUI / No ODS
+All Material UI and oute-ds-* packages have been completely removed. All UI uses:
+- Tailwind CSS classes for layout/spacing/colors
+- shadcn/ui components for interactive elements (Radix UI under the hood)
+- Lucide React for icons
 
-### Environment Variables
-See `packages/editor-sample/.env` (copied from `.env.sample`). Key variables:
+### SDK Stub
+`oute-services-mail-sdk` is a private package. It's stubbed at `src/sdk/stubs/oute-services-mail-sdk.ts`. The stub throws errors on API calls, which are caught and handled gracefully (errors logged, loading dismissed).
+
+### Legacy Archive
+`src_legacy/` contains the complete original MUI/ODS codebase for reference. Never delete it.
+
+### block-rte FloatingMenu
+The `packages/block-rte/src/component/plugin/FloatingMenu/` has been rebuilt to use Lucide icons and plain HTML instead of ODS components.
+
+## Environment Variables
+Key variables in `packages/editor-sample/.env`:
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
-- `REACT_APP_KEYCLOAK_*` - Auth server config (not used with stub)
-
-### Package Version Fixes
-Several `oute-ds-*` packages had version constraints higher than what's published on npm. Fixed to use latest available versions.
 
 ## Deployment
-Static site deployment configured:
+Static site deployment:
 - Build: `pnpm --filter @usewaypoint/editor-sample run vitebuild`
 - Public dir: `packages/editor-sample/dist`

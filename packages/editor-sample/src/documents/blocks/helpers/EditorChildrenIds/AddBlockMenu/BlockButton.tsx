@@ -1,46 +1,26 @@
 import React from 'react';
 
-import { Box, Button, SxProps, Typography } from '@mui/material';
+  type BlockMenuButtonProps = {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+  };
 
-type BlockMenuButtonProps = {
-	label: string;
-	icon: React.ReactNode;
-	onClick: () => void;
-};
-
-const BUTTON_SX: SxProps = { p: 1.5, display: 'flex', flexDirection: 'column' };
-const ICON_SX: SxProps = {
-	mb: 0.75,
-	width: '100%',
-	bgcolor: 'cadet.200',
-	display: 'flex',
-	justifyContent: 'center',
-	p: 1,
-	border: '1px solid',
-	borderColor: 'cadet.300',
-};
-
-export default function BlockTypeButton({
-	label,
-	icon,
-	onClick,
-}: BlockMenuButtonProps) {
-	return (
-		<Button
-			sx={{
-				...BUTTON_SX,
-				'&:hover': {
-					backgroundColor: '#ECEFF1',
-				},
-			}}
-			onClick={(ev) => {
-				ev.stopPropagation();
-				onClick();
-			}}
-			data-testid={`${label.toLowerCase()}-block-button`}
-		>
-			<Box sx={ICON_SX}>{icon}</Box>
-			<Typography variant="body2">{label}</Typography>
-		</Button>
-	);
-}
+  export default function BlockTypeButton({ label, icon, onClick }: BlockMenuButtonProps) {
+    return (
+      <button
+        className="p-1.5 flex flex-col items-center hover:bg-gray-100 rounded-md transition-colors"
+        onClick={(ev) => {
+          ev.stopPropagation();
+          onClick();
+        }}
+        data-testid={`${label.toLowerCase()}-block-button`}
+      >
+        <div className="w-full bg-gray-100 flex justify-center p-1 border border-gray-200 rounded mb-1">
+          {icon}
+        </div>
+        <span className="text-xs text-gray-600">{label}</span>
+      </button>
+    );
+  }
+  

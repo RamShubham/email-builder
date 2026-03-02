@@ -1,38 +1,34 @@
 import React, { useState } from 'react';
 
-import { FileUploadOutlined } from '@mui/icons-material';
-import { IconButton, Tooltip } from '@mui/material';
+  import { FileUp } from 'lucide-react';
 
-import ImportJsonDialog from './ImportJsonDialog';
+  import { Button } from '@/components/ui/button';
+  import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-export default function ImportJson() {
-	const [open, setOpen] = useState(false);
+  import ImportJsonDialog from './ImportJsonDialog';
 
-	return (
-		<>
-			<Tooltip title="Import JSON file">
-				<IconButton
-					onClick={() => setOpen(true)}
-					data-testid="import-json-button"
-					sx={{
-						transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-						borderRadius: '0.375rem',
+  export default function ImportJson() {
+    const [open, setOpen] = useState(false);
 
-						'&:hover': {
-							transform: 'scale(1.1) translateY(-2px)',
-							backgroundColor: 'rgba(33, 33, 33, 0.1)',
+    return (
+      <>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(true)}
+              data-testid="import-json-button"
+              className="h-8 w-8"
+            >
+              <FileUp className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Import JSON file</TooltipContent>
+        </Tooltip>
 
-							'& .MuiSvgIcon-root': {
-								color: '#333',
-							},
-						},
-					}}
-				>
-					<FileUploadOutlined fontSize="small" />
-				</IconButton>
-			</Tooltip>
-
-			{open ? <ImportJsonDialog onClose={() => setOpen(false)} /> : null}
-		</>
-	);
-}
+        {open ? <ImportJsonDialog onClose={() => setOpen(false)} /> : null}
+      </>
+    );
+  }
+  

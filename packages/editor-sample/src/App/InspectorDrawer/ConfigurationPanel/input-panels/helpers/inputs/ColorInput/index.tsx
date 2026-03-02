@@ -1,23 +1,42 @@
 import React from 'react';
 
-import BaseColorInput from './BaseColorInput';
+  import BaseColorInput from './BaseColorInput';
 
-type Props = {
-	label: string;
-	onChange: (value: string) => void;
-	defaultValue: string;
-	dataTestId?: string;
-};
-export default function ColorInput(props: Props) {
-	return <BaseColorInput {...props} nullable={false} />;
-}
+  type ColorInputProps = {
+    label: string;
+    onChange: (value: string) => void;
+    defaultValue: string;
+    dataTestId?: string;
+  };
 
-type NullableProps = {
-	label: string;
-	onChange: (value: null | string) => void;
-	defaultValue: null | string;
-	dataTestId?: string;
-};
-export function NullableColorInput(props: NullableProps) {
-	return <BaseColorInput {...props} nullable />;
-}
+  export default function ColorInput({ label, onChange, defaultValue, dataTestId }: ColorInputProps) {
+    return (
+      <BaseColorInput
+        nullable={false}
+        label={label}
+        defaultValue={defaultValue}
+        onChange={onChange}
+        dataTestId={dataTestId}
+      />
+    );
+  }
+
+  type NullableColorInputProps = {
+    label: string;
+    onChange: (value: string | null) => void;
+    defaultValue: string | null;
+    dataTestId?: string;
+  };
+
+  export function NullableColorInput({ label, onChange, defaultValue, dataTestId }: NullableColorInputProps) {
+    return (
+      <BaseColorInput
+        nullable={true}
+        label={label}
+        defaultValue={defaultValue}
+        onChange={onChange}
+        dataTestId={dataTestId}
+      />
+    );
+  }
+  

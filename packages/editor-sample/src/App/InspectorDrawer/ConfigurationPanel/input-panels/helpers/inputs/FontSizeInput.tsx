@@ -1,49 +1,37 @@
 import React, { useState } from 'react';
 
-import { Stack, TextField, Typography } from '@mui/material';
+  import { Input } from '@/components/ui/input';
 
-type Props = {
-	label: string;
-	defaultValue: number;
-	onChange: (v: number) => void;
-	dataTestId?: string;
-};
-export default function FontSizeInput({
-	label,
-	defaultValue,
-	onChange,
-	dataTestId,
-}: Props) {
-	const [value, setValue] = useState(defaultValue || 16);
-	const handleChange = (value: number) => {
-		setValue(value);
-		onChange(value);
-	};
+  type Props = {
+    label: string;
+    defaultValue: number;
+    onChange: (v: number) => void;
+    dataTestId?: string;
+  };
 
-	return (
-		<Stack spacing={1} alignItems="flex-start">
-			<TextField
-				data-testid={dataTestId}
-				fullWidth
-				variant="outlined"
-				size="small"
-				value={value}
-				label={label}
-				onChange={(e) => handleChange(Number(e.target.value))}
-				InputProps={{
-					// startAdornment: <TextFieldsOutlined sx={{ fontSize: 16 }} />,
-					endAdornment: (
-						<Typography variant="body2" color="text.secondary">
-							px
-						</Typography>
-					),
-				}}
-				inputProps={{
-					min: 0,
+  export default function FontSizeInput({ label, defaultValue, onChange, dataTestId }: Props) {
+    const [value, setValue] = useState(defaultValue || 16);
 
-					type: 'number',
-				}}
-			/>
-		</Stack>
-	);
-}
+    const handleChange = (v: number) => {
+      setValue(v);
+      onChange(v);
+    };
+
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-gray-500">{label}</label>
+        <div className="relative flex items-center">
+          <Input
+            data-testid={dataTestId}
+            type="number"
+            min={0}
+            value={value}
+            onChange={(e) => handleChange(Number(e.target.value))}
+            className="pr-8 h-8 text-sm"
+          />
+          <span className="absolute right-2 text-xs text-gray-400 pointer-events-none">px</span>
+        </div>
+      </div>
+    );
+  }
+  

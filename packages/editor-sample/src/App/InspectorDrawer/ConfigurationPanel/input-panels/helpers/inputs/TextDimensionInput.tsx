@@ -1,45 +1,37 @@
 import React from 'react';
 
-import { TextField, Typography } from '@mui/material';
+  import { Input } from '@/components/ui/input';
 
-type TextDimensionInputProps = {
-	label: string;
-	defaultValue: number | null | undefined;
-	onChange: (v: number | null) => void;
-	dataTestId: string;
-};
-export default function TextDimensionInput({
-	label,
-	defaultValue,
-	onChange,
-	dataTestId,
-}: TextDimensionInputProps) {
-	const handleChange: React.ChangeEventHandler<HTMLInputElement> = (ev) => {
-		const value = parseInt(ev.target.value);
-		onChange(isNaN(value) ? null : value);
-	};
-	return (
-		<TextField
-			fullWidth
-			onChange={handleChange}
-			defaultValue={defaultValue}
-			label={label}
-			variant="standard"
-			placeholder="auto"
-			size="small"
-			InputProps={{
-				endAdornment: (
-					<Typography variant="body2" color="text.secondary">
-						px
-					</Typography>
-				),
-				inputProps: {
-					min: 0,
-					max: 500,
-					type: 'number',
-					'data-testid': dataTestId,
-				},
-			}}
-		/>
-	);
-}
+  type TextDimensionInputProps = {
+    label: string;
+    defaultValue: number | null | undefined;
+    onChange: (v: number | null) => void;
+    dataTestId: string;
+  };
+
+  export default function TextDimensionInput({ label, defaultValue, onChange, dataTestId }: TextDimensionInputProps) {
+    const handleChange: React.ChangeEventHandler<HTMLInputElement> = (ev) => {
+      const value = parseInt(ev.target.value);
+      onChange(isNaN(value) ? null : value);
+    };
+
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-gray-500">{label}</label>
+        <div className="relative flex items-center">
+          <Input
+            onChange={handleChange}
+            defaultValue={defaultValue ?? ''}
+            placeholder="auto"
+            type="number"
+            min={0}
+            max={500}
+            data-testid={dataTestId}
+            className="pr-8 h-8 text-sm"
+          />
+          <span className="absolute right-2 text-xs text-gray-400 pointer-events-none">px</span>
+        </div>
+      </div>
+    );
+  }
+  

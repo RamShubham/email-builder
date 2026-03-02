@@ -1,11 +1,11 @@
-import { Box, Typography } from '@mui/material';
+import React from 'react';
 
 import { TEditorBlock } from '../../../documents/editor/core';
 import {
-	setDocument,
-	useDocument,
-	useSelectedBlockId,
-	useVariables,
+  setDocument,
+  useDocument,
+  useSelectedBlockId,
+  useVariables,
 } from '../../../documents/editor/EditorContext';
 import { replaceTemplateVariables } from '../../../utils/replaceTemplateVariables';
 
@@ -23,145 +23,68 @@ import SpacerSidebarPanel from './input-panels/SpacerSidebarPanel';
 import TextSidebarPanel from './input-panels/TextSidebarPanel';
 
 function renderMessage(val: string) {
-	return (
-		<Box sx={{ m: 3, p: 1, border: '1px dashed', borderColor: 'divider' }}>
-			<Typography color="text.secondary">{val}</Typography>
-		</Box>
-	);
+  return (
+    <div className="m-4 p-3 border border-dashed border-gray-300 rounded-md">
+      <p className="text-sm text-gray-500">{val}</p>
+    </div>
+  );
 }
 
 export default function ConfigurationPanel() {
-	const document = useDocument();
-	const globalVariables = useVariables();
+  const document = useDocument();
+  const globalVariables = useVariables();
+  const selectedBlockId = useSelectedBlockId();
 
-	const selectedBlockId = useSelectedBlockId();
+  if (!selectedBlockId) {
+    return renderMessage('Click on a block to inspect.');
+  }
+  const block = document[selectedBlockId];
+  if (!block) {
+    return renderMessage(`Block with id ${selectedBlockId} was not found. Click on a block to reset.`);
+  }
 
-	if (!selectedBlockId) {
-		return renderMessage('Click on a block to inspect.');
-	}
-	const block = document[selectedBlockId];
-	if (!block) {
-		return renderMessage(
-			`Block with id ${selectedBlockId} was not found. Click on a block to reset.`
-		);
-	}
+  const setBlock = (conf: TEditorBlock) => {
+    setDocument({
+      [selectedBlockId]: {
+        ...conf,
+        data: {
+          ...conf.data,
+          template: conf.data.props,
+          props: replaceTemplateVariables(conf.data.props, globalVariables),
+        },
+      },
+    });
+  };
 
-	const setBlock = (conf: TEditorBlock) => {
-		setDocument({
-			[selectedBlockId]: {
-				...conf,
-				data: {
-					...conf.data,
-					template: conf.data.props,
-					props: replaceTemplateVariables(
-						conf.data.props,
-						globalVariables
-					),
-				},
-			},
-		});
-	};
+  const { data, type } = block;
+  const d = data as any;
 
-	const { data, type } = block;
-
-	switch (type) {
-		case 'Avatar':
-			return (
-				<AvatarSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Button':
-			return (
-				<ButtonSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'ColumnsContainer':
-			return (
-				<ColumnsContainerSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Container':
-			return (
-				<ContainerSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Divider':
-			return (
-				<DividerSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Heading':
-			return (
-				<HeadingSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Html':
-			return (
-				<HtmlSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Image':
-			return (
-				<ImageSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'EmailLayout':
-			return (
-				<EmailLayoutSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Spacer':
-			return (
-				<SpacerSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Text':
-			return (
-				<TextSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		case 'Rte':
-			return (
-				<RteSidebarPanel
-					key={selectedBlockId}
-					data={data}
-					setData={(data) => setBlock({ type, data })}
-				/>
-			);
-		default:
-			return <pre>{JSON.stringify(block, null, '  ')}</pre>;
-	}
+  switch (type) {
+    case 'Avatar':
+      return <AvatarSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Button':
+      return <ButtonSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'ColumnsContainer':
+      return <ColumnsContainerSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Container':
+      return <ContainerSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Divider':
+      return <DividerSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Heading':
+      return <HeadingSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Html':
+      return <HtmlSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Image':
+      return <ImageSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'EmailLayout':
+      return <EmailLayoutSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Spacer':
+      return <SpacerSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Text':
+      return <TextSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    case 'Rte':
+      return <RteSidebarPanel key={selectedBlockId} data={d} setData={(data) => setBlock({ type, data })} />;
+    default:
+      return <pre className="text-xs p-4 overflow-auto">{JSON.stringify(block, null, '  ')}</pre>;
+  }
 }
