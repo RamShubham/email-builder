@@ -23,12 +23,13 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --island-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-    --island-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --island-radius: 0.75rem;
-    --island-gap: 0.5rem;
+    --island-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03), 0 2px 6px 0 rgb(0 0 0 / 0.04), 0 0 0 1px rgb(0 0 0 / 0.03);
+    --island-shadow-md: 0 2px 4px 0 rgb(0 0 0 / 0.04), 0 6px 16px 0 rgb(0 0 0 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.03);
+    --island-radius: 1rem;
+    --island-radius-sm: 0.625rem;
+    --island-gap: 0.625rem;
   }
 }
 
@@ -42,6 +43,8 @@
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -49,6 +52,11 @@
   .island {
     @apply bg-white;
     border-radius: var(--island-radius);
+    box-shadow: var(--island-shadow);
+  }
+  .island-sm {
+    @apply bg-white;
+    border-radius: var(--island-radius-sm);
     box-shadow: var(--island-shadow);
   }
   .island-hover {
@@ -64,11 +72,11 @@
   width: 100% !important;
 }
 .react-colorful__saturation {
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   margin-bottom: 8px !important;
 }
 .react-colorful__last-control {
-  border-radius: 4px !important;
+  border-radius: 8px !important;
 }
 .react-colorful__pointer {
   width: 16px !important;

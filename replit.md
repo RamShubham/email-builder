@@ -45,17 +45,20 @@ Vite and tsconfig are configured with `@` pointing to `src/`:
 - All shadcn components live in `src/components/ui/`
 - Utilities in `src/lib/utils.ts` (cn helper)
 
-## Island Design System
+## Island Design System (macOS Sequoia-inspired)
 The UI uses a floating "island" layout where each major panel is a distinct card:
 - **Background**: Subtle slate-gray (`--background: 220 14% 96%`) shows between islands
-- **Islands**: White cards with `rounded-xl` corners and soft `box-shadow` (`.island` utility class)
-- **Layout**: `p-2 gap-2` spacing between all panels; `h-screen w-screen` viewport container
-- **Panels**: Navbar (top), Navigator (left), Canvas (center), Inspector (right) — all floating
-- **Inspector tabs**: Pill/segmented style (`bg-gray-100/80` container, white active pill)
-- **Main tabs**: Dark filled active button, ghost inactive
+- **Islands**: White cards with `border-radius: var(--island-radius)` (16px) and multi-layer macOS-style shadow (`.island` utility class)
+- **Layout**: `p-2.5 gap-2.5` spacing (10px gaps); `h-screen w-screen` viewport container
+- **Panels**: Navbar (top), Navigator (left), Canvas (center), Inspector (right), AI Prompt (bottom of canvas) — all floating
+- **AI Prompt**: Separate floating island below the canvas (`AiPromptIsland` component), only visible on editor tab
+- **Tabs & selections**: macOS segmented control style — `bg-gray-100/80` pill container with white active pill + `shadow-sm`, `rounded-[10px]` inner pills
+- **Block library cards**: Borderless, `rounded-xl`, background-only (`bg-gray-50/80`), hover lifts with shadow
 - **Block wrappers**: Soft blue outline with `outlineOffset`, rounded corners
 - **TuneMenu**: Dark pill (`bg-gray-900`) with icon buttons
-- CSS variables: `--island-shadow`, `--island-shadow-md`, `--island-radius`, `--island-gap`
+- **Save button**: Rounded-full capsule pill
+- CSS variables: `--island-shadow`, `--island-shadow-md`, `--island-radius` (1rem), `--island-radius-sm` (0.625rem), `--island-gap` (0.625rem)
+- `ISLAND_GAP` JS constant: `10` (matches `--island-gap`)
 
 ## Key Architectural Notes
 

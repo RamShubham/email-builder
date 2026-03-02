@@ -23,17 +23,17 @@ export default function MainTabsGroup() {
   const selectedMainTab = useSelectedMainTab();
 
   return (
-    <div className="flex gap-0.5 px-1 py-1.5">
+    <div className="flex items-center bg-gray-100/80 rounded-xl p-0.5 gap-0.5">
       {TABS.map(({ value, icon: Icon, label, testId }) => (
         <Tooltip key={value}>
           <TooltipTrigger asChild>
             <button
               onClick={() => setSelectedMainTab(value)}
               data-testid={testId}
-              className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all ${
+              className={`h-8 w-8 flex items-center justify-center rounded-[10px] transition-all ${
                 selectedMainTab === value
-                  ? 'bg-gray-900 text-white shadow-sm'
-                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                  ? 'bg-white text-gray-800 shadow-sm'
+                  : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />

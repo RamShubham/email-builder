@@ -55,14 +55,14 @@ export default function NavigatorDrawer() {
       data-testid="navigator-panel"
     >
       <div className="flex flex-col h-full overflow-hidden" style={{ width: NAVIGATOR_DRAWER_WIDTH }}>
-        <div className="px-4 pt-3 pb-1 flex-shrink-0">
-          <h2 className="text-sm font-semibold text-gray-900">Navigator</h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+        <div className="px-5 pt-4 pb-2 flex-shrink-0">
+          <h2 className="text-[13px] font-semibold text-gray-800 tracking-tight">Navigator</h2>
+          <p className="text-[11px] text-gray-400 mt-1">
             Drag and drop to move blocks.
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-2">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

@@ -38,36 +38,36 @@ export default function InspectorDrawer() {
       data-testid="inspector-panel"
     >
       <div className="flex flex-col h-full overflow-hidden" style={{ width: INSPECTOR_DRAWER_WIDTH }}>
-        <div className="px-2 pt-1 flex-shrink-0">
+        <div className="px-3 pt-3 pb-1 flex-shrink-0">
           <Tabs
             value={selectedSidebarTab}
             onValueChange={(v) => setSidebarTab(v as any)}
           >
-            <TabsList className="h-10 bg-gray-100/80 rounded-lg p-0.5 gap-0.5 w-full">
+            <TabsList className="h-10 bg-gray-100/80 rounded-xl p-0.5 gap-0.5 w-full">
               <TabsTrigger
                 value="blocks"
-                className="flex-1 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
+                className="flex-1 rounded-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
                 data-testid="blocks-panel-tab"
               >
                 Blocks
               </TabsTrigger>
               <TabsTrigger
                 value="styles"
-                className="flex-1 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
+                className="flex-1 rounded-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
                 data-testid="styles-panel-tab"
               >
                 Styles
               </TabsTrigger>
               <TabsTrigger
                 value="block-configuration"
-                className="flex-1 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
+                className="flex-1 rounded-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
                 data-testid="inspect-panel-tab"
               >
                 Inspect
               </TabsTrigger>
               <TabsTrigger
                 value="data"
-                className="flex-1 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
+                className="flex-1 rounded-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm h-full text-xs font-medium"
                 data-testid="data-panel-tab"
               >
                 Data

@@ -4,14 +4,11 @@ import React from 'react';
 import { Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import EditorBlock from '../../../documents/editor/EditorBlock';
 
 import useTemplate from './useTemplate';
 
 function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSProperties }) {
-  const { loading: templateLoading, prompt, setPrompt, onSubmitHandler } = useTemplate();
-
   return (
     <div className="flex flex-col h-full" data-testid="editor-tab-content">
       <div className="flex-1 overflow-auto">
@@ -19,13 +16,24 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
           <EditorBlock id="root" />
         </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="border-t border-gray-100 p-3">
-        <div className="relative" data-testid="prompt-field-container">
-          <Textarea
+export default CustomEditorBlock;
+
+export function AiPromptIsland() {
+  const { loading: templateLoading, prompt, setPrompt, onSubmitHandler } =
+    useTemplate();
+
+  return (
+    <div className="island flex-shrink-0" data-testid="prompt-island">
+      <div className="p-3" data-testid="prompt-field-container">
+        <div className="relative">
+          <textarea
             placeholder="Describe your email template or enter a prompt for AI to generate..."
             value={prompt}
-            rows={3}
+            rows={2}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -33,7 +41,7 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
                 onSubmitHandler();
               }
             }}
-            className="resize-none pr-12 text-sm"
+            className="w-full resize-none rounded-xl border-0 bg-gray-50/80 px-4 py-3 pr-12 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
             data-testid="prompt-text-field"
           />
           <Button
@@ -41,7 +49,7 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
             variant="ghost"
             disabled={templateLoading || isEmpty(prompt)}
             onClick={onSubmitHandler}
-            className="absolute right-2 bottom-2 h-8 w-8"
+            className="absolute right-2 bottom-2 h-8 w-8 rounded-xl hover:bg-gray-200/60"
             data-testid="prompt-submit-icon"
           >
             <Send className="h-4 w-4" />
@@ -51,5 +59,3 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
     </div>
   );
 }
-
-export default CustomEditorBlock;

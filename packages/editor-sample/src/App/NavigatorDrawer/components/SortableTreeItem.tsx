@@ -54,16 +54,16 @@ function SortableTreeItem({
     <div ref={setNodeRef} style={style}>
       <div
         className={cn(
-          'flex items-center gap-1 py-1 pr-2 cursor-pointer text-sm rounded-lg mx-1 transition-colors',
+          'flex items-center gap-1.5 py-1.5 pr-2.5 cursor-pointer text-sm rounded-xl transition-all duration-150',
           !isColumn && 'hover:bg-gray-100/80 group'
         )}
-        style={{ paddingLeft: `${level * 16 + 8}px` }}
+        style={{ paddingLeft: `${level * 16 + 10}px` }}
         onClick={handleClick}
       >
         <div className="flex items-center min-w-[36px]">
           {hasChildren ? (
             <button
-              className="p-0.5 mr-0.5 rounded-md hover:bg-gray-200/60 transition-all"
+              className="p-0.5 mr-1 rounded-lg hover:bg-gray-200/60 transition-all"
               style={{
                 transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -86,7 +86,7 @@ function SortableTreeItem({
 
         <span
           className={cn(
-            'flex-1 truncate text-xs',
+            'flex-1 truncate text-xs font-medium',
             !isColumn && 'text-gray-600',
             isColumn && 'text-gray-400'
           )}

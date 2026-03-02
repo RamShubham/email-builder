@@ -14,7 +14,7 @@ import {
 import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
 import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 
-import CustomEditorBlock from './CustomEditorBlock';
+import CustomEditorBlock, { AiPromptIsland } from './CustomEditorBlock';
 import DownloadJson from './DownloadJson';
 import HtmlPanel from './HtmlPanel';
 import ImportJson from './ImportJson';
@@ -49,56 +49,64 @@ export default function TemplatePanel() {
   };
 
   return (
-    <div className="island flex flex-col h-full overflow-hidden">
-      <div className="flex items-center border-b border-gray-100 flex-shrink-0">
-        <div className="flex items-center px-1.5">
-          <ToggleNavigatorPanelButton />
+    <div className="flex flex-col h-full gap-2.5">
+      <div className="island flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="flex items-center px-2 py-1.5 flex-shrink-0">
+          <div className="flex items-center px-1">
+            <ToggleNavigatorPanelButton />
+          </div>
+
+          <div className="flex-1 flex items-center">
+            <MainTabsGroup />
+          </div>
+
+          <div className="flex items-center gap-1 px-1">
+            {selectedMainTab === 'editor' && (
+              <div className="flex items-center bg-gray-100/80 rounded-xl p-0.5 gap-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${
+                        selectedScreenSize === 'desktop'
+                          ? 'bg-white shadow-sm text-gray-700'
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                      onClick={() => setSelectedScreenSize('desktop')}
+                    >
+                      <Monitor className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Desktop</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${
+                        selectedScreenSize === 'mobile'
+                          ? 'bg-white shadow-sm text-gray-700'
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                      onClick={() => setSelectedScreenSize('mobile')}
+                    >
+                      <Smartphone className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Mobile</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+            <ImportJson />
+            <DownloadJson />
+            <ToggleInspectorPanelButton />
+          </div>
         </div>
 
-        <div className="flex-1">
-          <MainTabsGroup />
-        </div>
-
-        <div className="flex items-center gap-0.5 px-2">
-          {selectedMainTab === 'editor' && (
-            <>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={selectedScreenSize === 'desktop' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-7 w-7 rounded-lg"
-                    onClick={() => setSelectedScreenSize('desktop')}
-                  >
-                    <Monitor className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Desktop</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={selectedScreenSize === 'mobile' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="h-7 w-7 rounded-lg"
-                    onClick={() => setSelectedScreenSize('mobile')}
-                  >
-                    <Smartphone className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Mobile</TooltipContent>
-              </Tooltip>
-            </>
-          )}
-          <ImportJson />
-          <DownloadJson />
-          <ToggleInspectorPanelButton />
+        <div className="flex-1 overflow-auto bg-gray-100/60 rounded-b-[1rem] mx-[1px] mb-[1px]">
+          {renderMainPanel()}
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50/50 rounded-b-xl">
-        {renderMainPanel()}
-      </div>
+      {selectedMainTab === 'editor' && <AiPromptIsland />}
     </div>
   );
 }

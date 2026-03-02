@@ -33,7 +33,7 @@ import NavigatorDrawer, { NAVIGATOR_DRAWER_WIDTH } from './NavigatorDrawer';
 import TemplatePanelLoader from './TemplateLoader';
 import TemplatePanel from './TemplatePanel';
 
-const ISLAND_GAP = 8;
+const ISLAND_GAP = 10;
 
 const conditionalModifiers: Modifier = (args) => {
   const { active, over } = args;
@@ -82,7 +82,7 @@ export default function App() {
   }, [globalVariables]);
 
   return (
-    <div className="h-screen w-screen bg-background flex flex-col overflow-hidden p-2 gap-2">
+    <div className="h-screen w-screen bg-background flex flex-col overflow-hidden p-2.5 gap-2.5">
       <Navbar />
       <DndContext
         sensors={sensors}

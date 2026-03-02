@@ -16,7 +16,7 @@ export default function ToggleNavigatorPanelButton() {
       size="icon"
       onClick={toggleSamplesDrawerOpen}
       data-testid="navigator-panel-button"
-      className="h-7 w-7 rounded-lg transition-colors"
+      className="h-7 w-7 rounded-xl transition-all hover:bg-gray-100/80"
     >
       {samplesDrawerOpen ? (
         <ChevronsLeft className="h-3.5 w-3.5" />

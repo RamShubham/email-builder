@@ -19,7 +19,7 @@ import React, { useMemo } from 'react';
             variant="ghost"
             size="icon"
             asChild
-            className="h-8 w-8"
+            className="h-7 w-7 rounded-xl"
             data-testid="download-json-button"
           >
             <a href={href} download="emailTemplate.json">
