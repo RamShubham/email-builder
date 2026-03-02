@@ -1,8 +1,11 @@
 import './styles/globals.css';
 
+import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { Toaster } from 'sonner';
 
 import AppRouter from './AppRouter';
+import { TooltipProvider } from './components/ui/tooltip';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root element not found');
@@ -16,6 +19,9 @@ root.render(
 	// 	serverUrl={process.env.REACT_APP_KEYCLOAK_AUTH_SERVER_URL}
 	// 	assetServerUrl={process.env.REACT_APP_OUTE_SERVER}
 	// >
-	<AppRouter />
+	<TooltipProvider>
+		<AppRouter />
+		<Toaster position="top-right" richColors />
+	</TooltipProvider>
 	// </TinyCommandAuthController>
 );
