@@ -9,7 +9,7 @@ declare global {
 import ReactDOM from 'react-dom/client';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import TinyCommandAuthController from '@oute/oute-ds.common.molecule.tiny-auth';
+// import TinyCommandAuthController from '@oute/oute-ds.common.molecule.tiny-auth';
 import * as Sentry from '@sentry/react';
 
 import AppRouter from './AppRouter';
@@ -68,16 +68,16 @@ initFbPixel();
 initGoogleAds();
 
 root.render(
-	<TinyCommandAuthController
-		loginUrl={process.env.REACT_APP_LOGIN_URL}
-		clientId={process.env.REACT_APP_KEYCLOAK_RESOURCE}
-		realm={process.env.REACT_APP_KEYCLOAK_REALM}
-		serverUrl={process.env.REACT_APP_KEYCLOAK_AUTH_SERVER_URL}
-		assetServerUrl={process.env.REACT_APP_OUTE_SERVER}
-	>
-		<ThemeProvider theme={theme}>
-			<CssBaseline />
-			<AppRouter />
-		</ThemeProvider>
-	</TinyCommandAuthController>
+	// <TinyCommandAuthController
+	// 	loginUrl={process.env.REACT_APP_LOGIN_URL}
+	// 	clientId={process.env.REACT_APP_KEYCLOAK_RESOURCE}
+	// 	realm={process.env.REACT_APP_KEYCLOAK_REALM}
+	// 	serverUrl={process.env.REACT_APP_KEYCLOAK_AUTH_SERVER_URL}
+	// 	assetServerUrl={process.env.REACT_APP_OUTE_SERVER}
+	// >
+	<ThemeProvider theme={theme}>
+		<CssBaseline />
+		<AppRouter />
+	</ThemeProvider>
+	// </TinyCommandAuthController>
 );
