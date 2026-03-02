@@ -17,12 +17,12 @@ export default function ToggleInspectorPanelButton() {
       size="icon"
       onClick={toggleInspectorDrawerOpen}
       data-testid="inspector-panel-button"
-      className="h-8 w-8 rounded-md transition-colors"
+      className="h-7 w-7 rounded-lg transition-colors"
     >
       {inspectorDrawerOpen ? (
-        <ChevronsRight className="h-4 w-4" />
+        <ChevronsRight className="h-3.5 w-3.5" />
       ) : (
-        <LayoutTemplate className="h-4 w-4" />
+        <LayoutTemplate className="h-3.5 w-3.5" />
       )}
     </Button>
   );

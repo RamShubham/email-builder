@@ -45,6 +45,18 @@ Vite and tsconfig are configured with `@` pointing to `src/`:
 - All shadcn components live in `src/components/ui/`
 - Utilities in `src/lib/utils.ts` (cn helper)
 
+## Island Design System
+The UI uses a floating "island" layout where each major panel is a distinct card:
+- **Background**: Subtle slate-gray (`--background: 220 14% 96%`) shows between islands
+- **Islands**: White cards with `rounded-xl` corners and soft `box-shadow` (`.island` utility class)
+- **Layout**: `p-2 gap-2` spacing between all panels; `h-screen w-screen` viewport container
+- **Panels**: Navbar (top), Navigator (left), Canvas (center), Inspector (right) — all floating
+- **Inspector tabs**: Pill/segmented style (`bg-gray-100/80` container, white active pill)
+- **Main tabs**: Dark filled active button, ghost inactive
+- **Block wrappers**: Soft blue outline with `outlineOffset`, rounded corners
+- **TuneMenu**: Dark pill (`bg-gray-900`) with icon buttons
+- CSS variables: `--island-shadow`, `--island-shadow-md`, `--island-radius`, `--island-gap`
+
 ## Key Architectural Notes
 
 ### No MUI / No ODS

@@ -15,7 +15,7 @@ function Navbar() {
   return (
     <>
       <header
-        className="flex items-center justify-between px-3 border-b border-gray-200 bg-white h-[60px] gap-16"
+        className="island flex items-center justify-between px-4 h-[52px] gap-16 flex-shrink-0"
         data-testid="navbar"
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -28,7 +28,7 @@ function Navbar() {
           </button>
 
           <button
-            className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 rounded-md px-2 py-1 transition-colors min-w-0"
+            className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors min-w-0"
             onClick={() => setOpen(true)}
             data-testid="template-name-container"
           >
@@ -38,7 +38,7 @@ function Navbar() {
             >
               {templateName || 'Untitled Template'}
             </span>
-            <Pencil className="h-4 w-4 text-gray-500 flex-shrink-0" data-testid="template-name-edit-icon" />
+            <Pencil className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" data-testid="template-name-edit-icon" />
           </button>
         </div>
 
@@ -46,10 +46,10 @@ function Navbar() {
           <Button
             onClick={() => onSaveHandler()}
             disabled={loading}
-            className="bg-gray-900 hover:bg-gray-700 text-white"
+            className="bg-gray-900 hover:bg-gray-700 text-white rounded-lg h-8 px-4 text-xs"
             data-testid="save-button"
           >
-            <Save className="h-4 w-4 mr-1" />
+            <Save className="h-3.5 w-3.5 mr-1.5" />
             SAVE
           </Button>
         </div>

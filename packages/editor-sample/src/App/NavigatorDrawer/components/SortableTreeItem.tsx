@@ -54,8 +54,8 @@ function SortableTreeItem({
     <div ref={setNodeRef} style={style}>
       <div
         className={cn(
-          'flex items-center gap-1 py-1 pr-2 cursor-pointer text-sm rounded-sm transition-colors',
-          !isColumn && 'hover:bg-accent group'
+          'flex items-center gap-1 py-1 pr-2 cursor-pointer text-sm rounded-lg mx-1 transition-colors',
+          !isColumn && 'hover:bg-gray-100/80 group'
         )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={handleClick}
@@ -63,7 +63,7 @@ function SortableTreeItem({
         <div className="flex items-center min-w-[36px]">
           {hasChildren ? (
             <button
-              className="p-0.5 mr-0.5 rounded hover:bg-blue-50 transition-all"
+              className="p-0.5 mr-0.5 rounded-md hover:bg-gray-200/60 transition-all"
               style={{
                 transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -73,13 +73,13 @@ function SortableTreeItem({
                 toggleExpanded(item.id);
               }}
             >
-              <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
+              <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
             </button>
           ) : (
             <div className="w-5" />
           )}
 
-          <span className="text-gray-500 flex items-center">
+          <span className="text-gray-400 flex items-center">
             {BLOCK_ICON_MAPPING[item.type]}
           </span>
         </div>
@@ -87,7 +87,7 @@ function SortableTreeItem({
         <span
           className={cn(
             'flex-1 truncate text-xs',
-            !isColumn && 'text-gray-700',
+            !isColumn && 'text-gray-600',
             isColumn && 'text-gray-400'
           )}
         >
@@ -97,7 +97,7 @@ function SortableTreeItem({
         {!isColumn && (
           <GripVertical
             className={cn(
-              'h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0',
+              'h-3.5 w-3.5 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0',
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             )}
             {...attributes}

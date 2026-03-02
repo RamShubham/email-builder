@@ -48,14 +48,14 @@ export default function NavigatorDrawer() {
 
   return (
     <aside
-      className="fixed left-0 top-[60px] h-[calc(100vh-60px)] border-r border-gray-200 bg-white flex flex-col overflow-hidden transition-all duration-200 z-10"
+      className="island absolute left-0 top-0 h-full flex flex-col overflow-hidden transition-all duration-200 z-10"
       style={{
         width: samplesDrawerOpen ? NAVIGATOR_DRAWER_WIDTH : 0,
       }}
       data-testid="navigator-panel"
     >
       <div className="flex flex-col h-full overflow-hidden" style={{ width: NAVIGATOR_DRAWER_WIDTH }}>
-        <div className="px-3 pt-3 pb-1 flex-shrink-0">
+        <div className="px-4 pt-3 pb-1 flex-shrink-0">
           <h2 className="text-sm font-semibold text-gray-900">Navigator</h2>
           <p className="text-xs text-gray-400 mt-0.5">
             Drag and drop to move blocks.

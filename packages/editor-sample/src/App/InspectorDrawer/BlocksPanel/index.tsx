@@ -6,7 +6,7 @@ import Block from './Block';
 function BlocksPanel() {
   return (
     <BaseSidebarPanel title="Blocks">
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-2">
         {BUTTONS.map((k, i) => (
           <Block
             key={i}

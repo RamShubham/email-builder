@@ -20,7 +20,7 @@ function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSPropertie
         </div>
       </div>
 
-      <div className="border-t border-gray-200 p-4 bg-white">
+      <div className="border-t border-gray-100 p-3">
         <div className="relative" data-testid="prompt-field-container">
           <Textarea
             placeholder="Describe your email template or enter a prompt for AI to generate..."

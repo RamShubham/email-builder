@@ -16,12 +16,12 @@ export default function ToggleNavigatorPanelButton() {
       size="icon"
       onClick={toggleSamplesDrawerOpen}
       data-testid="navigator-panel-button"
-      className="h-8 w-8 rounded-md transition-colors"
+      className="h-7 w-7 rounded-lg transition-colors"
     >
       {samplesDrawerOpen ? (
-        <ChevronsLeft className="h-4 w-4" />
+        <ChevronsLeft className="h-3.5 w-3.5" />
       ) : (
-        <Menu className="h-4 w-4" />
+        <Menu className="h-3.5 w-3.5" />
       )}
     </Button>
   );

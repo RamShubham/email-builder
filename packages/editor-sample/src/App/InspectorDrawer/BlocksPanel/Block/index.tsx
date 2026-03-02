@@ -21,12 +21,12 @@ function Block({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className="flex flex-col items-center m-1 cursor-grab active:cursor-grabbing select-none"
+      className="flex flex-col items-center cursor-grab active:cursor-grabbing select-none group"
     >
-      <div className="w-full bg-gray-100 flex justify-center p-2 border border-gray-200 rounded-md mb-1.5 hover:bg-gray-200 transition-colors">
+      <div className="w-full bg-gray-50 flex justify-center p-2.5 border border-gray-100 rounded-lg mb-1.5 group-hover:bg-gray-100 group-hover:border-gray-200 group-hover:shadow-sm transition-all duration-150">
         {icon}
       </div>
-      <span className="text-xs text-gray-600 text-center leading-tight">{label}</span>
+      <span className="text-[11px] text-gray-500 text-center leading-tight font-medium">{label}</span>
     </div>
   );
 }
