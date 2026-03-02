@@ -31,6 +31,7 @@ import React, { useRef, useState } from 'react';
             updateData({ ...data, props: { ...data.props, url } });
             urlRef.current?.setValue(url);
           }}
+          currentAlt={data.props?.alt ?? data.template?.alt}
         />
         <TextInput
           ref={urlRef}

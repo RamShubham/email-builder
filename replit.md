@@ -54,8 +54,10 @@ For development testing, navigate to `/dev` to bypass auth.
   - `POST /api/chat` — synchronous chat (returns full response)
   - `POST /api/chat/stream` — streaming SSE chat (real-time chunks)
   - `POST /api/chat/reset` — reset conversation session
+  - `POST /api/image/generate` — AI image generation (accepts `{ prompt }`, returns `{ url }` as data URL)
   - `GET /api/health` — health check
-- **Template Generation**: AI outputs templates wrapped in `|||TEMPLATE_START|||...|||TEMPLATE_END|||` markers, parsed by the agent
+- **Template Generation**: AI outputs templates wrapped in `|||TEMPLATE_START|||...|||TEMPLATE_END|||` markers, parsed by the agent. During streaming, template JSON is hidden from the chat display — users only see the conversational text.
+- **AI Image Generation**: Uses `gpt-image-1` model via Replit AI Integrations. Available in Image block inspector via "Generate with AI" button. AI templates include descriptive alt text that doubles as generation prompts.
 - **OpenAI**: Uses Replit AI Integrations (env vars `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`)
 
 ## App Routes

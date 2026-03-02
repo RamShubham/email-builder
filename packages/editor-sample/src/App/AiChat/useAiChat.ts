@@ -10,6 +10,24 @@ export interface ChatMessage {
 
 const API_BASE = '/api';
 
+const TEMPLATE_START = '|||TEMPLATE_START|||';
+const MARKER_PREFIX = '|||';
+
+function stripTemplateContent(text: string): string {
+  const idx = text.indexOf(TEMPLATE_START);
+  if (idx !== -1) return text.substring(0, idx).trim();
+
+  const lastPipe = text.lastIndexOf(MARKER_PREFIX);
+  if (lastPipe !== -1) {
+    const trailing = text.substring(lastPipe);
+    if (TEMPLATE_START.startsWith(trailing)) {
+      return text.substring(0, lastPipe).trim();
+    }
+  }
+
+  return text;
+}
+
 export function useAiChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -64,6 +82,7 @@ export function useAiChat() {
       let buffer = '';
       let fullContent = '';
       let templateData: Record<string, any> | undefined;
+      let hitTemplateMarker = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -81,16 +100,23 @@ export function useAiChat() {
 
             if (event.type === 'chunk') {
               fullContent += event.content;
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId ? { ...m, content: fullContent } : m
-                )
-              );
+
+              if (!hitTemplateMarker) {
+                const displayContent = stripTemplateContent(fullContent);
+                if (displayContent !== fullContent) {
+                  hitTemplateMarker = true;
+                }
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: displayContent || 'Building your template...' } : m
+                  )
+                );
+              }
             } else if (event.type === 'done') {
               if (event.responseType === 'template' && event.template) {
                 templateData = event.template;
               }
-              const finalContent = event.content || fullContent;
+              const finalContent = event.content || stripTemplateContent(fullContent);
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === assistantId
