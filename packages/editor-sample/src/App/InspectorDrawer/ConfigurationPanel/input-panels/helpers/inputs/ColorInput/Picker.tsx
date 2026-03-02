@@ -1,95 +1,28 @@
 import React from 'react';
-import { HexColorInput, HexColorPicker } from 'react-colorful';
 
-import { Box, Stack, SxProps } from '@mui/material';
+  import { HexColorPicker } from 'react-colorful';
 
-import Swatch from './Swatch';
+  import Swatch from './Swatch';
 
-const DEFAULT_PRESET_COLORS = [
-	'#E11D48',
-	'#DB2777',
-	'#C026D3',
-	'#9333EA',
-	'#7C3AED',
-	'#4F46E5',
-	'#2563EB',
-	'#0284C7',
-	'#0891B2',
-	'#0D9488',
-	'#059669',
-	'#16A34A',
-	'#65A30D',
-	'#CA8A04',
-	'#D97706',
-	'#EA580C',
-	'#DC2626',
-	'#FFFFFF',
-	'#FAFAFA',
-	'#F5F5F5',
-	'#E5E5E5',
-	'#D4D4D4',
-	'#A3A3A3',
-	'#737373',
-	'#525252',
-	'#404040',
-	'#262626',
-	'#171717',
-	'#0A0A0A',
-	'#000000',
-];
+  const PALETTE_COLORS = [
+    '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc',
+    '#d9d9d9', '#ffffff', '#ff0000', '#ff9900', '#ffff00', '#00ff00',
+    '#00ffff', '#0000ff', '#9900ff', '#ff00ff', '#f4cccc', '#fce5cd',
+    '#fff2cc', '#d9ead3', '#d0e0e3', '#cfe2f3', '#d9d2e9', '#ead1dc',
+    '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#9fc5e8',
+  ];
 
-const SX: SxProps = {
-	p: 1,
-	'.react-colorful__pointer ': {
-		width: 16,
-		height: 16,
-	},
-	'.react-colorful__saturation': {
-		mb: 1,
-		borderRadius: '4px',
-	},
-	'.react-colorful__last-control': {
-		borderRadius: '4px',
-	},
-	'.react-colorful__hue-pointer': {
-		width: '4px',
-		borderRadius: '4px',
-		height: 24,
-		cursor: 'col-resize',
-	},
-	'.react-colorful__saturation-pointer': {
-		cursor: 'all-scroll',
-	},
-	input: {
-		padding: 1,
-		border: '1px solid',
-		borderColor: 'grey.300',
-		borderRadius: '4px',
-		width: '100%',
-	},
-};
+  type Props = {
+    value: string;
+    onChange: (value: string) => void;
+  };
 
-type Props = {
-	value: string;
-	onChange: (v: string) => void;
-};
-export default function Picker({ value, onChange }: Props) {
-	return (
-		<Stack spacing={1} sx={SX}>
-			<HexColorPicker color={value} onChange={onChange} />
-			<Swatch
-				paletteColors={DEFAULT_PRESET_COLORS}
-				value={value}
-				onChange={onChange}
-			/>
-			<Box pt={1}>
-				<HexColorInput
-					prefixed
-					color={value}
-					onChange={onChange}
-					data-testid="inspect-panel-color-picker-input"
-				/>
-			</Box>
-		</Stack>
-	);
-}
+  export default function Picker({ value, onChange }: Props) {
+    return (
+      <div className="p-3 flex flex-col gap-3" style={{ width: 200 }}>
+        <HexColorPicker color={value} onChange={onChange} style={{ width: '100%' }} />
+        <Swatch paletteColors={PALETTE_COLORS} value={value} onChange={onChange} />
+      </div>
+    );
+  }
+  

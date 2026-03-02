@@ -1,40 +1,28 @@
-import { serverConfig } from 'oute-ds-utils';
-//import React from 'react';
+import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-// import clarity from '@microsoft/clarity';
-// import { useAuth } from '@oute/oute-ds.common.molecule.tiny-auth';
 import App from './App';
 import AuthRoute from './AuthRoute';
-import Redirect from './Redirect';
+
+function NotFound() {
+	return (
+		<div className="flex h-screen items-center justify-center">
+			<div className="text-center">
+				<h1 className="text-2xl font-semibold text-gray-900">Page not found</h1>
+				<p className="mt-2 text-sm text-gray-500">Navigate to /template or /asset with required parameters.</p>
+			</div>
+		</div>
+	);
+}
 
 function AppRouter() {
-	// const { user } = useAuth();
-
-	// useEffect(() => {
-	// 	clarity.init(process.env.REACT_APP_CLARITY_ID || '');
-	// 	clarity.identify(user.sub, user.sub, '', user.email);
-	// 	clarity.setTag('email', user.email);
-	// 	clarity.setTag('user_id', user.sub);
-	// }, [user?.sub, user?.email]);
-
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/" element={<AuthRoute component={App} />} />
-
-
-				<Route
-					path="/template"
-					element={<AuthRoute component={App} />}
-				/>
-
+				<Route path="/template" element={<AuthRoute component={App} />} />
 				<Route path="/asset" element={<AuthRoute component={App} />} />
-
-				<Route
-					path="*"
-					element={<Redirect url={serverConfig.WC_LANDING_URL} />}
-				/>
+				<Route path="/dev" element={<App />} />
+				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</BrowserRouter>
 	);

@@ -1,61 +1,58 @@
-import ODSButton from 'oute-ds-button';
-import ODSDialog from 'oute-ds-dialog';
-import ODSIcon from 'oute-ds-icon';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-import { ImagePicker } from '@oute/oute-ds.atom.image-picker';
+  import { Upload } from 'lucide-react';
 
-import { useIds } from '../../../../documents/editor/EditorContext';
+  import { Button } from '@/components/ui/button';
+  import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+  import { Input } from '@/components/ui/input';
 
-function ImagePickerPanel({ onChange }) {
-	const [isOpen, setIsOpen] = useState(false);
+  function ImagePickerPanel({ onChange }: { onChange: (url: string) => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [url, setUrl] = useState('');
 
-	const { workspaceId } = useIds();
+    const onClose = () => setIsOpen(false);
 
-	const onClose = () => setIsOpen(false);
+    const handleConfirm = () => {
+      if (url.trim()) {
+        onChange(url.trim());
+        onClose();
+      }
+    };
 
-	return (
-		<>
-			<ODSButton
-				variant="black"
-				onClick={() => setIsOpen(true)}
-				data-testid="inspect-panel-image-picker-button"
-			>
-				<ODSIcon
-					outeIconName="OUTEUploadIcon"
-					outeIconProps={{
-						sx: {
-							color: '#fff',
-						},
-					}}
-				/>
-				Upload Image
-			</ODSButton>
+    return (
+      <>
+        <Button
+          variant="default"
+          onClick={() => setIsOpen(true)}
+          data-testid="inspect-panel-image-picker-button"
+          className="gap-2"
+        >
+          <Upload className="h-4 w-4" />
+          Upload Image
+        </Button>
 
-			<ODSDialog
-				open={isOpen}
-				dialogWidth="650px"
-				dialogHeight="750px"
-				onClose={onClose}
-				draggable={false}
-				hideBackdrop={false}
-				showFullscreenIcon={false}
-				dialogTitle="Upload Image"
-				data-testid="inspect-panel-image-picker-dialog"
-				removeContentPadding={true}
-				dialogContent={
-					<ImagePicker
-						onChange={(value: any) => {
-							onChange(value.url);
-							onClose();
-						}}
-						hideEditButton={true}
-						workspaceId={workspaceId ?? ''}
-					/>
-				}
-			/>
-		</>
-	);
-}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent data-testid="inspect-panel-image-picker-dialog">
+            <DialogHeader>
+              <DialogTitle>Image URL</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 pt-2">
+              <Input
+                placeholder="https://..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={onClose}>Cancel</Button>
+                <Button onClick={handleConfirm} disabled={!url.trim()}>Confirm</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
-export default ImagePickerPanel;
+  export default ImagePickerPanel;
+  

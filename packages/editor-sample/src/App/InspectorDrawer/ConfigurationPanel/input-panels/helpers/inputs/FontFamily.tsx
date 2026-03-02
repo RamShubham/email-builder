@@ -1,48 +1,45 @@
 import React, { useState } from 'react';
 
-import { MenuItem, TextField } from '@mui/material';
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  import { FONT_FAMILIES } from '../../../../../../documents/blocks/helpers/fontFamily';
 
-import { FONT_FAMILIES } from '../../../../../../documents/blocks/helpers/fontFamily';
+  type NullableProps = {
+    label: string;
+    onChange: (value: null | string) => void;
+    defaultValue: null | string;
+    dataTestId?: string;
+  };
 
-const OPTIONS = FONT_FAMILIES.map((option) => (
-	<MenuItem
-		key={option.key}
-		value={option.key}
-		sx={{ fontFamily: option.value }}
-		data-testid={`font-family-option-${option.key}`}
-	>
-		{option.label}
-	</MenuItem>
-));
-
-type NullableProps = {
-	label: string;
-	onChange: (value: null | string) => void;
-	defaultValue: null | string;
-	dataTestId?: string;
-};
-export function NullableFontFamily({
-	label,
-	onChange,
-	defaultValue,
-	dataTestId,
-}: NullableProps) {
-	const [value, setValue] = useState(defaultValue ?? 'inherit');
-	return (
-		<TextField
-			select
-			variant="standard"
-			label={label}
-			value={value}
-			onChange={(ev) => {
-				const v = ev.target.value;
-				setValue(v);
-				onChange(v === null ? null : v);
-			}}
-			id={dataTestId}
-		>
-			<MenuItem value="inherit">Match email settings</MenuItem>
-			{OPTIONS}
-		</TextField>
-	);
-}
+  export function NullableFontFamily({ label, onChange, defaultValue, dataTestId }: NullableProps) {
+    const [value, setValue] = useState(defaultValue ?? 'inherit');
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-gray-500">{label}</label>
+        <Select
+          value={value}
+          onValueChange={(v) => {
+            setValue(v);
+            onChange(v === 'inherit' ? null : v);
+          }}
+        >
+          <SelectTrigger className="h-8 text-sm" id={dataTestId}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="inherit">Match email settings</SelectItem>
+            {FONT_FAMILIES.map((option) => (
+              <SelectItem
+                key={option.key}
+                value={option.key}
+                data-testid={`font-family-option-${option.key}`}
+                style={{ fontFamily: option.value }}
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+  

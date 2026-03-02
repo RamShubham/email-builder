@@ -1,179 +1,112 @@
-import { $getSelection, $isRangeSelection } from 'lexical';
-import ODSIcon from 'oute-ds-icon';
-import ODSPopover from 'oute-ds-popover';
-import ODSTextField from 'oute-ds-text-field';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { TOGGLE_LINK_COMMAND } from '@lexical/link';
+  import { TOGGLE_LINK_COMMAND } from '@lexical/link';
+  import { Edit2, ExternalLink, Trash2 } from 'lucide-react';
 
-import styles from './styles.module.scss';
+  import styles from './styles.module.scss';
 
-const validateUrl = (urlString: string): boolean => {
-	if (!urlString || urlString === 'https://') return false;
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
-	try {
-		new URL(urlString);
-		return true;
-	} catch {
-		return false;
-	}
-};
+  function LinkPopover({ editor, isLink, url, setUrl, anchorEl, setLinkPopoverOpen }) {
+    const [isEditing, setIsEditing] = useState(!isLink);
+    const [inputUrl, setInputUrl] = useState(url || '');
+    const isValid = !inputUrl || isValidUrl(inputUrl);
 
-const buttonSx = {
-	padding: '0.25rem !important',
-	'&:hover': {
-		backgroundColor: '#eee',
-	},
-};
+    const handleSave = () => {
+      if (!isValidUrl(inputUrl)) return;
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: inputUrl, target: '_blank' });
+      setUrl(inputUrl);
+      setLinkPopoverOpen(false);
+    };
 
-const iconSx = {
-	width: '1.5rem',
-	height: '1.5rem',
-	color: '#000000',
-};
+    const rect = anchorEl?.getBoundingClientRect?.() ?? { bottom: 0, left: 0 };
 
-function LinkPopover({
-	editor,
-	linkPopoverOpen,
-	setLinkPopoverOpen,
-	initialUrl,
-	anchorEl,
-}) {
-	const [url, setUrl] = useState(initialUrl);
-	const [isValid, setIsValid] = useState(true);
-	const [isEditing, setIsEditing] = useState<boolean>(false);
+    return (
+      <div
+        className={styles.popover}
+        style={{
+          position: 'fixed',
+          top: rect.bottom + 8,
+          left: rect.left,
+          zIndex: 10001,
+          background: '#fff',
+          border: '1px solid #e5e7eb',
+          borderRadius: 6,
+          padding: 12,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          minWidth: 260,
+        }}
+      >
+        {isEditing ? (
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              placeholder="https://..."
+              data-testid="floating-menu-link-input"
+              className="w-full border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-blue-500"
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
+              autoFocus
+            />
+            {!isValid && <span className="text-xs text-red-500">Invalid URL</span>}
+            <div className="flex gap-2 justify-end">
+              <button
+                className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
+                onClick={() => setLinkPopoverOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-2 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                onClick={handleSave}
+                disabled={!isValid || !inputUrl}
+                data-testid="floating-menu-link-save"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:underline max-w-[180px] truncate flex items-center gap-1"
+            >
+              {url}
+              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+            </a>
+            <button
+              className="p-1 rounded hover:bg-gray-100"
+              onClick={() => setIsEditing(true)}
+              data-testid="floating-menu-link-edit"
+            >
+              <Edit2 className="h-3.5 w-3.5 text-gray-600" />
+            </button>
+            <button
+              className="p-1 rounded hover:bg-gray-100"
+              onClick={() => {
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+                setLinkPopoverOpen(false);
+              }}
+              data-testid="floating-menu-link-delete"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-gray-600" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
-	const handleConfirm = () => {
-		if (!validateUrl(url)) {
-			setIsValid(false);
-			return;
-		}
-
-		let finalUrl = url;
-		if (!url.startsWith('http://') && !url.startsWith('https://')) {
-			finalUrl = `https://${url}`;
-		}
-
-		editor.update(() => {
-			const selection = $getSelection();
-			if ($isRangeSelection(selection)) {
-				editor.dispatchCommand(TOGGLE_LINK_COMMAND, finalUrl);
-			}
-		});
-		setLinkPopoverOpen(false);
-	};
-
-	useEffect(() => {
-		if (linkPopoverOpen) {
-			setUrl(initialUrl || 'https://');
-			setIsValid(true);
-			setIsEditing(!initialUrl);
-		}
-	}, [initialUrl, linkPopoverOpen]);
-
-	return (
-		<ODSPopover
-			anchorEl={anchorEl}
-			open={linkPopoverOpen}
-			onClose={() => setLinkPopoverOpen(false)}
-			anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-			// disablePortal={true}
-		>
-			<div className={styles.container}>
-				{isEditing ? (
-					<>
-						<ODSTextField
-							value={url}
-							className="black"
-							onChange={(e) => setUrl(e.target.value)}
-							placeholder="Enter URL"
-							autoFocus
-							onEnter={handleConfirm}
-						/>
-						<ODSIcon
-							outeIconName={'CheckIcon'}
-							onClick={handleConfirm}
-							outeIconProps={{
-								sx: iconSx,
-							}}
-							buttonProps={{
-								'data-testid': 'floating-menu-link-confirm',
-								sx: buttonSx,
-							}}
-						/>
-						<ODSIcon
-							outeIconName={'OUTECloseIcon'}
-							onClick={() => {
-								setLinkPopoverOpen(false);
-							}}
-							outeIconProps={{
-								sx: iconSx,
-							}}
-							buttonProps={{
-								'data-testid': 'floating-menu-link-cancel',
-								sx: buttonSx,
-							}}
-						/>
-					</>
-				) : (
-					<>
-						{/* <a
-							href="https://www.google.com"
-							target="_blank"
-							rel="noopener noreferrer"
-							style={{
-								color: 'blue',
-								textDecoration: 'underline',
-							}}
-						>
-							asd
-						</a> */}
-
-						<span
-							className={styles.link}
-							onClick={() => {
-								window.open(url, '_blank');
-							}}
-						>
-							{url}
-						</span>
-
-						<ODSIcon
-							outeIconName={'OUTEEditIcon'}
-							onClick={() => {
-								setIsEditing(true);
-							}}
-							outeIconProps={{
-								sx: iconSx,
-							}}
-							buttonProps={{
-								'data-testid': 'floating-menu-link-edit',
-								sx: buttonSx,
-							}}
-						/>
-						<ODSIcon
-							outeIconName={'OUTETrashIcon'}
-							onClick={() => {
-								editor.dispatchCommand(
-									TOGGLE_LINK_COMMAND,
-									null
-								);
-								setLinkPopoverOpen(false);
-							}}
-							outeIconProps={{
-								sx: iconSx,
-							}}
-							buttonProps={{
-								'data-testid': 'floating-menu-link-delete',
-								sx: buttonSx,
-							}}
-						/>
-					</>
-				)}
-				{!isValid && <div className={styles.error}>Invalid URL</div>}
-			</div>
-		</ODSPopover>
-	);
-}
-
-export default LinkPopover;
+  export default LinkPopover;
+  

@@ -1,29 +1,20 @@
-import Lottie, { LottieRefCurrentProps } from 'lottie-react';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-import animationData from '../../assets/lotties/tinycommand-loading.json';
-
-import styles from './styles.module.scss';
+import { useGlobalLoader } from '../../documents/editor/EditorContext';
 
 function GlobalLoader() {
-	const lottieRef = useRef<LottieRefCurrentProps>(null);
+  const isLoading = useGlobalLoader();
 
-	useEffect(() => {
-		if (lottieRef.current) {
-			lottieRef.current.setSpeed(2); // This will set the animation speed to 2x
-		}
-	}, []);
+  if (!isLoading) return null;
 
-	return (
-		<div className={styles.container}>
-			<Lottie
-				animationData={animationData}
-				loop={true}
-				style={{ height: '12rem' }}
-				lottieRef={lottieRef}
-			/>
-		</div>
-	);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+        <span className="text-sm text-gray-500">Loading...</span>
+      </div>
+    </div>
+  );
 }
 
 export default GlobalLoader;

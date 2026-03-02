@@ -1,149 +1,48 @@
-import { useState } from 'react';
+import React from 'react';
 
-import {
-	CodeOutlined,
-	DataObjectOutlined,
-	EditOutlined,
-	PreviewOutlined,
-} from '@mui/icons-material';
-import { Tab, Tabs, Tooltip } from '@mui/material';
+  import { Code, Edit, Eye, FileJson } from 'lucide-react';
 
-import {
-	setSelectedMainTab,
-	useSelectedMainTab,
-} from '../../documents/editor/EditorContext';
+  import {
+    setSelectedMainTab,
+    useSelectedMainTab,
+  } from '../../documents/editor/EditorContext';
+  import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+  } from '@/components/ui/tooltip';
 
-const getTabSx = (isHovered: boolean) => {
-	return {
-		transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-		transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-	};
-};
+  const TABS = [
+    { value: 'editor', icon: Edit, label: 'Edit', testId: 'editor-tab' },
+    { value: 'preview', icon: Eye, label: 'Preview', testId: 'preview-tab' },
+    { value: 'html', icon: Code, label: 'HTML output', testId: 'html-tab' },
+    { value: 'json', icon: FileJson, label: 'JSON output', testId: 'json-tab' },
+  ] as const;
 
-export default function MainTabsGroup() {
-	const selectedMainTab = useSelectedMainTab();
-	const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  export default function MainTabsGroup() {
+    const selectedMainTab = useSelectedMainTab();
 
-	const handleChange = (_: unknown, v: unknown) => {
-		switch (v) {
-			case 'json':
-			case 'preview':
-			case 'editor':
-			case 'html':
-				setSelectedMainTab(v);
-				return;
-			default:
-				setSelectedMainTab('editor');
-		}
-	};
-
-	const handleTabHover = (tabValue: string) => {
-		setHoveredTab(tabValue);
-	};
-
-	const handleTabLeave = () => {
-		setHoveredTab(null);
-	};
-
-	return (
-		<Tabs
-			value={selectedMainTab}
-			scrollButtons={false}
-			onChange={handleChange}
-			sx={{
-				'& .MuiTab-root': {
-					transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-
-					'&:hover': {
-						transform: 'scale(1.05)',
-						backgroundColor: 'rgba(33, 33, 33, 0.1)',
-						'& .MuiSvgIcon-root': {
-							color: '#333',
-							transform: 'scale(1.1)',
-						},
-					},
-				},
-				'& .MuiTabs-indicator': {
-					height: 2,
-					borderRadius: '2px 2px 0 0',
-					transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-					boxShadow: '0 0 8px rgba(33, 150, 243, 0.3)',
-				},
-				// Smooth color transitions
-				'& .MuiTab-root.Mui-selected': {
-					color: '#333',
-					transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-				},
-				'& .MuiTab-root:not(.Mui-selected)': {
-					color: 'text.secondary',
-					transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-				},
-			}}
-		>
-			<Tab
-				value="editor"
-				label={
-					<Tooltip title="Edit" enterDelay={300} leaveDelay={0}>
-						<EditOutlined
-							fontSize="small"
-							sx={getTabSx(hoveredTab === 'editor')}
-						/>
-					</Tooltip>
-				}
-				data-testid="editor-tab"
-				onMouseEnter={() => handleTabHover('editor')}
-				onMouseLeave={handleTabLeave}
-			/>
-			<Tab
-				value="preview"
-				label={
-					<Tooltip title="Preview" enterDelay={300} leaveDelay={0}>
-						<PreviewOutlined
-							fontSize="small"
-							sx={getTabSx(hoveredTab === 'preview')}
-						/>
-					</Tooltip>
-				}
-				data-testid="preview-tab"
-				onMouseEnter={() => handleTabHover('preview')}
-				onMouseLeave={handleTabLeave}
-			/>
-			<Tab
-				value="html"
-				label={
-					<Tooltip
-						title="HTML output"
-						enterDelay={300}
-						leaveDelay={0}
-					>
-						<CodeOutlined
-							fontSize="small"
-							sx={getTabSx(hoveredTab === 'html')}
-						/>
-					</Tooltip>
-				}
-				data-testid="html-tab"
-				onMouseEnter={() => handleTabHover('html')}
-				onMouseLeave={handleTabLeave}
-			/>
-			<Tab
-				value="json"
-				label={
-					<Tooltip
-						title="JSON output"
-						enterDelay={300}
-						leaveDelay={0}
-					>
-						<DataObjectOutlined
-							fontSize="small"
-							sx={getTabSx(hoveredTab === 'json')}
-						/>
-					</Tooltip>
-				}
-				data-testid="json-tab"
-				onMouseEnter={() => handleTabHover('json')}
-				onMouseLeave={handleTabLeave}
-			/>
-		</Tabs>
-	);
-}
+    return (
+      <div className="flex">
+        {TABS.map(({ value, icon: Icon, label, testId }) => (
+          <Tooltip key={value}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setSelectedMainTab(value)}
+                data-testid={testId}
+                className={`h-12 w-12 flex items-center justify-center transition-all hover:bg-gray-100 ${
+                  selectedMainTab === value
+                    ? 'border-b-2 border-blue-500 text-blue-600'
+                    : 'text-gray-500'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    );
+  }
+  

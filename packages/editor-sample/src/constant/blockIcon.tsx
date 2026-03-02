@@ -1,33 +1,33 @@
 import React from 'react';
 
 import {
-	AccountCircleOutlined,
-	Crop32Outlined,
-	FormatColorTextOutlined,
-	HMobiledataOutlined,
-	HorizontalRuleOutlined,
-	HtmlOutlined,
-	ImageOutlined,
-	LibraryAddOutlined,
-	NotesOutlined,
-	SmartButtonOutlined,
-	ViewColumnOutlined,
-} from '@mui/icons-material';
+  AlignLeft,
+  CircleUser,
+  Columns,
+  FileCode,
+  Heading,
+  Image,
+  Layout,
+  Minus,
+  MousePointerClick,
+  SeparatorHorizontal,
+  Type,
+} from 'lucide-react';
 
-const BLOCK_ICON_MAPPING = {
-	Heading: <HMobiledataOutlined />,
-	Text: <NotesOutlined />,
-	Button: <SmartButtonOutlined />,
-	Image: <ImageOutlined />,
-	Avatar: <AccountCircleOutlined />,
-	Divider: <HorizontalRuleOutlined />,
-	Spacer: <Crop32Outlined />,
-	Html: <HtmlOutlined />,
-	Container: <LibraryAddOutlined />,
-	ColumnsContainer: <ViewColumnOutlined />,
-	Columns: <ViewColumnOutlined />, // added because label mapping is used in block button overlay
-	Rte: <FormatColorTextOutlined />,
-	'Rich Text': <FormatColorTextOutlined />,
+const BLOCK_ICON_MAPPING: Record<string, JSX.Element> = {
+  Heading: <Heading className="h-3.5 w-3.5" />,
+  Text: <AlignLeft className="h-3.5 w-3.5" />,
+  Button: <MousePointerClick className="h-3.5 w-3.5" />,
+  Image: <Image className="h-3.5 w-3.5" />,
+  Avatar: <CircleUser className="h-3.5 w-3.5" />,
+  Divider: <Minus className="h-3.5 w-3.5" />,
+  Spacer: <SeparatorHorizontal className="h-3.5 w-3.5" />,
+  Html: <FileCode className="h-3.5 w-3.5" />,
+  Container: <Layout className="h-3.5 w-3.5" />,
+  ColumnsContainer: <Columns className="h-3.5 w-3.5" />,
+  Columns: <Columns className="h-3.5 w-3.5" />,
+  Rte: <Type className="h-3.5 w-3.5" />,
+  'Rich Text': <Type className="h-3.5 w-3.5" />,
 };
 
 export default BLOCK_ICON_MAPPING;

@@ -1,131 +1,112 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-	ChevronRight as ChevronRightIcon,
-	DragIndicator as DragIcon,
-} from '@mui/icons-material';
-import { Box, IconButton, ListItem, ListItemText } from '@mui/material';
+import { ChevronRight, GripVertical } from 'lucide-react';
 
+import { cn } from '../../../lib/utils';
 import BLOCK_ICON_MAPPING from '../../../constant/blockIcon';
 
-import styles from './SortableTreeItem.module.scss';
-
 type SortableTreeItemProps = {
-	item: {
-		id: string;
-		type: string;
-		children: any[];
-	};
-	level: number;
-	handleBlockClick: (id: string) => void;
-	toggleExpanded: (id: string) => void;
-	isExpanded: boolean;
+  item: {
+    id: string;
+    type: string;
+    children: any[];
+  };
+  level: number;
+  handleBlockClick: (id: string) => void;
+  toggleExpanded: (id: string) => void;
+  isExpanded: boolean;
 };
 
 function SortableTreeItem({
-	item,
-	level,
-	handleBlockClick,
-	toggleExpanded,
-	isExpanded,
+  item,
+  level,
+  handleBlockClick,
+  toggleExpanded,
+  isExpanded,
 }: SortableTreeItemProps) {
-	const hasChildren = item.children.length > 0;
+  const hasChildren = item.children.length > 0;
+  const isColumn = item.id.includes('column');
 
-	const {
-		attributes,
-		listeners,
-		setNodeRef,
-		transition,
-		transform,
-		isDragging,
-	} = useSortable({ id: item.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transition,
+    transform,
+    isDragging,
+  } = useSortable({ id: item.id });
 
-	// Handle selection animation
-	const handleClick = () => {
-		if (!item.id.includes('column')) {
-			handleBlockClick(item.id);
-		}
-	};
+  const handleClick = () => {
+    if (!isColumn) {
+      handleBlockClick(item.id);
+    }
+  };
 
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-		opacity: isDragging ? 0.8 : 1,
-		position: 'relative' as const,
-		zIndex: isDragging ? 999 : 1,
-	};
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.8 : 1,
+    position: 'relative' as const,
+    zIndex: isDragging ? 999 : 1,
+  };
 
-	return (
-		<div ref={setNodeRef} style={style}>
-			<ListItem
-				className={!item.id.includes('column') ? styles.container : ''}
-				sx={{
-					pl: level * 2 + 1,
-					cursor: 'pointer',
-					gap: 1,
-				}}
-				onClick={handleClick}
-			>
-				<Box
-					sx={{
-						display: 'flex',
-						alignItems: 'center',
-						minWidth: 36,
-					}}
-				>
-					{hasChildren ? (
-						<IconButton
-							size="small"
-							onClick={() => {
-								// e.stopPropagation();
-								toggleExpanded(item.id);
-							}}
-							sx={{
-								p: 0.5,
-								mr: 0.5,
-								transition:
-									'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-								transform: isExpanded
-									? 'rotate(90deg)'
-									: 'rotate(0deg)',
-								'&:hover': {
-									backgroundColor: 'rgba(33, 150, 243, 0.1)',
-									transform: isExpanded
-										? 'rotate(90deg) scale(1.1)'
-										: 'rotate(0deg) scale(1.1)',
-								},
-							}}
-						>
-							<ChevronRightIcon fontSize="small" />
-						</IconButton>
-					) : (
-						<Box sx={{ width: 20 }} /> // Spacer for alignment when no icon
-					)}
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div
+        className={cn(
+          'flex items-center gap-1 py-1 pr-2 cursor-pointer text-sm rounded-sm transition-colors',
+          !isColumn && 'hover:bg-accent group'
+        )}
+        style={{ paddingLeft: `${level * 16 + 8}px` }}
+        onClick={handleClick}
+      >
+        <div className="flex items-center min-w-[36px]">
+          {hasChildren ? (
+            <button
+              className="p-0.5 mr-0.5 rounded hover:bg-blue-50 transition-all"
+              style={{
+                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleExpanded(item.id);
+              }}
+            >
+              <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
+            </button>
+          ) : (
+            <div className="w-5" />
+          )}
 
-					{BLOCK_ICON_MAPPING[item.type]}
-				</Box>
+          <span className="text-gray-500 flex items-center">
+            {BLOCK_ICON_MAPPING[item.type]}
+          </span>
+        </div>
 
-				<ListItemText
-					primary={item.type}
-					primaryTypographyProps={{
-						variant: 'body2',
-						noWrap: true,
-					}}
-					className={!item.id.includes('column') ? styles.text : ''}
-				/>
+        <span
+          className={cn(
+            'flex-1 truncate text-xs',
+            !isColumn && 'text-gray-700',
+            isColumn && 'text-gray-400'
+          )}
+        >
+          {item.type}
+        </span>
 
-				{!item.id.includes('column') ? (
-					<DragIcon
-						fontSize="small"
-						className={styles.drag_handle}
-						sx={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-						{...attributes}
-						{...listeners}
-					/>
-				) : null}
-			</ListItem>
-		</div>
-	);
+        {!isColumn && (
+          <GripVertical
+            className={cn(
+              'h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0',
+              isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            )}
+            {...attributes}
+            {...listeners}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default SortableTreeItem;

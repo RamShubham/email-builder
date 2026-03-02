@@ -1,69 +1,55 @@
-import ODSButton from 'oute-ds-button';
-import { z } from 'zod';
+import React from 'react';
+  import { z } from 'zod';
 
-import { Box, CircularProgress } from '@mui/material';
-import { Image, ImageProps } from '@usewaypoint/block-image';
+  import { Image, ImageProps } from '@usewaypoint/block-image';
 
-import useGenerateImg from './useGenerateImg';
+  import { Button } from '@/components/ui/button';
+  import useGenerateImg from './useGenerateImg';
 
-// URL validation schema using Zod
-const urlSchema = z.string().url();
+  const urlSchema = z.string().url();
 
-function CustomImage(props: ImageProps) {
-	const { url, alt, height } = props?.props || {};
-	const { loading, generateImage } = useGenerateImg();
+  function CustomImage(props: ImageProps) {
+    const { url, alt, height } = props?.props || {};
+    const { loading, generateImage } = useGenerateImg();
 
-	// Check if URL is valid using Zod schema
-	const isUrlValid = url ? urlSchema.safeParse(url)?.success : false;
+    const isUrlValid = url ? urlSchema.safeParse(url)?.success : false;
 
-	// Show generate image CTA if URL is invalid and alt text is present
-	if (!isUrlValid && alt) {
-		return (
-			<Box
-				sx={{
-					width: '100%',
-					height: height,
-					background: '#efefef',
-					padding: '20px',
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-					gap: '10px',
-					boxSizing: 'border-box',
-				}}
-				data-testid="image-block"
-			>
-				{loading ? (
-					<div
-						style={{
-							position: 'absolute',
-							inset: 0,
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-							background: 'rgba(0, 0, 0, 0.08)',
-							zIndex: 10,
-							backdropFilter: 'blur(4px)',
-						}}
-					>
-						<CircularProgress />
-					</div>
-				) : null}
+    if (!isUrlValid && alt) {
+      return (
+        <div
+          style={{
+            width: '100%',
+            height: height as React.CSSProperties['height'],
+            background: '#efefef',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
+            boxSizing: 'border-box',
+            position: 'relative',
+          }}
+          data-testid="image-block"
+        >
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm z-10">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+            </div>
+          )}
+          <img alt={alt} src="" />
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => generateImage({ imageDescription: alt })}
+          >
+            Generate Image
+          </Button>
+        </div>
+      );
+    }
 
-				<img alt={alt} src="" />
+    return <Image {...props} />;
+  }
 
-				<ODSButton
-					variant="black"
-					size="sm"
-					onClick={() => generateImage({ imageDescription: alt })}
-				>
-					Generate Image
-				</ODSButton>
-			</Box>
-		);
-	}
-
-	return <Image {...props} />;
-}
-
-export default CustomImage;
+  export default CustomImage;
+  

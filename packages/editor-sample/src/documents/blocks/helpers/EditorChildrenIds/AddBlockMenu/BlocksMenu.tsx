@@ -1,66 +1,50 @@
-import { Box, Menu } from '@mui/material';
+import React from 'react';
 
-import { BUTTONS } from '../../../../../constant/buttons';
-import { TEditorBlock } from '../../../../editor/core';
+  import { Popover, PopoverContent } from '@/components/ui/popover';
+  import { BUTTONS } from '../../../../../constant/buttons';
+  import { TEditorBlock } from '../../../../editor/core';
 
-import BlockButton from './BlockButton';
+  import BlockButton from './BlockButton';
 
-type BlocksMenuProps = {
-	anchorEl: HTMLElement | null;
-	setAnchorEl: (v: HTMLElement | null) => void;
-	onSelect: (block: TEditorBlock) => void;
-};
-export default function BlocksMenu({
-	anchorEl,
-	setAnchorEl,
-	onSelect,
-}: BlocksMenuProps) {
-	const onClose = () => {
-		setAnchorEl(null);
-	};
+  type BlocksMenuProps = {
+    anchorEl: HTMLElement | null;
+    setAnchorEl: (v: HTMLElement | null) => void;
+    onSelect: (block: TEditorBlock) => void;
+  };
 
-	const onClick = (block: TEditorBlock) => {
-		onSelect(block);
-		setAnchorEl(null);
-	};
+  export default function BlocksMenu({ anchorEl, setAnchorEl, onSelect }: BlocksMenuProps) {
+    const onClose = () => setAnchorEl(null);
+    const onClick = (block: TEditorBlock) => {
+      onSelect(block);
+      setAnchorEl(null);
+    };
 
-	if (anchorEl === null) {
-		return null;
-	}
+    if (anchorEl === null) return null;
 
-	return (
-		<Menu
-			open
-			anchorEl={anchorEl}
-			onClose={onClose}
-			anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-			slotProps={{
-				paper: {
-					style: {
-						borderRadius: '6px',
-						boxShadow: '0px 6px 12px 0px rgba(0, 0, 0, 0.1)',
-						border: '0.75px solid #CFD8DC',
-					},
-				},
-			}}
-		>
-			<Box
-				sx={{
-					p: 1,
-					display: 'grid',
-					gridTemplateColumns: '1fr 1fr 1fr 1fr',
-				}}
-			>
-				{BUTTONS.map((k, i) => (
-					<BlockButton
-						key={i}
-						label={k.label}
-						icon={k.icon}
-						onClick={() => onClick(k.block())}
-					/>
-				))}
-			</Box>
-		</Menu>
-	);
-}
+    return (
+      <Popover open onOpenChange={(open) => { if (!open) onClose(); }}>
+        <PopoverContent
+          className="p-2 w-auto"
+          style={{
+            position: 'fixed',
+            top: anchorEl.getBoundingClientRect().bottom + 4,
+            left: anchorEl.getBoundingClientRect().left,
+            zIndex: 9999,
+          }}
+          onInteractOutside={onClose}
+        >
+          <div className="grid grid-cols-4 gap-1">
+            {BUTTONS.map((k, i) => (
+              <BlockButton
+                key={i}
+                label={k.label}
+                icon={k.icon}
+                onClick={() => onClick(k.block())}
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+  

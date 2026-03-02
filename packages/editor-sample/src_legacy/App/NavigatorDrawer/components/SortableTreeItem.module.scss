@@ -1,0 +1,33 @@
+.container {
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&:hover {
+		background-color: rgba(33, 150, 243, 0.04);
+		box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+		transform: scale(1.02);
+
+		.drag_handle {
+			color: #1976d2;
+		}
+	}
+}
+
+.text {
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&:hover {
+		color: #1976d2;
+	}
+}
+
+.drag_handle {
+	cursor: grab;
+	color: #d6d6d6;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&:active {
+		cursor: 'grabbing';
+		transform: 'scale(0.9)';
+	}
+}

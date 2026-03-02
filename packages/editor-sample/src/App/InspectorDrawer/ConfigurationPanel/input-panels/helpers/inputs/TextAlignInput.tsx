@@ -1,47 +1,33 @@
 import React, { useState } from 'react';
 
-import {
-	FormatAlignCenterOutlined,
-	FormatAlignLeftOutlined,
-	FormatAlignRightOutlined,
-} from '@mui/icons-material';
-import { ToggleButton } from '@mui/material';
+  import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react';
 
-import RadioGroupInput from './RadioGroupInput';
+  import RadioGroupInput, { RadioOption } from './RadioGroupInput';
 
-type Props = {
-	label: string;
-	defaultValue: string | null;
-	onChange: (value: string | null) => void;
-	dataTestId?: string;
-};
-export default function TextAlignInput({
-	label,
-	defaultValue,
-	onChange,
-	dataTestId,
-}: Props) {
-	const [value, setValue] = useState(defaultValue ?? 'left');
+  type Props = {
+    label: string;
+    defaultValue: string | null;
+    onChange: (value: string | null) => void;
+    dataTestId?: string;
+  };
 
-	return (
-		<RadioGroupInput
-			dataTestId={dataTestId}
-			label={label}
-			defaultValue={value}
-			onChange={(value) => {
-				setValue(value);
-				onChange(value);
-			}}
-		>
-			<ToggleButton value="left">
-				<FormatAlignLeftOutlined fontSize="small" />
-			</ToggleButton>
-			<ToggleButton value="center">
-				<FormatAlignCenterOutlined fontSize="small" />
-			</ToggleButton>
-			<ToggleButton value="right">
-				<FormatAlignRightOutlined fontSize="small" />
-			</ToggleButton>
-		</RadioGroupInput>
-	);
-}
+  export default function TextAlignInput({ label, defaultValue, onChange, dataTestId }: Props) {
+    const [value, setValue] = useState(defaultValue ?? 'left');
+
+    return (
+      <RadioGroupInput
+        dataTestId={dataTestId}
+        label={label}
+        defaultValue={value}
+        onChange={(value) => {
+          setValue(value);
+          onChange(value);
+        }}
+      >
+        <RadioOption value="left"><AlignLeft className="h-3.5 w-3.5" /></RadioOption>
+        <RadioOption value="center"><AlignCenter className="h-3.5 w-3.5" /></RadioOption>
+        <RadioOption value="right"><AlignRight className="h-3.5 w-3.5" /></RadioOption>
+      </RadioGroupInput>
+    );
+  }
+  

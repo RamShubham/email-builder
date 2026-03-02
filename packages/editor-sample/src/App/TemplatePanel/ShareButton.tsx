@@ -1,37 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { IosShareOutlined } from '@mui/icons-material';
-import { IconButton, Snackbar, Tooltip } from '@mui/material';
 
-import { useDocument } from '../../documents/editor/EditorContext';
+  import { Share2 } from 'lucide-react';
+  import { toast } from 'sonner';
 
-export default function ShareButton() {
-  const document = useDocument();
-  const [message, setMessage] = useState<string | null>(null);
+  import { Button } from '@/components/ui/button';
+  import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+  import { useDocument } from '../../documents/editor/EditorContext';
 
-  const onClick = async () => {
-    const c = encodeURIComponent(JSON.stringify(document));
-    location.hash = `#code/${btoa(c)}`;
-    setMessage('The URL was updated. Copy it to share your current template.');
-  };
+  export default function ShareButton() {
+    const document = useDocument();
 
-  const onClose = () => {
-    setMessage(null);
-  };
+    const onClick = async () => {
+      const c = encodeURIComponent(JSON.stringify(document));
+      location.hash = `#code/${btoa(c)}`;
+      toast.success('The URL was updated. Copy it to share your current template.');
+    };
 
-  return (
-    <>
-      <IconButton onClick={onClick}>
-        <Tooltip title="Share current template">
-          <IosShareOutlined fontSize="small" />
-        </Tooltip>
-      </IconButton>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        open={message !== null}
-        onClose={onClose}
-        message={message}
-      />
-    </>
-  );
-}
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" onClick={onClick} className="h-8 w-8">
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Share current template</TooltipContent>
+      </Tooltip>
+    );
+  }
+  

@@ -1,10 +1,11 @@
+import React from 'react';
 import { TEditorBlock } from '../documents/editor/core';
 
 import BLOCK_ICON_MAPPING from './blockIcon';
 
 type TButtonProps = {
 	label: string;
-	icon: JSX.Element;
+	icon: React.ReactNode;
 	block: () => TEditorBlock;
 };
 
