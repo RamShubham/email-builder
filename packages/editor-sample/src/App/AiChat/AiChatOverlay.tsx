@@ -50,31 +50,31 @@ export default function AiChatOverlay({
   if (!open) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center chat-overlay-enter">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-end chat-overlay-enter">
       <div
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-[1rem]"
+        className="absolute inset-0 bg-white/40 backdrop-blur-[6px] rounded-[1rem]"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-[480px] max-h-[70vh] flex flex-col ai-chat-card mx-4 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+      <div className="relative w-full max-w-[520px] h-[55%] min-h-[320px] flex flex-col bg-white rounded-t-2xl overflow-hidden ai-chat-panel mb-0">
+        <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center ai-icon-glow">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <Sparkles className="w-3 h-3 text-white" />
             </div>
-            <span className="text-sm font-semibold text-gray-800">AI Email Builder</span>
+            <span className="text-[13px] font-semibold text-gray-800">AI Email Builder</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={onResetChat}
-                  className="h-8 w-8 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100/80"
+                  className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100/80"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>New conversation</TooltipContent>
@@ -86,9 +86,9 @@ export default function AiChatOverlay({
                   size="icon"
                   variant="ghost"
                   onClick={onClose}
-                  className="h-8 w-8 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100/80"
+                  className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100/80"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Close</TooltipContent>
@@ -96,15 +96,15 @@ export default function AiChatOverlay({
           </div>
         </div>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+        <div className="w-full h-px bg-gray-100" />
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
           {messages.map((msg) => (
             <ChatMessageComponent key={msg.id} message={msg} onApplyTemplate={handleApply} />
           ))}
         </div>
 
-        <div className="flex-shrink-0 px-4 pb-4 pt-2">
+        <div className="flex-shrink-0 px-4 pb-3 pt-1.5">
           <ChatInput onSend={onSendMessage} disabled={isLoading} />
         </div>
       </div>
