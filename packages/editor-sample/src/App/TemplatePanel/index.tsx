@@ -145,7 +145,7 @@ export default function TemplatePanel() {
         />
       </div>
 
-      {selectedMainTab === 'editor' && <AiPromptIsland onActivate={handleActivateChat} />}
+      {selectedMainTab === 'editor' && !chatOpen && <AiPromptIsland onActivate={handleActivateChat} />}
     </div>
   );
 }

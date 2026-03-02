@@ -33,6 +33,15 @@ export default function AiChatOverlay({
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
   const handleApply = (template: Record<string, any>) => {
     onApplyTemplate(template);
     onClose();
@@ -41,13 +50,16 @@ export default function AiChatOverlay({
   if (!open) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col chat-overlay-enter">
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-xl rounded-[1rem]" />
+    <div className="absolute inset-0 z-50 flex items-center justify-center chat-overlay-enter">
+      <div
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-[1rem]"
+        onClick={onClose}
+      />
 
-      <div className="relative flex flex-col h-full">
+      <div className="relative w-full max-w-[480px] max-h-[70vh] flex flex-col ai-chat-card mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center ai-icon-glow">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-semibold text-gray-800">AI Email Builder</span>
@@ -84,9 +96,9 @@ export default function AiChatOverlay({
           </div>
         </div>
 
-        <div className="w-full h-px bg-gray-200/60" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
           {messages.map((msg) => (
             <ChatMessageComponent key={msg.id} message={msg} onApplyTemplate={handleApply} />
           ))}

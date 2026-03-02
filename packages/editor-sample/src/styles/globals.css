@@ -123,19 +123,61 @@
   50% { background-position: 100% 50%; }
 }
 
-/* Chat overlay animations */
-.chat-overlay-enter {
-  animation: chat-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* AI chat card */
+.ai-chat-card {
+  background: white;
+  border-radius: var(--island-radius);
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.15),
+    0 0 20px 0 rgba(139, 92, 246, 0.08),
+    0 8px 32px -4px rgba(0, 0, 0, 0.12),
+    0 24px 48px -8px rgba(0, 0, 0, 0.08);
+  animation: ai-card-glow 4s ease-in-out infinite alternate;
 }
 
-@keyframes chat-slide-up {
+@keyframes ai-card-glow {
+  0% {
+    box-shadow:
+      0 0 0 1px rgba(139, 92, 246, 0.15),
+      0 0 20px 0 rgba(139, 92, 246, 0.06),
+      0 8px 32px -4px rgba(0, 0, 0, 0.12),
+      0 24px 48px -8px rgba(0, 0, 0, 0.08);
+  }
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(139, 92, 246, 0.25),
+      0 0 28px 0 rgba(139, 92, 246, 0.12),
+      0 8px 32px -4px rgba(0, 0, 0, 0.12),
+      0 24px 48px -8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.ai-icon-glow {
+  box-shadow: 0 0 10px 2px rgba(139, 92, 246, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-chat-card {
+    animation: none;
+  }
+  .chat-overlay-enter {
+    animation: none;
+  }
+}
+
+/* Chat overlay animations */
+.chat-overlay-enter {
+  animation: chat-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes chat-scale-in {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: scale(0.95) translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
