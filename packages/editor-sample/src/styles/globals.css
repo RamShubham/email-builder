@@ -38,6 +38,7 @@
     @apply border-border;
     box-sizing: border-box;
   }
+
   body {
     @apply bg-background text-foreground;
     margin: 0;
@@ -54,14 +55,17 @@
     border-radius: var(--island-radius);
     box-shadow: var(--island-shadow);
   }
+
   .island-sm {
     @apply bg-white;
     border-radius: var(--island-radius-sm);
     box-shadow: var(--island-shadow);
   }
+
   .island-hover {
     @apply transition-shadow duration-200;
   }
+
   .island-hover:hover {
     box-shadow: var(--island-shadow-md);
   }
@@ -71,17 +75,21 @@
 .react-colorful {
   width: 100% !important;
 }
+
 .react-colorful__saturation {
   border-radius: 8px !important;
   margin-bottom: 8px !important;
 }
+
 .react-colorful__last-control {
   border-radius: 8px !important;
 }
+
 .react-colorful__pointer {
   width: 16px !important;
   height: 16px !important;
 }
+
 .react-colorful__hue-pointer {
   width: 4px !important;
   border-radius: 4px !important;
@@ -102,15 +110,18 @@
   opacity: 0;
   transform: translateX(20px);
 }
+
 .fade-enter-active {
   opacity: 1;
   transform: translateX(0);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .fade-exit {
   opacity: 1;
   transform: translateX(0);
 }
+
 .fade-exit-active {
   opacity: 0;
   transform: translateX(-20px);
@@ -119,8 +130,15 @@
 
 /* Gradient border animation for AI prompt field */
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* AI chat panel — bottom-anchored */
@@ -147,6 +165,7 @@
     opacity: 0;
     transform: translateY(24px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -155,10 +174,14 @@
 
 /* Typing indicator */
 @keyframes typing-bounce {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
     opacity: 0.4;
   }
+
   30% {
     transform: translateY(-4px);
     opacity: 1;
@@ -176,36 +199,43 @@
   margin: 0.67em 0;
   line-height: 1.2;
 }
+
 .email-markdown h2 {
   font-size: 1.5em;
   font-weight: bold;
   margin: 0.83em 0;
   line-height: 1.3;
 }
+
 .email-markdown h3 {
   font-size: 1.25em;
   font-weight: bold;
   margin: 1em 0;
   line-height: 1.4;
 }
+
 .email-markdown h4 {
   font-size: 1em;
   font-weight: bold;
   margin: 1.33em 0;
 }
+
 .email-markdown h5 {
   font-size: 0.875em;
   font-weight: 600;
   margin: 1.67em 0;
 }
+
 .email-markdown h6 {
   font-size: 0.75em;
   font-weight: 600;
   margin: 2.33em 0;
 }
+
 .email-markdown p {
   margin: 1em 0;
 }
+
 .email-markdown p:first-child,
 .email-markdown h1:first-child,
 .email-markdown h2:first-child,
@@ -215,6 +245,7 @@
 .email-markdown h6:first-child {
   margin-top: 0;
 }
+
 .email-markdown p:last-child,
 .email-markdown h1:last-child,
 .email-markdown h2:last-child,
@@ -224,31 +255,37 @@
 .email-markdown h6:last-child {
   margin-bottom: 0;
 }
+
 .email-markdown ul {
   list-style-type: disc;
   padding-left: 1.5em;
   margin: 1em 0;
 }
+
 .email-markdown ol {
   list-style-type: decimal;
   padding-left: 1.5em;
   margin: 1em 0;
 }
+
 .email-markdown li {
   margin: 0.25em 0;
 }
+
 .email-markdown blockquote {
   border-left: 3px solid #d1d5db;
   padding-left: 1em;
   margin: 1em 0;
   color: #6b7280;
 }
+
 .email-markdown code {
   background: #f3f4f6;
   padding: 0.15em 0.4em;
   border-radius: 3px;
   font-size: 0.9em;
 }
+
 .email-markdown pre {
   background: #f3f4f6;
   padding: 1em;
@@ -256,21 +293,28 @@
   overflow-x: auto;
   margin: 1em 0;
 }
+
 .email-markdown pre code {
   background: none;
   padding: 0;
 }
+
 .email-markdown hr {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 1.5em 0;
 }
-.email-markdown strong, .email-markdown b {
+
+.email-markdown strong,
+.email-markdown b {
   font-weight: bold;
 }
-.email-markdown em, .email-markdown i {
+
+.email-markdown em,
+.email-markdown i {
   font-style: italic;
 }
+
 .email-markdown a {
   color: #2563eb;
   text-decoration: underline;
@@ -281,11 +325,18 @@
   padding-inline-start: 1.5em;
   margin: 0.5em 0;
 }
+
 .editor-container ol {
   list-style-type: decimal;
   padding-inline-start: 1.5em;
   margin: 0.5em 0;
 }
+
 .editor-container li {
   display: list-item;
+}
+
+.editor-container a {
+  color: #2563eb;
+  text-decoration: underline;
 }
