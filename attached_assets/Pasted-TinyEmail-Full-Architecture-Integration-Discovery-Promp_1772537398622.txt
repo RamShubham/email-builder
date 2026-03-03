@@ -1,0 +1,191 @@
+TinyEmail — Full Architecture & Integration Discovery Prompt
+Who Is Asking and Why
+I am working on a separate Replit project called TinyCommand AI. TinyCommand AI is an AI-powered system architect that lets users describe business needs in natural language, and then plans and builds interconnected digital assets — Forms, Workflows, Tables, Emails, and AI Agents — through a conversational interface with a visual Command Centre canvas.
+
+Our tech stack:
+
+Frontend: React 19, Vite, TailwindCSS v4, shadcn/ui, GoJS for canvas views
+Backend: Express.js, Node.js
+Database: PostgreSQL with Drizzle ORM + pgvector extension
+AI: OpenAI GPT-4o-mini with tool-calling (function calling)
+Embeddings: OpenAI text-embedding-3-small (1536 dimensions), stored in PostgreSQL via pgvector, searched via cosine similarity
+What we need to do: We need to deeply integrate TinyCommand AI with TinyEmail so that:
+
+When our AI builds an "Email" asset, it can push that email template/campaign into TinyEmail
+When our AI builds a "Workflow" that includes email-sending steps, it can configure those steps to use TinyEmail's sending infrastructure
+We can embed TinyEmail's visual email builder/editor inside our workspace (via iframe or similar)
+We can create an email-specific embedding/knowledge base in TinyCommand AI that understands all of TinyEmail's capabilities, components, template structures, and merge fields — so our AI can intelligently generate email configurations without hallucinating
+We can read back analytics/tracking data from TinyEmail into our workspace
+To build this integration, I need you to provide an exhaustive technical documentation of the TinyEmail project. Please answer every section below in as much detail as possible. Use actual code snippets, actual field names, actual endpoint paths, actual JSON structures. Do not summarize — be specific and complete.
+
+SECTION 1: Overall Architecture
+What is TinyEmail's overall tech stack? (Frontend framework, backend language/framework, database, cache layer, queue system, etc.)
+What is the project folder structure? List the top-level directories and their purpose.
+How is the project deployed? (Docker, serverless, traditional server, Replit deployment, etc.)
+What external services does TinyEmail depend on? (AWS SES, SendGrid, S3, Redis, etc.)
+Is there a monorepo or separate repos for frontend/backend/services?
+What is the base URL structure? (e.g., api.tinyemail.com, app.tinyemail.com)
+SECTION 2: Database Schema — Complete
+For EVERY table in the database, provide:
+
+Table name
+Every column: name, data type, nullable, default value, constraints
+Primary keys, foreign keys, indexes
+Relationships to other tables
+Pay special attention to tables related to:
+
+Email templates / designs
+Campaigns
+Contacts / subscribers / lists
+Sending logs / delivery status
+Analytics (opens, clicks, bounces, unsubscribes)
+Users / workspaces / accounts
+API keys / tokens
+SECTION 3: API Endpoints — Complete
+For EVERY API endpoint, provide:
+
+HTTP method and full path (e.g., POST /api/v1/campaigns)
+Authentication required? What type? (Bearer token, API key header, session cookie)
+Request headers required
+Request body schema (with field names, types, required/optional, example values)
+Response body schema (with field names, types, example values)
+Error response formats
+Rate limits if any
+Group by domain:
+
+Authentication & User Management
+Templates / Email Builder
+Campaigns
+Contacts / Lists
+Sending
+Analytics / Tracking
+Webhooks
+Settings / Configuration
+File/Image Upload
+SECTION 4: Email Template / Design Data Model
+How are email templates stored? What is the exact JSON/data structure of a template?
+What is the difference between a "template" and a "campaign"?
+What email builder/editor does TinyEmail use? (Drag-and-drop? Code editor? Both?)
+What are the available building blocks/components in the email builder? (e.g., text block, image block, button, divider, columns, social links, header, footer, etc.) List ALL of them with their configuration options.
+What is the internal JSON structure of an email design? (The data structure that represents the visual layout — often called "design JSON" or "editor JSON"). Provide a complete example of a real email design JSON.
+How is the final HTML generated from the design JSON?
+Are there pre-built template categories? What are they? How are they stored?
+Can templates have variants (A/B testing)?
+How are template thumbnails/previews generated?
+What is the maximum email size supported?
+SECTION 5: Merge Fields & Dynamic Content
+What merge fields / personalization variables are supported? (e.g., {{first_name}}, {{company}}, {{unsubscribe_url}})
+What is the exact syntax for merge fields? (Double curly braces? Percent signs? Other?)
+Can users define custom merge fields? How?
+Is there conditional content support? (e.g., "show this block only if subscriber is in segment X")
+What system-generated merge fields exist? (unsubscribe link, view in browser link, company address, etc.)
+How are merge fields resolved at send time? What happens if a field is missing for a contact?
+Are there default/fallback values for merge fields?
+SECTION 6: Contact & List Management
+What is the data model for a Contact/Subscriber? List every field.
+How are lists/audiences/segments structured?
+What custom fields can be defined for contacts?
+How are contacts imported? (CSV, API, manual entry, integrations)
+How are unsubscribes, bounces, and complaints handled?
+Is there contact scoring or tagging?
+What is the segmentation logic? (field-based filters, behavioral, engagement-based)
+How do contacts relate to campaigns and sending history?
+SECTION 7: Email Sending Pipeline
+What is the complete flow from "send campaign" to "email delivered"? Describe each step.
+What email sending provider(s) are used? (AWS SES, SendGrid, Postmark, custom SMTP, etc.)
+How is sending authenticated? (SPF, DKIM, DMARC — how are these configured?)
+Is there a queue system for sending? (Redis queue, SQS, Bull, etc.) How does it work?
+How are emails batched for large sends?
+What is the sending rate / throughput?
+How are transactional emails vs. marketing emails differentiated?
+What retry logic exists for failed sends?
+How is the "From" address configured? Can it be customized per campaign?
+Is there warm-up logic for new sending domains/IPs?
+SECTION 8: Email Tracking & Analytics
+How are email opens tracked? (Tracking pixel? What endpoint serves it?)
+How are link clicks tracked? (URL rewriting? What is the redirect endpoint?)
+How are bounces processed? (Webhook from SES? SNS notification?)
+How are unsubscribes processed?
+What analytics data is stored per email/per contact/per campaign? List every metric.
+How is real-time vs. aggregated reporting handled?
+Are there any analytics API endpoints for querying campaign performance?
+Is there engagement scoring (e.g., "engaged", "at risk", "inactive")?
+How long is tracking data retained?
+SECTION 9: Campaign Management
+What campaign types exist? (One-time blast, automated/triggered, drip sequence, RSS, A/B test)
+What is the data model for a Campaign? Every field.
+What are the campaign statuses/lifecycle? (draft → scheduled → sending → sent → etc.)
+How is scheduling implemented? (Cron? Delayed queue job? Timezone handling?)
+Can campaigns be paused and resumed?
+How do campaigns relate to templates, contacts/lists, and analytics?
+Is there a concept of "sequences" or "automations" (multi-step email flows)? If so, how are they structured?
+SECTION 10: Webhooks & Events
+What events can TinyEmail emit as webhooks? (e.g., email.sent, email.opened, email.clicked, email.bounced, contact.subscribed, campaign.completed)
+What is the webhook payload format for each event? Provide exact JSON examples.
+How are webhooks configured? (API? Dashboard?)
+Is there retry logic for failed webhook deliveries?
+Are there internal event buses or pub/sub systems?
+SECTION 11: Authentication & Authorization
+How does API authentication work? (API keys? OAuth2? JWT?)
+How are API keys generated and managed?
+What scopes/permissions exist?
+Is there workspace/team-level access control?
+How would an external system (TinyCommand AI) authenticate to TinyEmail's API?
+Are there service-to-service authentication mechanisms (internal API keys, shared secrets)?
+What are the CORS settings? Can TinyEmail's API be called from a browser?
+SECTION 12: Embeddable Components (iframe / SDK)
+Does TinyEmail have an embeddable email builder that can be loaded in an iframe?
+If yes: What is the iframe URL structure? What query parameters does it accept?
+How does the host page communicate with the embedded builder? (postMessage API? Custom events?)
+What messages can the host send TO the embedded builder? (load template, set theme, save, etc.)
+What messages does the embedded builder send BACK to the host? (template saved, design changed, ready, etc.)
+Can the embedded builder be themed/white-labeled?
+Is there a JavaScript SDK for embedding?
+What authentication is needed for the embedded builder?
+SECTION 13: File & Image Handling
+How are images uploaded for use in emails?
+Where are images stored? (S3? CloudFront? Local storage?)
+What is the URL structure for hosted images?
+Are images optimized/resized automatically?
+What file types and size limits are supported?
+Is there a media library / gallery feature?
+SECTION 14: Sequences / Automations / Drip Campaigns
+Does TinyEmail support multi-step email sequences?
+If yes: What is the data model for a sequence?
+What trigger types are supported? (time-based, event-based, date-based)
+What branching/conditional logic is available?
+How are delays between steps configured?
+How do contacts enter and exit sequences?
+Can sequences be nested or linked?
+SECTION 15: Error Handling & Edge Cases
+What error response format does the API use? (HTTP status codes, error codes, error messages)
+How are validation errors returned? (Field-level errors?)
+What happens when sending fails for some recipients but not others?
+How are duplicate contacts handled?
+What happens when a contact unsubscribes mid-sequence?
+How are suppression lists managed?
+SECTION 16: Existing Integrations
+What existing integrations does TinyEmail have with other platforms? (CRM, e-commerce, form builders, etc.)
+How are these integrations built? (Webhooks? OAuth? API polling?)
+Is there a Zapier/Make integration?
+Are there any SDKs or client libraries published?
+Is there an official API documentation URL?
+SECTION 17: What Needs to Change in TinyEmail for This Integration
+Based on what TinyCommand AI needs (listed at the top), please identify:
+
+What API endpoints already exist that we can use directly?
+What new API endpoints would need to be created?
+What changes to the data model might be needed?
+What new webhook events might need to be added?
+What authentication changes might be needed to support the integration?
+If there is an embeddable email builder: what changes would be needed to support loading designs from TinyCommand AI and saving them back?
+Any other changes or considerations?
+OUTPUT FORMAT
+Please structure your response using the exact section numbers and headings above. For data models and API endpoints, use tables or code blocks with actual field names. For JSON structures, provide complete real examples (not abbreviated). Where you reference code files, include the file path.
+
+The goal is that after reading your response, a developer working on TinyCommand AI should have everything they need to:
+
+Build an embedding/knowledge base of all TinyEmail capabilities
+Create API integration code to push/pull data between the two systems
+Embed TinyEmail's visual editor in the TinyCommand AI workspace
+Configure the TinyCommand AI's AI to correctly generate email assets that are compatible with TinyEmail
