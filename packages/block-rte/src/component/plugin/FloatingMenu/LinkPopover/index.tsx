@@ -173,6 +173,7 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                                                 href={url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
+                                                onClick={(e) => { e.stopPropagation(); window.open(url, '_blank', 'noopener,noreferrer'); }}
                                                 style={{
                                                         fontSize: 13,
                                                         color: '#2563eb',
@@ -184,6 +185,7 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                                                         display: 'inline-flex',
                                                         alignItems: 'center',
                                                         gap: 4,
+                                                        cursor: 'pointer',
                                                 }}
                                         >
                                                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</span>
