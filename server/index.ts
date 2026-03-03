@@ -73,12 +73,20 @@ app.post('/api/image/generate', async (req, res) => {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    console.log(`Generating image for prompt: "${prompt.substring(0, 80)}..."`);
+    const { aspectRatio = 'landscape' } = req.body;
+    const sizeMap: Record<string, string> = {
+      square: '1024x1024',
+      landscape: '1536x1024',
+      portrait: '1024x1536',
+    };
+    const size = sizeMap[aspectRatio] || sizeMap.landscape;
+
+    console.log(`Generating image for prompt: "${prompt.substring(0, 80)}..." (${size})`);
 
     const response = await openai.images.generate({
       model: 'gpt-image-1',
       prompt,
-      size: '1024x1024',
+      size: size as any,
       quality: 'medium',
     });
 
