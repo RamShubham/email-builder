@@ -35,8 +35,9 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                 if (!anchorEl) return;
                 const updatePosition = () => {
                         const rect = anchorEl.getBoundingClientRect();
-                        const popoverWidth = 300;
-                        const popoverHeight = 120;
+                        const popoverEl = popoverRef.current;
+                        const popoverWidth = popoverEl ? popoverEl.offsetWidth : 300;
+                        const popoverHeight = popoverEl ? popoverEl.offsetHeight : 120;
                         let left = rect.left + rect.width / 2 - popoverWidth / 2;
                         left = Math.max(8, Math.min(left, window.innerWidth - popoverWidth - 8));
                         let top = rect.bottom + 8;
@@ -46,14 +47,14 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                         top = Math.max(8, top);
                         setPosition({ top, left });
                 };
-                updatePosition();
+                requestAnimationFrame(updatePosition);
                 window.addEventListener('scroll', updatePosition, true);
                 window.addEventListener('resize', updatePosition);
                 return () => {
                         window.removeEventListener('scroll', updatePosition, true);
                         window.removeEventListener('resize', updatePosition);
                 };
-        }, [anchorEl]);
+        }, [anchorEl, isEditing]);
 
         useEffect(() => {
                 if (isEditing && inputRef.current) {
@@ -104,7 +105,8 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                                 borderRadius: 12,
                                 padding: '10px 14px',
                                 boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-                                width: 300,
+                                width: isEditing ? 300 : 'auto',
+                                maxWidth: 360,
                                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                 lineHeight: 1.4,
                         }}
