@@ -14,7 +14,7 @@ import React, { memo, useEffect, useRef, useState } from 'react';
   function EditableText(props: any) {
     const { isEditing, onEditComplete, ...textProps } = props;
     const { style } = props;
-    const { padding, fontSize, fontFamily, textAlign, color, ...rest } = style || {};
+    const { padding, fontSize, fontFamily, fontWeight, textAlign, color, backgroundColor, borderRadius, ...rest } = style || {};
 
     const currentText = props.template?.text ?? props.props?.text ?? '';
     const [editedText, setEditedText] = useState(currentText);
@@ -61,10 +61,12 @@ import React, { memo, useEffect, useRef, useState } from 'react';
             width: '100%',
             border: 'none',
             outline: 'none',
-            background: 'transparent',
+            backgroundColor: backgroundColor ?? 'transparent',
+            borderRadius: borderRadius ? `${borderRadius}px` : undefined,
             resize: 'none',
             fontFamily: FONT_FAMILY_MAPPING[fontFamily] || 'inherit',
             fontSize: fontSize ? `${fontSize}px` : 'inherit',
+            fontWeight: fontWeight || 'normal',
             textAlign: textAlign || 'left',
             color: color || 'inherit',
             paddingTop: padding?.top ? `${padding.top}px` : 0,

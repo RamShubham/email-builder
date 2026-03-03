@@ -107,9 +107,16 @@ The `packages/block-rte/` Rich Text Editor uses Lexical (by Meta). The floating 
 - **FloatingMenu.tsx**: Toolbar with Bold, Italic, Unordered List, Ordered List, Link buttons. Uses `onMouseDown={preventDefault}` on the entire toolbar container to prevent focus theft from the Lexical editor. Inline styles, no SCSS modules.
 - **FloatingMenuPlugin (index.tsx)**: Shows toolbar when text is selected, hides on deselection. Uses `registerUpdateListener` + pointer refs for selection tracking, `BLUR_COMMAND` handler for focus-out detection, `@floating-ui/dom` for positioning.
 - **useFloatingMenu.ts**: Tracks active formatting state (bold/italic/list/link) via both `SELECTION_CHANGE_COMMAND` and `registerUpdateListener` so button highlights update after format commands, not just selection moves.
-- **LinkPopover**: URL input with validation, save/cancel, edit/delete existing links. Click-outside-to-close, escape key support.
+- **LinkPopover**: Renders via React Portal to `document.body` to escape canvas stacking context. URL input with validation, save/cancel, edit/delete existing links. Click-outside-to-close, escape key support. Pre-fills "https://" for new links.
 - **Rte.tsx OnChangePlugin**: Uses `editorState.read()` instead of `editor.update()` to avoid nested Lexical updates.
 - Dead files removed: `usePointerInteractions.ts`, FloatingMenu `styles.module.scss`, LinkPopover `styles.module.scss`.
+
+### Editable Block Components
+All editable blocks (`packages/editor-sample/src/documents/blocks/customBlockComponent/editable/`) preserve full visual styling in edit mode:
+- **EditableHeading**: Wraps input in styled container with padding/bg/borderRadius; applies explicit fontSize from level (h1=32, h2=24, h3=20), fontFamily, fontWeight, color, textAlign.
+- **EditableText**: Applies padding, fontSize, fontFamily, fontWeight, textAlign, color, backgroundColor, borderRadius to textarea.
+- **EditableButton**: Two-layer structure matching base Button — outer wrapper with padding/bg/textAlign, inner div with buttonBackgroundColor/borderRadius/size-dependent padding, input with buttonTextColor/fontWeight. Supports fullWidth and all button sizes.
+- **EditableHtml**: Uses monospace code-editor styling (intentionally different from rendered output).
 
 ## Environment Variables
 Key variables in `packages/editor-sample/.env`:

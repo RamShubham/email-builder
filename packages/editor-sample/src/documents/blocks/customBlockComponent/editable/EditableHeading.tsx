@@ -2,6 +2,7 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 
   import { Heading } from '@usewaypoint/block-heading';
 
+  import FONT_FAMILY_MAPPING from '../../../../constant/fontFamily';
   import { replaceTemplateVariables } from '../../../../utils/replaceTemplateVariables';
   import { useCurrentBlockId } from '../../../editor/EditorBlock';
   import {
@@ -10,8 +11,24 @@ import React, { memo, useEffect, useRef, useState } from 'react';
     useVariables,
   } from '../../../editor/EditorContext';
 
+  function getFontSize(level: string) {
+    switch (level) {
+      case 'h1':
+        return 32;
+      case 'h3':
+        return 20;
+      case 'h2':
+      default:
+        return 24;
+    }
+  }
+
   function EditableHeading(props: any) {
     const { isEditing, onEditComplete, ...headingProps } = props;
+    const { style } = props;
+    const { padding, fontFamily, fontWeight, color, backgroundColor, borderRadius, textAlign } = style || {};
+    const level = props.props?.level ?? 'h2';
+
     const currentText = props.template?.text ?? props.props?.text ?? '';
     const [editedText, setEditedText] = useState(currentText);
     const blockId = useCurrentBlockId();
@@ -46,22 +63,36 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 
     if (isEditing) {
       return (
-        <input
-          ref={inputRef}
-          value={editedText}
-          onChange={(e) => setEditedText(e.target.value)}
-          onBlur={handleBlur}
+        <div
           style={{
-            width: '100%',
-            border: 'none',
-            outline: 'none',
-            background: 'transparent',
-            fontSize: 'inherit',
-            fontWeight: 'inherit',
-            color: 'inherit',
+            backgroundColor: backgroundColor ?? undefined,
+            borderRadius: borderRadius ? `${borderRadius}px` : undefined,
+            paddingTop: padding?.top ? `${padding.top}px` : 0,
+            paddingBottom: padding?.bottom ? `${padding.bottom}px` : 0,
+            paddingLeft: padding?.left ? `${padding.left}px` : 0,
+            paddingRight: padding?.right ? `${padding.right}px` : 0,
           }}
-          data-testid="editable-heading-input"
-        />
+        >
+          <input
+            ref={inputRef}
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            onBlur={handleBlur}
+            style={{
+              width: '100%',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: getFontSize(level),
+              fontWeight: fontWeight ?? 'bold',
+              fontFamily: FONT_FAMILY_MAPPING[fontFamily as keyof typeof FONT_FAMILY_MAPPING] || 'inherit',
+              color: color || 'inherit',
+              textAlign: textAlign || 'left',
+              margin: 0,
+            }}
+            data-testid="editable-heading-input"
+          />
+        </div>
       );
     }
 
@@ -69,4 +100,3 @@ import React, { memo, useEffect, useRef, useState } from 'react';
   }
 
   export default memo(EditableHeading);
-  
