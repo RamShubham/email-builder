@@ -25,7 +25,7 @@ interface LinkPopoverProps {
 
 function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPopoverProps) {
         const [isEditing, setIsEditing] = useState(!isLink);
-        const [inputUrl, setInputUrl] = useState(url || '');
+        const [inputUrl, setInputUrl] = useState(url || (isLink ? '' : 'https://'));
         const popoverRef = useRef<HTMLDivElement>(null);
         const inputRef = useRef<HTMLInputElement>(null);
         const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
@@ -58,6 +58,8 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
         useEffect(() => {
                 if (isEditing && inputRef.current) {
                         inputRef.current.focus();
+                        const len = inputRef.current.value.length;
+                        inputRef.current.setSelectionRange(len, len);
                 }
         }, [isEditing]);
 
@@ -99,10 +101,12 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                                 zIndex: 99999,
                                 background: '#fff',
                                 border: '1px solid #e5e7eb',
-                                borderRadius: 8,
-                                padding: 12,
-                                boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+                                borderRadius: 12,
+                                padding: '10px 14px',
+                                boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
                                 width: 300,
+                                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                lineHeight: 1.4,
                         }}
                 >
                         {isEditing ? (
@@ -175,43 +179,49 @@ function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPop
                                                         overflow: 'hidden',
                                                         textOverflow: 'ellipsis',
                                                         whiteSpace: 'nowrap',
-                                                        display: 'flex',
+                                                        display: 'inline-flex',
                                                         alignItems: 'center',
                                                         gap: 4,
                                                 }}
                                         >
-                                                {url}
-                                                <ExternalLink style={{ width: 12, height: 12, flexShrink: 0 }} />
+                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</span>
+                                                <ExternalLink style={{ width: 12, height: 12, flexShrink: 0, color: '#2563eb' }} />
                                         </a>
                                         <button
                                                 type="button"
-                                                onClick={() => setIsEditing(true)}
+                                                onClick={() => { setInputUrl(url || 'https://'); setIsEditing(true); }}
                                                 data-testid="floating-menu-link-edit"
                                                 style={{
-                                                        padding: 4,
-                                                        borderRadius: 4,
+                                                        padding: 5,
+                                                        borderRadius: 6,
                                                         border: 'none',
-                                                        background: 'transparent',
+                                                        background: '#f3f4f6',
                                                         cursor: 'pointer',
                                                         display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        flexShrink: 0,
                                                 }}
                                         >
-                                                <Edit2 style={{ width: 14, height: 14, color: '#6b7280' }} />
+                                                <Edit2 style={{ width: 14, height: 14, color: '#374151' }} />
                                         </button>
                                         <button
                                                 type="button"
                                                 onClick={handleRemove}
                                                 data-testid="floating-menu-link-delete"
                                                 style={{
-                                                        padding: 4,
-                                                        borderRadius: 4,
+                                                        padding: 5,
+                                                        borderRadius: 6,
                                                         border: 'none',
-                                                        background: 'transparent',
+                                                        background: '#f3f4f6',
                                                         cursor: 'pointer',
                                                         display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        flexShrink: 0,
                                                 }}
                                         >
-                                                <Trash2 style={{ width: 14, height: 14, color: '#6b7280' }} />
+                                                <Trash2 style={{ width: 14, height: 14, color: '#374151' }} />
                                         </button>
                                 </div>
                         )}
