@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
   import { Html } from '@usewaypoint/block-html';
 
@@ -15,9 +15,16 @@ import React, { memo, useEffect, useState } from 'react';
     const currentContents = props.template?.contents ?? props.props?.contents ?? '';
     const [editedContents, setEditedContents] = useState(currentContents);
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
     useEffect(() => {
       if (!isEditing) setEditedContents(currentContents);
     }, [currentContents, isEditing]);
+
+    useEffect(() => {
+      if (isEditing && textareaRef.current) textareaRef.current.focus();
+    }, [isEditing]);
+
     const blockId = useCurrentBlockId();
     const document = useDocument();
     const globalVariables = useVariables();
@@ -42,6 +49,7 @@ import React, { memo, useEffect, useState } from 'react';
     if (isEditing) {
       return (
         <textarea
+          ref={textareaRef}
           value={editedContents}
           onChange={(e) => setEditedContents(e.target.value)}
           onBlur={handleBlur}

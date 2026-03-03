@@ -54,6 +54,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical';
     useLinkClickHandler({ onLinkClick: handleLinkClick });
     useImperativeHandle(ref, () => floatingMenuRef.current, []);
 
+    const preventFocusLoss = (e: React.MouseEvent) => e.preventDefault();
     const btnClass = "p-1 rounded hover:bg-gray-200 flex items-center justify-center cursor-pointer";
 
     return (
@@ -74,6 +75,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical';
             className={btnClass}
             data-testid="floating-text-format-bold"
             aria-label="Format text as bold"
+            onMouseDown={preventFocusLoss}
             onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
           >
             <Bold className={`w-5 h-5 ${getIconClass(state.isBold)}`} />
@@ -83,6 +85,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical';
             className={btnClass}
             data-testid="floating-text-format-italic"
             aria-label="Format text as italics"
+            onMouseDown={preventFocusLoss}
             onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
           >
             <Italic className={`w-5 h-5 ${getIconClass(state.isItalic)}`} />
@@ -90,11 +93,11 @@ import { FORMAT_TEXT_COMMAND } from 'lexical';
 
           <div className={styles.divider} />
 
-          <button className={btnClass} onClick={handleUnorderedListClick}>
+          <button className={btnClass} onMouseDown={preventFocusLoss} onClick={handleUnorderedListClick}>
             <List className={`w-5 h-5 ${getIconClass(state.isUnorderedList)}`} />
           </button>
 
-          <button className={btnClass} onClick={handleOrderedListClick}>
+          <button className={btnClass} onMouseDown={preventFocusLoss} onClick={handleOrderedListClick}>
             <ListOrdered className={`w-5 h-5 ${getIconClass(state.isOrderedList)}`} />
           </button>
 
@@ -104,6 +107,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical';
             className={btnClass}
             ref={setLinkNodeRef}
             data-testid="floating-menu-link-button"
+            onMouseDown={preventFocusLoss}
             onClick={insertLinkHandler}
           >
             <Link className={`w-5 h-5 ${getIconClass(isLink || linkPopoverOpen)}`} />
