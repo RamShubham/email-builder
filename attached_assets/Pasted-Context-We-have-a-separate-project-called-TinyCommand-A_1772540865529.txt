@@ -1,0 +1,328 @@
+Context
+We have a separate project called TinyCommand AI that needs to deeply integrate with TinyEmail. TinyCommand AI is an AI-powered system architect that builds interconnected business assets (Forms, Workflows, Tables, Emails, AI Agents) through a conversational interface. When a user asks TinyCommand AI to "build a welcome email" or "create a workflow that sends a confirmation email", we need to:
+
+Generate email templates in TinyEmail's TEditorConfiguration JSON format
+Embed TinyEmail's visual editor inside our workspace via iframe
+Save/load templates through a CRUD API
+Render templates to HTML with merge field substitution
+Receive change events when users edit templates in the embedded editor
+We have already built our side of the integration:
+
+Our AI generates TEditorConfiguration JSON natively (all 12 block types)
+We store email assets with the full template JSON in our database
+We have a GoJS-based email canvas preview in our workspace
+We have iframe embed infrastructure (used for our Studio product — forms & workflows)
+Our embed system uses a postMessage protocol with handshake: ready → auth → loadAsset → assetLoaded
+Your job is to build the TinyEmail side of this integration. Here's exactly what needs to be implemented.
+
+Task 1: Add /embed Route (Email Editor for iframe)
+Create a new route in TinyEmail that renders the email editor without the navigation chrome (navbar, sidebar toggles, etc.) — a clean, standalone editor suitable for iframe embedding.
+
+Requirements:
+
+URL: /embed (or /embed/editor)
+No navbar, no app-level navigation
+Full drag-and-drop email editor with all 12 block types
+Inspector drawer (right sidebar) for block styling
+Support URL parameters:
+?mode=edit (default) — full editor
+?mode=preview — read-only preview
+?mode=json — JSON view
+?theme=dark — dark mode
+?hideInspector=true — hide the right sidebar initially
+Implementation approach:
+
+Create a new route component (e.g., EmbedEditor.tsx) that renders TemplatePanel + InspectorDrawer without the NavigatorDrawer or top navbar
+Use URL search params to configure mode and theme
+Wrap in the same EditorContext (Zustand) as the main editor
+Task 2: Implement postMessage API
+This is the most critical piece. The host page (TinyCommand AI) will communicate with the embedded editor via window.postMessage. Implement the following bidirectional message protocol.
+
+Messages from Host → TinyEmail Editor
+// 1. Load a template into the editor
+interface LoadTemplateMessage {
+  type: 'TINY_EMAIL_LOAD_TEMPLATE';
+  template: TEditorConfiguration;  // The full flat JSON dictionary
+  requestId?: string;              // Optional correlation ID
+}
+// 2. Request the current template
+interface GetTemplateMessage {
+  type: 'TINY_EMAIL_GET_TEMPLATE';
+  requestId: string;               // Required for response correlation
+}
+// 3. Request rendered HTML
+interface GetHtmlMessage {
+  type: 'TINY_EMAIL_GET_HTML';
+  requestId: string;
+  variables?: Record<string, string>;  // Merge field values to substitute
+}
+// 4. Set merge field preview values
+interface SetVariablesMessage {
+  type: 'TINY_EMAIL_SET_VARIABLES';
+  variables: Record<string, string>;   // e.g. { first_name: "John", company: "Acme" }
+}
+// 5. Set theme
+interface SetThemeMessage {
+  type: 'TINY_EMAIL_SET_THEME';
+  theme: 'light' | 'dark';
+}
+// 6. Set editor mode
+interface SetModeMessage {
+  type: 'TINY_EMAIL_SET_MODE';
+  mode: 'edit' | 'preview' | 'json';
+}
+Messages from TinyEmail Editor → Host
+// 1. Editor is ready for communication
+interface EditorReadyMessage {
+  type: 'TINY_EMAIL_EDITOR_READY';
+}
+// 2. Template was loaded successfully
+interface TemplateLoadedMessage {
+  type: 'TINY_EMAIL_TEMPLATE_LOADED';
+  requestId?: string;
+  blockCount: number;              // Number of blocks in the template
+}
+// 3. Response to GetTemplate request
+interface TemplateResponseMessage {
+  type: 'TINY_EMAIL_TEMPLATE_RESPONSE';
+  requestId: string;
+  template: TEditorConfiguration;
+}
+// 4. Response to GetHtml request
+interface HtmlResponseMessage {
+  type: 'TINY_EMAIL_HTML_RESPONSE';
+  requestId: string;
+  html: string;                    // Full rendered HTML string
+}
+// 5. Template was changed by the user (debounced)
+interface TemplateChangedMessage {
+  type: 'TINY_EMAIL_TEMPLATE_CHANGED';
+  template: TEditorConfiguration;
+  changeType: 'block_added' | 'block_removed' | 'block_updated' | 'layout_changed' | 'style_changed';
+}
+// 6. Error occurred
+interface ErrorMessage {
+  type: 'TINY_EMAIL_ERROR';
+  requestId?: string;
+  error: string;
+}
+Implementation approach:
+In the embed route component:
+
+// Listen for messages from the host
+useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    const { data } = event;
+    if (!data || !data.type || !data.type.startsWith('TINY_EMAIL_')) return;
+    switch (data.type) {
+      case 'TINY_EMAIL_LOAD_TEMPLATE':
+        setDocument(data.template);  // Use existing Zustand setter
+        postToHost({ type: 'TINY_EMAIL_TEMPLATE_LOADED', requestId: data.requestId, blockCount: Object.keys(data.template).length - 1 });
+        break;
+      case 'TINY_EMAIL_GET_TEMPLATE':
+        const template = useDocument();  // Use existing Zustand getter
+        postToHost({ type: 'TINY_EMAIL_TEMPLATE_RESPONSE', requestId: data.requestId, template });
+        break;
+      case 'TINY_EMAIL_GET_HTML':
+        // Use renderToStaticMarkup from email-builder package
+        // Apply variable substitution first if variables provided
+        const html = renderCurrentToHtml(data.variables);
+        postToHost({ type: 'TINY_EMAIL_HTML_RESPONSE', requestId: data.requestId, html });
+        break;
+      case 'TINY_EMAIL_SET_VARIABLES':
+        setVariables(data.variables);  // Use existing Zustand setter
+        break;
+      case 'TINY_EMAIL_SET_THEME':
+        // Toggle dark/light mode
+        break;
+      case 'TINY_EMAIL_SET_MODE':
+        // Switch editor view mode
+        break;
+    }
+  };
+  window.addEventListener('message', handleMessage);
+  // Signal readiness to host
+  window.parent.postMessage({ type: 'TINY_EMAIL_EDITOR_READY' }, '*');
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
+// Debounced change notification
+useEffect(() => {
+  const unsubscribe = subscribeToDocumentChanges((template, changeType) => {
+    window.parent.postMessage({ type: 'TINY_EMAIL_TEMPLATE_CHANGED', template, changeType }, '*');
+  });
+  return unsubscribe;
+}, []);
+Important: The TINY_EMAIL_EDITOR_READY message must be sent AFTER the editor has fully initialized and is ready to receive templates. The host will wait for this message before sending any data.
+
+Task 3: Template CRUD API
+Add a PostgreSQL database and template persistence endpoints. This is needed so both TinyCommand AI and TinyEmail can reference templates by ID.
+
+Database Setup
+Add a PostgreSQL database (Replit provides built-in PostgreSQL) with this table:
+
+CREATE TABLE templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  subject TEXT,
+  category TEXT,
+  template_json JSONB NOT NULL,
+  merge_fields TEXT[] DEFAULT '{}',
+  thumbnail_url TEXT,
+  workspace_id TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+API Endpoints
+POST /api/templates — Create a template
+
+// Request
+{
+  "name": "Welcome Email",
+  "description": "Sent to new users after signup",
+  "subject": "Welcome to {{company}}!",
+  "category": "lifecycle",
+  "templateJson": { "root": { ... }, "block-1": { ... } },
+  "mergeFields": ["first_name", "company"],
+  "workspaceId": "ws-123"
+}
+// Response (201)
+{
+  "id": "uuid-here",
+  "name": "Welcome Email",
+  "description": "...",
+  "subject": "Welcome to {{company}}!",
+  "category": "lifecycle",
+  "templateJson": { ... },
+  "mergeFields": ["first_name", "company"],
+  "workspaceId": "ws-123",
+  "createdAt": "2026-03-03T12:00:00Z",
+  "updatedAt": "2026-03-03T12:00:00Z"
+}
+GET /api/templates/:id — Get a template by ID
+
+// Response (200) — same as creation response
+GET /api/templates — List templates
+
+// Query params: ?workspaceId=ws-123&category=lifecycle&limit=20&offset=0
+// Response (200)
+{
+  "templates": [ ... ],
+  "total": 42,
+  "limit": 20,
+  "offset": 0
+}
+PUT /api/templates/:id — Update a template
+
+// Request — partial update (only send fields to change)
+{
+  "name": "Updated Welcome Email",
+  "templateJson": { ... }
+}
+// Response (200) — full updated template
+DELETE /api/templates/:id — Delete a template
+
+// Response (200)
+{ "success": true }
+POST /api/templates/:id/render — Render template to HTML
+
+// Request
+{
+  "variables": { "first_name": "John", "company": "Acme Corp" }
+}
+// Response (200)
+{
+  "html": "<!DOCTYPE html><html>...",
+  "subject": "Welcome to Acme Corp!"
+}
+GET /api/blocks/schema — Return all available block types and their schemas
+
+// Response (200)
+{
+  "blocks": {
+    "EmailLayout": { "description": "Root layout block", "properties": { ... } },
+    "Heading": { "description": "Heading text block", "properties": { ... } },
+    ...
+  },
+  "fontFamilies": ["MODERN_SANS", ...],
+  "mergeSyntax": "{{variable_name}}"
+}
+Task 4: Authentication Middleware
+Add API key authentication so TinyCommand AI can securely call TinyEmail's API.
+
+Requirements:
+
+Accept API keys via Authorization: Bearer <key> header
+Skip auth for /api/health, /embed, and static assets
+API keys can be stored in environment variables initially (e.g., TINYEMAIL_API_KEYS=key1,key2)
+Return 401 Unauthorized with { "error": "Invalid API key" } for bad/missing keys
+function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const publicPaths = ['/api/health', '/embed', '/assets'];
+  if (publicPaths.some(p => req.path.startsWith(p))) return next();
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'API key required' });
+  }
+  
+  const key = authHeader.slice(7);
+  const validKeys = (process.env.TINYEMAIL_API_KEYS || '').split(',').filter(Boolean);
+  if (!validKeys.includes(key)) {
+    return res.status(401).json({ error: 'Invalid API key' });
+  }
+  
+  next();
+}
+Task 5: CORS Configuration
+Update CORS to allow TinyCommand AI's domain:
+
+const allowedOrigins = [
+  process.env.TINYCOMMAND_ORIGIN || 'https://tinycommand.replit.app',
+  'http://localhost:5000',  // Local dev
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+Task 6: Webhook Events (Optional but Recommended)
+When templates are created, updated, or deleted via the API, emit webhook events to a configurable URL.
+
+// Environment variable: WEBHOOK_URL=https://tinycommand.replit.app/api/webhooks/tinyemail
+interface WebhookPayload {
+  event: 'template.created' | 'template.updated' | 'template.deleted' | 'template.rendered';
+  data: {
+    templateId: string;
+    name?: string;
+    workspaceId?: string;
+    timestamp: string;
+  };
+}
+Summary of Changes Needed
+Change	Priority	Effort
+/embed route (stripped editor)	HIGH	Medium
+postMessage API (bidirectional)	HIGH	Medium
+Template CRUD API + PostgreSQL	HIGH	Medium
+/api/templates/:id/render endpoint	HIGH	Low
+/api/blocks/schema endpoint	MEDIUM	Low
+API key authentication	MEDIUM	Low
+CORS configuration	MEDIUM	Low
+Webhook events	LOW	Low
+Testing the Integration
+After implementing, verify:
+
+Load https://your-tinyemail-url/embed in an iframe — editor should render without nav
+From the parent page console: iframe.contentWindow.postMessage({ type: 'TINY_EMAIL_LOAD_TEMPLATE', template: { root: { type: 'EmailLayout', data: { childrenIds: [], fontFamily: 'MODERN_SANS', canvasColor: '#FFFFFF', textColor: '#242424', backdropColor: '#F2F5F7' } } } }, '*') — editor should load the empty template
+POST /api/templates with a valid template JSON — should return 201
+GET /api/templates/:id — should return the saved template
+POST /api/templates/:id/render with variables — should return rendered HTML
+Environment Variables to Set
+DATABASE_URL=<postgresql connection string>
+TINYEMAIL_API_KEYS=<comma-separated API keys>
+TINYCOMMAND_ORIGIN=<TinyCommand AI's URL>
+WEBHOOK_URL=<optional webhook endpoint>
