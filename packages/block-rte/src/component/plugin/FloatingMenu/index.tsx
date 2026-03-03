@@ -1,8 +1,8 @@
 import {
-	$getSelection,
-	$isRangeSelection,
-	BLUR_COMMAND,
-	COMMAND_PRIORITY_LOW,
+        $getSelection,
+        $isRangeSelection,
+        BLUR_COMMAND,
+        COMMAND_PRIORITY_LOW,
 } from 'lexical';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -10,97 +10,97 @@ import { computePosition } from '@floating-ui/dom';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import FloatingMenu from './FloatingMenu';
-import { usePointerInteractions } from './hooks/usePointerInteractions';
 
 type FloatingMenuCoords = { x: number; y: number } | undefined;
 
 function FloatingMenuPlugin() {
-	const ref = useRef<HTMLDivElement>(null);
-	const [coords, setCoords] = useState<FloatingMenuCoords>(undefined);
-	const [editor] = useLexicalComposerContext();
+        const ref = useRef<HTMLDivElement>(null);
+        const [coords, setCoords] = useState<FloatingMenuCoords>(undefined);
+        const [editor] = useLexicalComposerContext();
+        const isPointerDownRef = useRef(false);
 
-	const { isPointerDown, isPointerReleased } = usePointerInteractions();
+        useEffect(() => {
+                const onPointerDown = () => { isPointerDownRef.current = true; };
+                const onPointerUp = () => {
+                        isPointerDownRef.current = false;
+                        setTimeout(() => {
+                                editor.getEditorState().read(() => {
+                                        checkSelection();
+                                });
+                        }, 10);
+                };
+                document.addEventListener('pointerdown', onPointerDown);
+                document.addEventListener('pointerup', onPointerUp);
+                return () => {
+                        document.removeEventListener('pointerdown', onPointerDown);
+                        document.removeEventListener('pointerup', onPointerUp);
+                };
+        }, [editor]);
 
-	const calculatePosition = useCallback(() => {
-		const domSelection = getSelection();
-		const domRange =
-			domSelection?.rangeCount !== 0 && domSelection?.getRangeAt(0);
+        const checkSelection = useCallback(() => {
+                if (isPointerDownRef.current) return;
 
-		if (!domRange || !ref.current || isPointerDown) {
-			return setCoords(undefined);
-		}
+                const rootElement = editor.getRootElement();
+                if (!rootElement) {
+                        setCoords(undefined);
+                        return;
+                }
 
-		computePosition(domRange, ref.current, { placement: 'top' })
-			.then((pos) => {
-				setCoords({ x: pos.x, y: pos.y - 10 });
-			})
-			.catch(() => {
-				setCoords(undefined);
-			});
-	}, [isPointerDown]);
+                const activeElement = document.activeElement;
+                const isEditorFocused = rootElement === activeElement || rootElement.contains(activeElement);
 
-	const handleSelectionChange = useCallback(() => {
-		if (
-			editor.isComposing() ||
-			editor.getRootElement() !== document.activeElement
-		) {
-			setCoords(undefined);
-			return;
-		}
+                if (!isEditorFocused || editor.isComposing()) {
+                        setCoords(undefined);
+                        return;
+                }
 
-		const selection = $getSelection();
+                const selection = $getSelection();
+                if ($isRangeSelection(selection) && !selection.anchor.is(selection.focus)) {
+                        const domSelection = window.getSelection();
+                        const domRange = domSelection?.rangeCount ? domSelection.getRangeAt(0) : null;
 
-		if (
-			$isRangeSelection(selection) &&
-			!selection.anchor.is(selection.focus)
-		) {
-			calculatePosition();
-		} else {
-			setCoords(undefined);
-		}
-	}, [editor, calculatePosition]);
+                        if (!domRange || !ref.current) {
+                                setCoords(undefined);
+                                return;
+                        }
 
-	useEffect(() => {
-		const unregisterListener = editor.registerUpdateListener(
-			({ editorState }) => {
-				editorState.read(() => handleSelectionChange());
-			}
-		);
+                        computePosition(domRange, ref.current, { placement: 'top' })
+                                .then((pos) => {
+                                        setCoords({ x: pos.x, y: pos.y - 10 });
+                                })
+                                .catch(() => {
+                                        setCoords(undefined);
+                                });
+                } else {
+                        setCoords(undefined);
+                }
+        }, [editor]);
 
-		return unregisterListener;
-	}, [editor, handleSelectionChange]);
+        useEffect(() => {
+                return editor.registerUpdateListener(({ editorState }) => {
+                        editorState.read(() => {
+                                checkSelection();
+                        });
+                });
+        }, [editor, checkSelection]);
 
-	useEffect(() => {
-		if (!coords && isPointerReleased) {
-			editor.getEditorState().read(() => handleSelectionChange());
-		}
-		// Adding coords to the dependency array causes an issue if
-		// a range selection is dismissed by navigating via arrow keys.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isPointerReleased, handleSelectionChange, editor]);
+        useEffect(() => {
+                return editor.registerCommand(
+                        BLUR_COMMAND,
+                        (e) => {
+                                const floatingMenu = ref?.current;
+                                const relatedTarget = e?.relatedTarget as Node;
+                                if (floatingMenu && relatedTarget && floatingMenu.contains(relatedTarget)) {
+                                        return true;
+                                }
+                                setCoords(undefined);
+                                return false;
+                        },
+                        COMMAND_PRIORITY_LOW
+                );
+        }, [editor]);
 
-	useEffect(() => {
-		return editor.registerCommand(
-			BLUR_COMMAND,
-			(e) => {
-				const floatingMenu = ref?.current;
-				const relatedTarget = e?.relatedTarget as Node;
-
-				if (
-					floatingMenu &&
-					relatedTarget &&
-					floatingMenu?.contains(relatedTarget)
-				) {
-					// check if the blur is from the floating menu
-					return true;
-				}
-				setCoords(undefined);
-				return false;
-			},
-			COMMAND_PRIORITY_LOW
-		);
-	}, [editor]);
-
-	return <FloatingMenu ref={ref} editor={editor} coords={coords} />;
+        return <FloatingMenu ref={ref} editor={editor} coords={coords} />;
 }
+
 export default FloatingMenuPlugin;

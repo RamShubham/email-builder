@@ -16,8 +16,8 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 
 import {
-	$createCustomParagraphNode,
-	CustomParagraphNode,
+        $createCustomParagraphNode,
+        CustomParagraphNode,
 } from '../node/CustomParagraphNode';
 import { getRteStyles } from '../utils/getRteStyles';
 
@@ -26,88 +26,88 @@ import LinkClickPlugin from './plugin/LinkClick';
 import styles from './styles.module.scss';
 
 function onError(error) {
-	console.error(error);
+        console.error(error);
 }
 
 const initialConfig = {
-	namespace: 'MyEditor',
-	theme: {
-		list: {
-			ul: 'list-disc pl-4',
-			ol: 'list-decimal pl-4',
-			listitem: 'list-item',
-		},
-	},
-	nodes: [
-		ListNode,
-		ListItemNode,
-		LinkNode,
-		CustomParagraphNode,
-		{
-			replace: ParagraphNode,
-			with: () => $createCustomParagraphNode(),
-			withKlass: CustomParagraphNode,
-		},
-	],
-	onError,
+        namespace: 'MyEditor',
+        theme: {
+                list: {
+                        ul: 'list-disc pl-4',
+                        ol: 'list-decimal pl-4',
+                        listitem: 'list-item',
+                },
+        },
+        nodes: [
+                ListNode,
+                ListItemNode,
+                LinkNode,
+                CustomParagraphNode,
+                {
+                        replace: ParagraphNode,
+                        with: () => $createCustomParagraphNode(),
+                        withKlass: CustomParagraphNode,
+                },
+        ],
+        onError,
 };
 
 function Rte({ props, style, onChange }) {
-	return (
-		<div style={getRteStyles(style)}>
-			<LexicalComposer
-				initialConfig={{
-					...initialConfig,
-					editorState: JSON.stringify(props.content),
-				}}
-			>
-				<div className="editor-container">
-					<RichTextPlugin
-						contentEditable={
-							<div className={styles.rte_container}>
-								<ContentEditable
-									className={styles.content_editable}
-									aria-placeholder={'Enter some text...'}
-									placeholder={
-										<div className={styles.placeholder}>
-											Enter some text...
-										</div>
-									}
-								/>
-							</div>
-						}
-						ErrorBoundary={LexicalErrorBoundary}
-					/>
-					<HistoryPlugin />
-					<OnChangePlugin
-						ignoreSelectionChange
-						onChange={(_, editor) => {
-							editor.update(() => {
-								const _raw = $generateHtmlFromNodes(
-									editor,
-									null
-								);
-								onChange({
-									content: editor.getEditorState(),
-									html: _raw,
-								});
-							});
-						}}
-					/>
-					<LinkPlugin
-						attributes={{
-							rel: 'noopener noreferrer',
-							target: '_blank',
-						}}
-					/>
-					<AutoFocusPlugin />
-					<ListPlugin />
-					<FloatingMenuPlugin />
-					<LinkClickPlugin />
-				</div>
-			</LexicalComposer>
-		</div>
-	);
+        return (
+                <div style={getRteStyles(style)}>
+                        <LexicalComposer
+                                initialConfig={{
+                                        ...initialConfig,
+                                        editorState: JSON.stringify(props.content),
+                                }}
+                        >
+                                <div className="editor-container">
+                                        <RichTextPlugin
+                                                contentEditable={
+                                                        <div className={styles.rte_container}>
+                                                                <ContentEditable
+                                                                        className={styles.content_editable}
+                                                                        aria-placeholder={'Enter some text...'}
+                                                                        placeholder={
+                                                                                <div className={styles.placeholder}>
+                                                                                        Enter some text...
+                                                                                </div>
+                                                                        }
+                                                                />
+                                                        </div>
+                                                }
+                                                ErrorBoundary={LexicalErrorBoundary}
+                                        />
+                                        <HistoryPlugin />
+                                        <OnChangePlugin
+                                                ignoreSelectionChange
+                                                onChange={(editorState, editor) => {
+                                                        editorState.read(() => {
+                                                                const _raw = $generateHtmlFromNodes(
+                                                                        editor,
+                                                                        null
+                                                                );
+                                                                onChange({
+                                                                        content: editorState,
+                                                                        html: _raw,
+                                                                });
+                                                        });
+                                                }}
+                                        />
+                                        <LinkPlugin
+                                                attributes={{
+                                                        rel: 'noopener noreferrer',
+                                                        target: '_blank',
+                                                }}
+                                        />
+                                        <AutoFocusPlugin />
+                                        <ListPlugin />
+                                        <FloatingMenuPlugin />
+                                        <LinkClickPlugin />
+                                </div>
+                        </LexicalComposer>
+                </div>
+        );
 }
 
 export default Rte;

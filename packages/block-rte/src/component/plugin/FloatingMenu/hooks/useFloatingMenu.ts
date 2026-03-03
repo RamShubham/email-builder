@@ -21,16 +21,17 @@ const useFloatingMenu = ({ editor }) => {
 	const [isLink, setIsLink] = useState(false);
 	const [currentLinkUrl, setCurrentLinkUrl] = useState('');
 
-	const updateLinkState = useCallback(() => {
+	const updateState = useCallback(() => {
 		const selection = $getSelection();
 		if (!$isRangeSelection(selection)) return;
 
-		setState((prev) => ({
-			...prev,
+		setState({
 			isBold: selection.hasFormat('bold'),
 			isItalic: selection.hasFormat('italic'),
 			isUnderline: selection.hasFormat('underline'),
-		}));
+			isOrderedList: false,
+			isUnorderedList: false,
+		});
 
 		const node = selection.anchor.getNode();
 		const linkNode = $findMatchingParent(node, $isLinkNode);
@@ -52,31 +53,34 @@ const useFloatingMenu = ({ editor }) => {
 				isOrderedList: listType === 'number',
 				isUnorderedList: listType === 'bullet',
 			}));
-		} else {
-			setState((prev) => ({
-				...prev,
-				isOrderedList: false,
-				isUnorderedList: false,
-			}));
 		}
 	}, []);
 
 	useEffect(() => {
-		const unregisterSelectionChange = editor.registerCommand(
+		const unregisterSelection = editor.registerCommand(
 			SELECTION_CHANGE_COMMAND,
 			() => {
 				editor.getEditorState().read(() => {
-					updateLinkState();
+					updateState();
 				});
 				return false;
 			},
 			COMMAND_PRIORITY_CRITICAL
 		);
 
+		const unregisterUpdate = editor.registerUpdateListener(
+			({ editorState }) => {
+				editorState.read(() => {
+					updateState();
+				});
+			}
+		);
+
 		return () => {
-			unregisterSelectionChange();
+			unregisterSelection();
+			unregisterUpdate();
 		};
-	}, [editor, updateLinkState]);
+	}, [editor, updateState]);
 
 	return {
 		state,

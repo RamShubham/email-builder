@@ -1,112 +1,198 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-  import { TOGGLE_LINK_COMMAND } from '@lexical/link';
-  import { Edit2, ExternalLink, Trash2 } from 'lucide-react';
+import { TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { LexicalEditor } from 'lexical';
+import { Edit2, ExternalLink, Trash2 } from 'lucide-react';
 
-  import styles from './styles.module.scss';
+const isValidUrl = (url: string) => {
+	try {
+		new URL(url);
+		return true;
+	} catch {
+		return false;
+	}
+};
 
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+interface LinkPopoverProps {
+	editor: LexicalEditor;
+	isLink: boolean;
+	url: string;
+	setUrl: (url: string) => void;
+	anchorEl: HTMLElement | null;
+	onClose: () => void;
+}
 
-  function LinkPopover({ editor, isLink, url, setUrl, anchorEl, setLinkPopoverOpen }) {
-    const [isEditing, setIsEditing] = useState(!isLink);
-    const [inputUrl, setInputUrl] = useState(url || '');
-    const isValid = !inputUrl || isValidUrl(inputUrl);
+function LinkPopover({ editor, isLink, url, setUrl, anchorEl, onClose }: LinkPopoverProps) {
+	const [isEditing, setIsEditing] = useState(!isLink);
+	const [inputUrl, setInputUrl] = useState(url || '');
+	const popoverRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const isValid = !inputUrl || isValidUrl(inputUrl);
 
-    const handleSave = () => {
-      if (!isValidUrl(inputUrl)) return;
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: inputUrl, target: '_blank' });
-      setUrl(inputUrl);
-      setLinkPopoverOpen(false);
-    };
+	useEffect(() => {
+		if (isEditing && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [isEditing]);
 
-    const rect = anchorEl?.getBoundingClientRect?.() ?? { bottom: 0, left: 0 };
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+				onClose();
+			}
+		};
+		const timer = setTimeout(() => {
+			document.addEventListener('mousedown', handleClickOutside);
+		}, 0);
+		return () => {
+			clearTimeout(timer);
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [onClose]);
 
-    return (
-      <div
-        className={styles.popover}
-        style={{
-          position: 'fixed',
-          top: rect.bottom + 8,
-          left: rect.left,
-          zIndex: 10001,
-          background: '#fff',
-          border: '1px solid #e5e7eb',
-          borderRadius: 6,
-          padding: 12,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-          minWidth: 260,
-        }}
-      >
-        {isEditing ? (
-          <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              value={inputUrl}
-              onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="https://..."
-              data-testid="floating-menu-link-input"
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-blue-500"
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
-              autoFocus
-            />
-            {!isValid && <span className="text-xs text-red-500">Invalid URL</span>}
-            <div className="flex gap-2 justify-end">
-              <button
-                className="px-2 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
-                onClick={() => setLinkPopoverOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-2 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
-                onClick={handleSave}
-                disabled={!isValid || !inputUrl}
-                data-testid="floating-menu-link-save"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline max-w-[180px] truncate flex items-center gap-1"
-            >
-              {url}
-              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-            </a>
-            <button
-              className="p-1 rounded hover:bg-gray-100"
-              onClick={() => setIsEditing(true)}
-              data-testid="floating-menu-link-edit"
-            >
-              <Edit2 className="h-3.5 w-3.5 text-gray-600" />
-            </button>
-            <button
-              className="p-1 rounded hover:bg-gray-100"
-              onClick={() => {
-                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-                setLinkPopoverOpen(false);
-              }}
-              data-testid="floating-menu-link-delete"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-gray-600" />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
+	const handleSave = () => {
+		if (!isValidUrl(inputUrl)) return;
+		editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: inputUrl, target: '_blank' });
+		setUrl(inputUrl);
+		onClose();
+	};
 
-  export default LinkPopover;
-  
+	const handleRemove = () => {
+		editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+		onClose();
+	};
+
+	const rect = anchorEl?.getBoundingClientRect?.() ?? { bottom: 0, left: 0 };
+
+	return (
+		<div
+			ref={popoverRef}
+			onMouseDown={(e) => e.stopPropagation()}
+			style={{
+				position: 'fixed',
+				top: rect.bottom + 8,
+				left: rect.left,
+				zIndex: 10001,
+				background: '#fff',
+				border: '1px solid #e5e7eb',
+				borderRadius: 8,
+				padding: 12,
+				boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+				minWidth: 280,
+			}}
+		>
+			{isEditing ? (
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+					<input
+						ref={inputRef}
+						type="text"
+						value={inputUrl}
+						onChange={(e) => setInputUrl(e.target.value)}
+						placeholder="https://example.com"
+						data-testid="floating-menu-link-input"
+						onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') onClose(); }}
+						style={{
+							width: '100%',
+							border: '1px solid #d1d5db',
+							borderRadius: 6,
+							padding: '6px 8px',
+							fontSize: 13,
+							outline: 'none',
+							boxSizing: 'border-box',
+						}}
+					/>
+					{!isValid && <span style={{ fontSize: 12, color: '#ef4444' }}>Please enter a valid URL</span>}
+					<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+						<button
+							type="button"
+							onClick={onClose}
+							style={{
+								padding: '4px 10px',
+								fontSize: 12,
+								borderRadius: 6,
+								border: '1px solid #d1d5db',
+								background: 'white',
+								cursor: 'pointer',
+							}}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onClick={handleSave}
+							disabled={!isValid || !inputUrl}
+							data-testid="floating-menu-link-save"
+							style={{
+								padding: '4px 10px',
+								fontSize: 12,
+								borderRadius: 6,
+								border: 'none',
+								background: (!isValid || !inputUrl) ? '#93c5fd' : '#3b82f6',
+								color: 'white',
+								cursor: (!isValid || !inputUrl) ? 'default' : 'pointer',
+								opacity: (!isValid || !inputUrl) ? 0.6 : 1,
+							}}
+						>
+							Save
+						</button>
+					</div>
+				</div>
+			) : (
+				<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+					<a
+						href={url}
+						target="_blank"
+						rel="noopener noreferrer"
+						style={{
+							fontSize: 13,
+							color: '#2563eb',
+							textDecoration: 'none',
+							maxWidth: 180,
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 4,
+						}}
+					>
+						{url}
+						<ExternalLink style={{ width: 12, height: 12, flexShrink: 0 }} />
+					</a>
+					<button
+						type="button"
+						onClick={() => setIsEditing(true)}
+						data-testid="floating-menu-link-edit"
+						style={{
+							padding: 4,
+							borderRadius: 4,
+							border: 'none',
+							background: 'transparent',
+							cursor: 'pointer',
+							display: 'flex',
+						}}
+					>
+						<Edit2 style={{ width: 14, height: 14, color: '#6b7280' }} />
+					</button>
+					<button
+						type="button"
+						onClick={handleRemove}
+						data-testid="floating-menu-link-delete"
+						style={{
+							padding: 4,
+							borderRadius: 4,
+							border: 'none',
+							background: 'transparent',
+							cursor: 'pointer',
+							display: 'flex',
+						}}
+					>
+						<Trash2 style={{ width: 14, height: 14, color: '#6b7280' }} />
+					</button>
+				</div>
+			)}
+		</div>
+	);
+}
+
+export default LinkPopover;

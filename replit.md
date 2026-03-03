@@ -102,8 +102,14 @@ All Material UI and oute-ds-* packages have been completely removed. All UI uses
 ### Legacy Archive
 `src_legacy/` contains the complete original MUI/ODS codebase for reference. Never delete it.
 
-### block-rte FloatingMenu
-The `packages/block-rte/src/component/plugin/FloatingMenu/` has been rebuilt to use Lucide icons and plain HTML instead of ODS components.
+### block-rte FloatingMenu (Rebuilt)
+The `packages/block-rte/` Rich Text Editor uses Lexical (by Meta). The floating toolbar was rebuilt from scratch:
+- **FloatingMenu.tsx**: Toolbar with Bold, Italic, Unordered List, Ordered List, Link buttons. Uses `onMouseDown={preventDefault}` on the entire toolbar container to prevent focus theft from the Lexical editor. Inline styles, no SCSS modules.
+- **FloatingMenuPlugin (index.tsx)**: Shows toolbar when text is selected, hides on deselection. Uses `registerUpdateListener` + pointer refs for selection tracking, `BLUR_COMMAND` handler for focus-out detection, `@floating-ui/dom` for positioning.
+- **useFloatingMenu.ts**: Tracks active formatting state (bold/italic/list/link) via both `SELECTION_CHANGE_COMMAND` and `registerUpdateListener` so button highlights update after format commands, not just selection moves.
+- **LinkPopover**: URL input with validation, save/cancel, edit/delete existing links. Click-outside-to-close, escape key support.
+- **Rte.tsx OnChangePlugin**: Uses `editorState.read()` instead of `editor.update()` to avoid nested Lexical updates.
+- Dead files removed: `usePointerInteractions.ts`, FloatingMenu `styles.module.scss`, LinkPopover `styles.module.scss`.
 
 ## Environment Variables
 Key variables in `packages/editor-sample/.env`:
