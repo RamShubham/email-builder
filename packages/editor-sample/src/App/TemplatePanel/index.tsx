@@ -14,6 +14,7 @@ import {
 } from '../../documents/editor/EditorContext';
 import getGlobalVariables from '../../utils/getGlobalVariables';
 import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
+import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 import AiChatOverlay from '../AiChat/AiChatOverlay';
 import { useAiChat } from '../AiChat/useAiChat';
 
@@ -80,7 +81,11 @@ export default function TemplatePanel() {
     <div className="flex flex-col h-full gap-2.5">
       <div className="island flex flex-col flex-1 min-h-0 overflow-hidden relative">
         <div className="flex items-center px-2 py-1.5 flex-shrink-0">
-          <div className="flex-1 flex items-center px-1">
+          <div className="flex items-center px-1">
+            <ToggleNavigatorPanelButton />
+          </div>
+
+          <div className="flex-1 flex items-center">
             <MainTabsGroup />
           </div>
 

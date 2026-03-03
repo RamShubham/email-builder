@@ -19,7 +19,7 @@ import BlockTree from './components/BlockTree';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import useNavigatorDrawer from './hooks/useNavigatorDrawer';
 
-export const NAVIGATOR_DRAWER_WIDTH = 240;
+export const NAVIGATOR_DRAWER_WIDTH = 180;
 
 export default function NavigatorDrawer() {
   const samplesDrawerOpen = useSamplesDrawerOpen();
@@ -54,11 +54,11 @@ export default function NavigatorDrawer() {
       }}
       data-testid="navigator-panel"
     >
-      <div className="flex flex-col h-full overflow-hidden" style={{ width: NAVIGATOR_DRAWER_WIDTH }}>
-        <div className="px-5 pt-4 pb-2 flex-shrink-0">
+      <div className="flex flex-col h-full overflow-hidden" style={{ width: NAVIGATOR_DRAWER_WIDTH, minWidth: NAVIGATOR_DRAWER_WIDTH }}>
+        <div className="px-3 pt-3 pb-1.5 flex-shrink-0">
           <h2 className="text-[13px] font-semibold text-gray-800 tracking-tight">Navigator</h2>
-          <p className="text-[11px] text-gray-400 mt-1">
-            Drag and drop to move blocks.
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            Drag and drop to move.
           </p>
         </div>
 

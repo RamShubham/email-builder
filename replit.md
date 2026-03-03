@@ -77,7 +77,7 @@ The UI uses a floating "island" layout where each major panel is a distinct card
 - **Background**: Subtle slate-gray (`--background: 220 14% 96%`) shows between islands
 - **Islands**: White cards with `border-radius: var(--island-radius)` (16px) and multi-layer macOS-style shadow (`.island` utility class)
 - **Layout**: `p-2.5 gap-2.5` spacing (10px gaps); `h-screen w-screen` viewport container
-- **Panels**: Navbar (top), Canvas (center), Inspector (right), AI Prompt (bottom of canvas) — all floating
+- **Panels**: Navbar (top), Navigator (left, 180px), Canvas (center), Inspector (right), AI Prompt (bottom of canvas) — all floating
 - **AI Prompt**: Separate floating island below the canvas (`AiPromptIsland` component), only visible on editor tab
 - **Chat Overlay**: Frosted glass overlay within the canvas island, violet gradient accents
 - **Tabs & selections**: macOS segmented control style — `bg-gray-100/80` pill container with white active pill + `shadow-sm`, `rounded-[10px]` inner pills

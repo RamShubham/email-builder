@@ -21,6 +21,7 @@ import {
   useDocument,
   useGlobalLoader,
   useInspectorDrawerOpen,
+  useSamplesDrawerOpen,
   useVariables,
 } from '../documents/editor/EditorContext';
 import { replaceTemplateVariables } from '../utils/replaceTemplateVariables';
@@ -28,6 +29,7 @@ import { replaceTemplateVariables } from '../utils/replaceTemplateVariables';
 import GlobalLoader from './GlobalLoader';
 import InspectorDrawer, { INSPECTOR_DRAWER_WIDTH } from './InspectorDrawer';
 import Navbar from './Navbar';
+import NavigatorDrawer, { NAVIGATOR_DRAWER_WIDTH } from './NavigatorDrawer';
 import TemplatePanelLoader from './TemplateLoader';
 import TemplatePanel from './TemplatePanel';
 
@@ -52,6 +54,7 @@ const conditionalModifiers: Modifier = (args) => {
 export default function App() {
   const globalLoader = useGlobalLoader();
   const inspectorDrawerOpen = useInspectorDrawerOpen();
+  const samplesDrawerOpen = useSamplesDrawerOpen();
   const globalVariables = useVariables();
   const document = useDocument();
 
@@ -89,10 +92,12 @@ export default function App() {
         <div className="relative flex-1 min-h-0">
           <TemplatePanelLoader />
           <InspectorDrawer />
+          <NavigatorDrawer />
           <div
             className="h-full transition-all duration-200"
             style={{
               marginRight: inspectorDrawerOpen ? INSPECTOR_DRAWER_WIDTH + ISLAND_GAP : 0,
+              marginLeft: samplesDrawerOpen ? NAVIGATOR_DRAWER_WIDTH + ISLAND_GAP : 0,
             }}
           >
             <TemplatePanel />
