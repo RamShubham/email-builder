@@ -16,11 +16,16 @@ import React, { memo, useEffect, useRef, useState } from 'react';
     const { style } = props;
     const { padding, fontSize, fontFamily, textAlign, color, ...rest } = style || {};
 
-    const [editedText, setEditedText] = useState(props.template?.text || props.props?.text || '');
+    const currentText = props.template?.text ?? props.props?.text ?? '';
+    const [editedText, setEditedText] = useState(currentText);
     const blockId = useCurrentBlockId();
     const document = useDocument();
     const globalVariables = useVariables();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+      if (!isEditing) setEditedText(currentText);
+    }, [currentText, isEditing]);
 
     const handleBlur = () => {
       if (blockId && document[blockId]) {

@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
   import { Html } from '@usewaypoint/block-html';
 
@@ -12,7 +12,12 @@ import React, { memo, useState } from 'react';
 
   function EditableHtml(props: any) {
     const { isEditing, onEditComplete, ...htmlProps } = props;
-    const [editedContents, setEditedContents] = useState(props.template?.contents || props.props?.contents || '');
+    const currentContents = props.template?.contents ?? props.props?.contents ?? '';
+    const [editedContents, setEditedContents] = useState(currentContents);
+
+    useEffect(() => {
+      if (!isEditing) setEditedContents(currentContents);
+    }, [currentContents, isEditing]);
     const blockId = useCurrentBlockId();
     const document = useDocument();
     const globalVariables = useVariables();

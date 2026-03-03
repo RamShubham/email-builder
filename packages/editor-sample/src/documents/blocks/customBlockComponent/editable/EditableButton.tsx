@@ -15,11 +15,16 @@ import React, { memo, useEffect, useRef, useState } from 'react';
     const { isEditing, onEditComplete, ...buttonProps } = props;
     const { style } = props;
     const { padding, fontFamily, fontSize, textAlign, ...rest } = style || {};
-    const [editedText, setEditedText] = useState(props.template?.text || props.props?.text || '');
+    const currentText = props.template?.text ?? props.props?.text ?? '';
+    const [editedText, setEditedText] = useState(currentText);
     const blockId = useCurrentBlockId();
     const document = useDocument();
     const globalVariables = useVariables();
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (!isEditing) setEditedText(currentText);
+    }, [currentText, isEditing]);
 
     const handleBlur = () => {
       if (blockId && document[blockId]) {

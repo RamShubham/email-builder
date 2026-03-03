@@ -103,7 +103,7 @@ type Props = {
   style: CSSProperties;
   markdown: string;
 };
-export default function EmailMarkdown({ markdown, ...props }: Props) {
+export default function EmailMarkdown({ markdown, className, ...props }: Props & { className?: string }) {
   const data = useMemo(() => renderMarkdownString(markdown), [markdown]);
-  return <div {...props} dangerouslySetInnerHTML={{ __html: data }} />;
+  return <div {...props} className={['email-markdown', className].filter(Boolean).join(' ')} dangerouslySetInnerHTML={{ __html: data }} />;
 }
