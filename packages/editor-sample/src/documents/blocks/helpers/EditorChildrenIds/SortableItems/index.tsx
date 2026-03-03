@@ -54,7 +54,7 @@ import React, { useEffect, useState } from 'react';
         <div
           {...attributes}
           {...listeners}
-          className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-blue-500 p-1 rounded-bl"
+          className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-blue-500/90 p-1 rounded-md shadow-sm"
           style={{ zIndex: 10 }}
         >
           <GripVertical className="h-4 w-4 text-white" />

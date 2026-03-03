@@ -23,7 +23,7 @@ function Block({
       {...listeners}
       className="flex flex-col items-center cursor-grab active:cursor-grabbing select-none group"
     >
-      <div className="w-full bg-gray-50/80 flex justify-center p-3 rounded-xl mb-1.5 group-hover:bg-gray-100 group-hover:shadow-sm transition-all duration-150">
+      <div className="w-full bg-gray-100 border border-gray-200/60 flex justify-center p-3 rounded-xl mb-1.5 group-hover:bg-gray-200/80 group-hover:border-gray-300/60 group-hover:shadow-sm transition-all duration-150">
         {icon}
       </div>
       <span className="text-[11px] text-gray-500 text-center leading-tight font-medium">{label}</span>
