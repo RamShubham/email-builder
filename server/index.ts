@@ -14,15 +14,20 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
+const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
+app.use(express.static(distPath));
+
 const allowedOrigins = [
   process.env.TINYCOMMAND_ORIGIN,
   process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
+  process.env.REPLIT_DEPLOYMENT_URL ? `https://${process.env.REPLIT_DEPLOYMENT_URL}` : null,
+  'https://email-builder-shubhamram2992.replit.app',
   'http://localhost:5000',
   'http://localhost:3001',
-  `http://0.0.0.0:5000`,
+  'http://0.0.0.0:5000',
 ].filter(Boolean) as string[];
 
-app.use(cors({
+const apiCors = cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -31,10 +36,11 @@ app.use(cors({
     }
   },
   credentials: true,
-}));
+});
 
-app.use(express.json({ limit: '50mb' }));
-app.use(authMiddleware);
+app.use('/api', apiCors);
+app.use('/api', express.json({ limit: '50mb' }));
+app.use('/api', authMiddleware);
 app.use(templateRoutes);
 
 const openai = new OpenAI({
@@ -140,8 +146,6 @@ app.all('/api/{*splat}', (_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
-app.use(express.static(distPath));
 app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
