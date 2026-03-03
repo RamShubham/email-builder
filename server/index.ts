@@ -1,16 +1,22 @@
 import './renderHtml.js';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import OpenAI from 'openai';
 import { chat, chatStream, resetSession } from './ai/templateAgent.js';
 import { authMiddleware } from './middleware/auth.js';
 import templateRoutes from './routes/templates.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const PORT = 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 const allowedOrigins = [
   process.env.TINYCOMMAND_ORIGIN,
+  process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
   'http://localhost:5000',
   'http://localhost:3001',
   `http://0.0.0.0:5000`,
@@ -130,6 +136,16 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.all('/api/{*splat}', (_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
+app.use(express.static(distPath));
+app.get('/{*splat}', (_req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`AI server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

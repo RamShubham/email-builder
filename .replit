@@ -55,6 +55,7 @@ waitForPort = 3001
 outputType = "console"
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 build = ["pnpm", "--filter", "@usewaypoint/editor-sample", "run", "vitebuild"]
 publicDir = "packages/editor-sample/dist"
+run = ["npx", "tsx", "server/index.ts"]

@@ -4,7 +4,7 @@
         "type": "module",
         "scripts": {
                 "vitedev": "vite",
-                "vitebuild": "vite build && cp dist/index.html dist/200.html",
+                "vitebuild": "vite build",
                 "vitebuild:watch": "vite build --watch",
                 "vitepreview": "vite preview",
                 "clean": "rm -rf node_modules pnpm-lock.yaml"

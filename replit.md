@@ -192,6 +192,8 @@ Key variables:
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
 
 ## Deployment
-Static site deployment:
+Autoscale deployment using the Express server:
 - Build: `pnpm --filter @usewaypoint/editor-sample run vitebuild`
-- Public dir: `packages/editor-sample/dist`
+- Run: `npx tsx server/index.ts` (serves API + static frontend with SPA fallback)
+- In production, the server uses `PORT` env var (defaults to 3001 in dev)
+- The Express server serves static files from `packages/editor-sample/dist` and falls back to `index.html` for all unmatched routes (SPA routing)
