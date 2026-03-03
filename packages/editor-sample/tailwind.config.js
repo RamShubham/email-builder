@@ -4,6 +4,7 @@ export default {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
+    '../block-rte/src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
