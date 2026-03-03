@@ -37,7 +37,6 @@ export default function EditorBlockWrapper({ children }: TEditorBlockWrapperProp
   const wrapperStyle: CSSProperties = {
     position: 'relative',
     maxWidth: '100%',
-    borderRadius: '8px',
     outline: isSelected ? '2px solid rgba(59, 130, 246, 0.5)' : undefined,
     outlineOffset: '2px',
     transition: 'outline 0.15s ease',
