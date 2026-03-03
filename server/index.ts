@@ -1,13 +1,35 @@
+import './renderHtml.js';
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
 import { chat, chatStream, resetSession } from './ai/templateAgent.js';
+import { authMiddleware } from './middleware/auth.js';
+import templateRoutes from './routes/templates.js';
 
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
+const allowedOrigins = [
+  process.env.TINYCOMMAND_ORIGIN,
+  'http://localhost:5000',
+  'http://localhost:3001',
+  `http://0.0.0.0:5000`,
+].filter(Boolean) as string[];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '50mb' }));
+app.use(authMiddleware);
+app.use(templateRoutes);
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,

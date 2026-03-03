@@ -1,12 +1,19 @@
 # Email Builder JS (Oute Email Editor)
 
 ## Overview
-A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages. Features a conversational AI assistant that helps users design email templates through natural chat.
+A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages. Features a conversational AI assistant that helps users design email templates through natural chat. Includes a TinyCommand AI integration layer with embeddable editor, postMessage API, template CRUD, and server-side rendering.
 
 ## Project Structure
 ```
 server/                   # Express AI backend (port 3001)
   index.ts                # Express server entry point
+  db.ts                   # PostgreSQL connection pool
+  renderHtml.ts           # Server-side template rendering (CSS module shim)
+  webhooks.ts             # Webhook event emitter
+  middleware/
+    auth.ts               # API key authentication middleware
+  routes/
+    templates.ts          # Template CRUD + render + block schema endpoints
   ai/
     templateAgent.ts      # OpenAI-powered conversational agent
     systemPrompt.ts       # System prompt with block schema + examples
@@ -18,6 +25,9 @@ packages/
         ChatMessage.tsx    # Message bubble component
         ChatInput.tsx      # Chat input component
         useAiChat.ts       # Chat state management hook
+      embed/
+        usePostMessage.ts  # Bidirectional postMessage hook for iframe embed
+      EmbedEditor.tsx      # Stripped-down editor for iframe embedding
     src_legacy/           # Archived legacy MUI/ODS code (do not delete)
   email-builder/          # Core email builder library (Reader component)
   document-core/          # Document model and block schema infrastructure
@@ -36,6 +46,7 @@ packages/
 - **Color Picker**: react-colorful
 - **AI Backend**: Express + OpenAI (via Replit AI Integrations, gpt-4.1)
 - **AI Packages**: openai, express, cors
+- **Database**: PostgreSQL (Replit built-in) with `pg` driver
 
 ## Running the App
 Two workflows run simultaneously:
@@ -46,25 +57,73 @@ Vite proxies `/api` requests to the Express server on port 3001.
 
 For development testing, navigate to `/dev` to bypass auth.
 
-## AI Chat System
-- **Prompt Bar**: Single-row input island at bottom of canvas with sparkle icon
-- **Chat Overlay**: Full-screen frosted-glass overlay that slides up from the prompt bar
-- **Conversational Flow**: AI greets → ideates → clarifies → user confirms → template generated → "Apply to canvas" button
-- **Endpoints**:
-  - `POST /api/chat` — synchronous chat (returns full response)
-  - `POST /api/chat/stream` — streaming SSE chat (real-time chunks)
-  - `POST /api/chat/reset` — reset conversation session
-  - `POST /api/image/generate` — AI image generation (accepts `{ prompt }`, returns `{ url }` as data URL)
-  - `GET /api/health` — health check
-- **Template Generation**: AI outputs templates wrapped in `|||TEMPLATE_START|||...|||TEMPLATE_END|||` markers, parsed by the agent. During streaming, template JSON is hidden from the chat display — users only see the conversational text.
-- **AI Image Generation**: Uses `gpt-image-1` model via Replit AI Integrations. Available in Image block inspector via "Generate with AI" button with aspect ratio selector (landscape/square/portrait). AI templates include descriptive alt text that doubles as generation prompts.
-- **OpenAI**: Uses Replit AI Integrations (env vars `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`)
+## Database
+PostgreSQL with a `templates` table:
+- `id` UUID PK (auto-generated)
+- `name` TEXT NOT NULL
+- `description`, `subject`, `category` TEXT
+- `template_json` JSONB (full TEditorConfiguration)
+- `merge_fields` TEXT[]
+- `thumbnail_url`, `workspace_id` TEXT
+- `created_at`, `updated_at` TIMESTAMP
+
+## API Endpoints
+
+### AI Chat
+- `POST /api/chat` — synchronous chat (returns full response)
+- `POST /api/chat/stream` — streaming SSE chat (real-time chunks)
+- `POST /api/chat/reset` — reset conversation session
+- `POST /api/image/generate` — AI image generation (`{ prompt }` → `{ url }`)
+- `GET /api/health` — health check
+
+### Template CRUD
+- `POST /api/templates` — create template (201)
+- `GET /api/templates` — list templates (`?workspaceId`, `?category`, `?limit`, `?offset`)
+- `GET /api/templates/:id` — get template by ID
+- `PUT /api/templates/:id` — partial update
+- `DELETE /api/templates/:id` — delete
+
+### Rendering & Schema
+- `POST /api/templates/:id/render` — render to HTML with variable substitution (`{ variables }` → `{ html, subject }`)
+- `GET /api/blocks/schema` — all 12 block types, properties, font families, merge syntax
+
+### Authentication
+- API key auth via `Authorization: Bearer <key>` header
+- Keys configured via `TINYEMAIL_API_KEYS` env var (comma-separated)
+- If no keys configured, auth is skipped (dev mode)
+- Public paths (no auth): `/api/health`, `/embed`, `/assets`
+
+### Webhooks
+- When `WEBHOOK_URL` env var is set, fires POST on template events:
+  - `template.created`, `template.updated`, `template.deleted`, `template.rendered`
+- Payload: `{ event, data: { templateId, name, workspaceId, timestamp } }`
 
 ## App Routes
 - `/template?q=<encoded-params>` - Edit/create email template (production auth flow)
 - `/asset?q=<encoded-params>` - Edit existing asset (production auth flow)
 - `/dev` - Direct access bypassing auth (development only)
+- `/embed` - Stripped-down editor for iframe embedding (no navbar/navigator)
+  - URL params: `?mode=edit|preview|json`, `?hideInspector=true`, `?theme=dark`
 - `*` - Shows "Page not found" message
+
+## Embed / postMessage API
+The `/embed` route supports bidirectional communication via `window.postMessage`:
+
+### Host → Editor Messages
+- `TINY_EMAIL_LOAD_TEMPLATE` — load a TEditorConfiguration into the editor
+- `TINY_EMAIL_GET_TEMPLATE` — request current template (needs `requestId`)
+- `TINY_EMAIL_GET_HTML` — render to HTML with optional variable substitution
+- `TINY_EMAIL_SET_VARIABLES` — set merge field preview values
+- `TINY_EMAIL_SET_THEME` — switch light/dark theme
+- `TINY_EMAIL_SET_MODE` — switch edit/preview/json mode
+
+### Editor → Host Messages
+- `TINY_EMAIL_EDITOR_READY` — editor is initialized and ready
+- `TINY_EMAIL_TEMPLATE_LOADED` — template was loaded (includes `blockCount`)
+- `TINY_EMAIL_TEMPLATE_RESPONSE` — response to GET_TEMPLATE
+- `TINY_EMAIL_HTML_RESPONSE` — response to GET_HTML (includes `html`)
+- `TINY_EMAIL_TEMPLATE_CHANGED` — debounced (500ms) change notification
+- `TINY_EMAIL_ERROR` — error response
 
 ## Path Aliases
 Vite and tsconfig are configured with `@` pointing to `src/`:
@@ -118,12 +177,19 @@ All editable blocks (`packages/editor-sample/src/documents/blocks/customBlockCom
 - **EditableButton**: Two-layer structure matching base Button — outer wrapper with padding/bg/textAlign, inner div with buttonBackgroundColor/borderRadius/size-dependent padding, input with buttonTextColor/fontWeight. Supports fullWidth and all button sizes.
 - **EditableHtml**: Uses monospace code-editor styling (intentionally different from rendered output).
 
+### Server-Side Rendering
+The render endpoint (`POST /api/templates/:id/render`) uses `renderToStaticMarkup` from `@usewaypoint/email-builder` server-side via `tsx`. A CSS module shim in `server/renderHtml.ts` intercepts `.scss`/`.css` imports that `tsx` can't handle natively, returning empty proxy objects instead.
+
 ## Environment Variables
-Key variables in `packages/editor-sample/.env`:
+Key variables:
+- `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key (managed by Replit Integrations)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI base URL (managed by Replit Integrations)
+- `DATABASE_URL` - PostgreSQL connection string (auto-provisioned)
+- `TINYEMAIL_API_KEYS` - Comma-separated API keys for authentication (optional, auth skipped if empty)
+- `TINYCOMMAND_ORIGIN` - Allowed CORS origin for TinyCommand AI (optional)
+- `WEBHOOK_URL` - Webhook endpoint for template events (optional)
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
-- `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key (managed by Replit)
-- `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI base URL (managed by Replit)
 
 ## Deployment
 Static site deployment:
