@@ -25,6 +25,64 @@ function applyVariablesToJson(templateJson: any, variables: Record<string, strin
   return JSON.parse(replaced);
 }
 
+function collectReferencedIds(template: any): string[] {
+  const refs: string[] = [];
+  for (const [id, block] of Object.entries(template)) {
+    const b = block as any;
+    if (b?.data?.childrenIds) {
+      refs.push(...b.data.childrenIds);
+    }
+    if (b?.data?.props?.childrenIds) {
+      refs.push(...b.data.props.childrenIds);
+    }
+    if (b?.data?.props?.columns) {
+      for (const col of b.data.props.columns) {
+        if (col?.childrenIds) {
+          refs.push(...col.childrenIds);
+        }
+      }
+    }
+  }
+  return refs;
+}
+
+function validateAndFixTemplate(template: any): { fixed: any; warnings: string[] } {
+  const warnings: string[] = [];
+  const blockIds = new Set(Object.keys(template));
+  const referenced = collectReferencedIds(template);
+
+  const missing = referenced.filter(id => !blockIds.has(id));
+  if (missing.length > 0) {
+    warnings.push(`Missing block IDs referenced in template: ${missing.join(', ')}`);
+  }
+
+  if (missing.length === 0) {
+    return { fixed: template, warnings };
+  }
+
+  const missingSet = new Set(missing);
+  const fixed = JSON.parse(JSON.stringify(template));
+
+  for (const [id, block] of Object.entries(fixed)) {
+    const b = block as any;
+    if (b?.data?.childrenIds) {
+      b.data.childrenIds = b.data.childrenIds.filter((cid: string) => !missingSet.has(cid));
+    }
+    if (b?.data?.props?.childrenIds) {
+      b.data.props.childrenIds = b.data.props.childrenIds.filter((cid: string) => !missingSet.has(cid));
+    }
+    if (b?.data?.props?.columns) {
+      for (const col of b.data.props.columns) {
+        if (col?.childrenIds) {
+          col.childrenIds = col.childrenIds.filter((cid: string) => !missingSet.has(cid));
+        }
+      }
+    }
+  }
+
+  return { fixed, warnings };
+}
+
 export function usePostMessage(
   setTheme?: (theme: 'light' | 'dark') => void,
 ) {
@@ -63,14 +121,57 @@ export function usePostMessage(
       parentOrigin = event.origin;
     }
 
+    console.log(`[PostMessage] Received: ${data.type}`, {
+      origin: event.origin,
+      requestId: data.requestId,
+      hasTemplate: !!data.template,
+      hasVariables: !!data.variables,
+      mode: data.mode,
+      theme: data.theme,
+    });
+
     try {
       switch (data.type) {
         case 'TINY_EMAIL_LOAD_TEMPLATE': {
-          resetDocument(data.template);
+          console.log('[PostMessage] LOAD_TEMPLATE payload:', {
+            blockIds: data.template ? Object.keys(data.template) : 'NO TEMPLATE',
+            blockCount: data.template ? Object.keys(data.template).length : 0,
+            rootType: data.template?.root?.type,
+            rootChildrenIds: data.template?.root?.data?.childrenIds,
+          });
+          console.log('[PostMessage] Full template JSON:', JSON.stringify(data.template, null, 2));
+
+          if (!data.template || typeof data.template !== 'object') {
+            console.error('[PostMessage] LOAD_TEMPLATE received invalid template:', data.template);
+            postToHost({
+              type: 'TINY_EMAIL_ERROR',
+              requestId: data.requestId,
+              error: 'Invalid template: expected an object with block definitions',
+            });
+            break;
+          }
+
+          if (!data.template.root) {
+            console.error('[PostMessage] LOAD_TEMPLATE missing root block. Keys:', Object.keys(data.template));
+            postToHost({
+              type: 'TINY_EMAIL_ERROR',
+              requestId: data.requestId,
+              error: 'Invalid template: missing "root" block',
+            });
+            break;
+          }
+
+          const { fixed, warnings } = validateAndFixTemplate(data.template);
+          for (const w of warnings) {
+            console.warn(`[PostMessage] Template validation: ${w}`);
+          }
+
+          resetDocument(fixed);
           postToHost({
             type: 'TINY_EMAIL_TEMPLATE_LOADED',
             requestId: data.requestId,
-            blockCount: Object.keys(data.template).length - 1,
+            blockCount: Object.keys(fixed).length - 1,
+            warnings: warnings.length > 0 ? warnings : undefined,
           });
           break;
         }
@@ -99,6 +200,7 @@ export function usePostMessage(
         }
 
         case 'TINY_EMAIL_SET_VARIABLES': {
+          console.log('[PostMessage] SET_VARIABLES:', data.variables);
           setVariables(data.variables);
           break;
         }
@@ -120,9 +222,11 @@ export function usePostMessage(
         }
 
         default:
+          console.log(`[PostMessage] Unhandled message type: ${data.type}`);
           break;
       }
     } catch (err: any) {
+      console.error(`[PostMessage] Error handling ${data.type}:`, err);
       postToHost({
         type: 'TINY_EMAIL_ERROR',
         requestId: data.requestId,
@@ -135,6 +239,7 @@ export function usePostMessage(
     window.addEventListener('message', handleMessage);
 
     const readyTimeout = setTimeout(() => {
+      console.log('[PostMessage] Sending EDITOR_READY');
       postToHost({ type: 'TINY_EMAIL_EDITOR_READY' });
     }, 100);
 

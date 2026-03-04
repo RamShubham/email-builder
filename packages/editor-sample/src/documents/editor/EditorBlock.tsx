@@ -10,17 +10,26 @@ type EditorBlockProps = {
   id: string;
 };
 
-/**
- *
- * @param id - Block id
- * @returns EditorBlock component that loads data from the EditorDocumentContext
- */
 export default function EditorBlock({ id }: EditorBlockProps) {
   const document = useDocument();
   const block = document[id];
 
   if (!block) {
-    throw new Error('Could not find block');
+    console.warn(`[EditorBlock] Missing block id="${id}". Available blocks:`, Object.keys(document));
+    return (
+      <div style={{
+        padding: '12px 16px',
+        margin: '4px 0',
+        background: '#fef2f2',
+        border: '1px dashed #fca5a5',
+        borderRadius: '6px',
+        color: '#991b1b',
+        fontSize: '13px',
+        fontFamily: 'monospace',
+      }}>
+        ⚠ Missing block: <strong>{id}</strong>
+      </div>
+    );
   }
   return (
     <EditorBlockContext.Provider value={id}>
