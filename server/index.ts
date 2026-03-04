@@ -134,7 +134,9 @@ app.post('/api/image/generate', async (req, res) => {
     res.json({ url: dataUrl });
   } catch (error: any) {
     console.error('Image generation error:', error);
-    res.status(500).json({ error: 'Failed to generate image' });
+    const status = error?.status || 500;
+    const message = error?.message || 'Failed to generate image';
+    res.status(status).json({ error: message });
   }
 });
 

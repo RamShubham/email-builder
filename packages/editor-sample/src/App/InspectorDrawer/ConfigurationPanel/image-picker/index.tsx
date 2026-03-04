@@ -94,16 +94,17 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
         body: JSON.stringify({ prompt: aiPrompt.trim(), aspectRatio }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to generate image');
+        throw new Error(data?.error || 'Failed to generate image');
       }
 
-      const data = await response.json();
       if (!data.url) throw new Error('No image returned');
       setGeneratedPreview(data.url);
       setGeneratedUrl(data.url);
-    } catch (err) {
-      setError('Failed to generate image. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'Failed to generate image. Please try again.');
     } finally {
       setIsGenerating(false);
     }
