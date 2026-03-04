@@ -14,6 +14,10 @@ externalPort = 3001
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
 [workflows]
 runButton = "Project"
 
@@ -59,3 +63,8 @@ deploymentTarget = "autoscale"
 build = ["pnpm", "--filter", "@usewaypoint/editor-sample", "run", "vitebuild"]
 publicDir = "packages/editor-sample/dist"
 run = ["npx", "tsx", "server/index.ts"]
+
+[userenv]
+
+[userenv.shared]
+TINYEMAIL_API_KEYS = "tk_live_192011f3e18b9796dce559c41b48e97a645d2ea76e443c5f"
