@@ -135,28 +135,28 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex gap-2 min-w-0">
         <Button
           variant="default"
           onClick={openUrlTab}
           data-testid="inspect-panel-image-picker-button"
-          className="gap-2 flex-1"
+          className="gap-2 flex-1 min-w-0"
         >
-          <Upload className="h-4 w-4" />
-          Upload Image
+          <Upload className="h-4 w-4 shrink-0" />
+          <span className="truncate">Upload Image</span>
         </Button>
         <Button
           variant="outline"
           onClick={openAiTab}
-          className="gap-2 flex-1 border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800"
+          className="gap-2 flex-1 min-w-0 border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800"
         >
-          <Sparkles className="h-4 w-4" />
-          Generate with AI
+          <Sparkles className="h-4 w-4 shrink-0" />
+          <span className="truncate">Generate with AI</span>
         </Button>
       </div>
 
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent data-testid="inspect-panel-image-picker-dialog" className="sm:max-w-[480px]">
+        <DialogContent data-testid="inspect-panel-image-picker-dialog" className="sm:max-w-[480px] overflow-hidden">
           <DialogHeader>
             <DialogTitle>
               {tab === 'url' ? 'Image URL' : 'Generate Image with AI'}
@@ -237,7 +237,7 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
                 <Button
                   onClick={handleGenerate}
                   disabled={!aiPrompt.trim() || isGenerating}
-                  className="gap-2 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white"
+                  className="w-full gap-2 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white"
                 >
                   {isGenerating ? (
                     <>

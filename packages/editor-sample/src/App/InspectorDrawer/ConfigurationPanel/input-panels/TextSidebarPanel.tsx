@@ -39,6 +39,7 @@ export default function TextSidebarPanel({
 					updateData({ ...data, props: { ...data.props, text } })
 				}
 				dataTestId="inspect-panel-content-field"
+				showVariableInsert
 			/>
 			<BooleanInput
 				label="Markdown"
@@ -59,6 +60,7 @@ export default function TextSidebarPanel({
 					});
 				}}
 				dataTestId="inspect-panel-url-field"
+				showVariableInsert
 			/>
 
 			<MultiStylePropertyPanel

@@ -37,6 +37,7 @@ export default function HtmlSidebarPanel({
 					updateData({ ...data, props: { ...data.props, contents } })
 				}
 				dataTestId="inspect-panel-content-field"
+				showVariableInsert
 			/>
 			<MultiStylePropertyPanel
 				names={[

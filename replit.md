@@ -170,6 +170,13 @@ The `packages/block-rte/` Rich Text Editor uses Lexical (by Meta). The floating 
 - **Rte.tsx OnChangePlugin**: Uses `editorState.read()` instead of `editor.update()` to avoid nested Lexical updates.
 - Dead files removed: `usePointerInteractions.ts`, FloatingMenu `styles.module.scss`, LinkPopover `styles.module.scss`.
 
+### Variable Insertion System
+The editor supports merge variables (`{{variableName}}`) in text fields:
+- **Insert Variable button**: TextInput component has an optional `showVariableInsert` prop that shows a `{ } Variable` button with a popover containing common presets (firstName, lastName, email, companyName, unsubscribeUrl, previewText) and custom variable input. Enabled on content/URL fields in Text, Heading, Button, and Html inspector panels.
+- **Visual pills**: EditableText and EditableHeading render `{{variable}}` as styled violet pills on the canvas (non-editing mode). URL link wrapping is preserved when the block has a URL set. In editing mode, raw `{{variable}}` text is shown for direct editing.
+- **Data panel**: Shows detected variables with default value inputs. Empty state shows a helpful hint about the Variable button.
+- **VariablePill component**: `src/components/VariablePill.tsx` — renders styled inline pill + `renderTextWithVariables()` utility for splitting text into pills and plain segments.
+
 ### Editable Block Components
 All editable blocks (`packages/editor-sample/src/documents/blocks/customBlockComponent/editable/`) preserve full visual styling in edit mode:
 - **EditableHeading**: Wraps input in styled container with padding/bg/borderRadius; applies explicit fontSize from level (h1=32, h2=24, h3=20), fontFamily, fontWeight, color, textAlign.
