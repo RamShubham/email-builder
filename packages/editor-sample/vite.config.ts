@@ -29,7 +29,7 @@ export default defineConfig({
                 },
         },
         server: {
-                port: 5000,
+                port: 8007,
                 allowedHosts: true,
                 proxy: {
                         '/api': {
