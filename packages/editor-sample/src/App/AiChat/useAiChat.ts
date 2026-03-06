@@ -45,7 +45,7 @@ export function useAiChat() {
   const [, resetChatRequest] = useRequest(
     {
       method: 'post',
-      url: `${API_BASE_URL}/chat/reset`,
+      url: `${API_BASE_URL}chat/reset`,
     },
     { manual: true }
   );
@@ -71,7 +71,7 @@ export function useAiChat() {
     abortRef.current = new AbortController();
 
     try {
-      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      const response = await fetch(`${API_BASE_URL}chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
