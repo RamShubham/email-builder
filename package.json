@@ -13,7 +13,10 @@
 	],
 	"scripts": {
 		"build": "npx tsc",
-		"test": "npx jest"
+		"test": "npx jest",
+		"server:dev": "cd server && npm run dev",
+		"server:build": "cd server && npm run build",
+		"server:start": "cd server && npm start"
 	},
 	"author": "carlos@usewaypoint.com",
 	"license": "MIT",

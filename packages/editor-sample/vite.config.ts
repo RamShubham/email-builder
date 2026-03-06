@@ -1,6 +1,5 @@
-import { resolve } from 'path';
-
 import dotenv from 'dotenv';
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 import react from '@vitejs/plugin-react-swc';
@@ -30,7 +29,6 @@ export default defineConfig({
                 },
         },
         server: {
-                host: '0.0.0.0',
                 port: 5000,
                 allowedHosts: true,
                 proxy: {
