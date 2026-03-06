@@ -854,15 +854,6 @@ The system works with individual templates only.
 
 ---
 
-## SECTION 10: Webhooks & Events
-
-**Not implemented.** There is no:
-- Webhook system
-- Event emission
-- Event bus or pub/sub
-
----
-
 ## SECTION 11: Authentication & Authorization
 
 ### Server-Side (API)
@@ -1125,15 +1116,6 @@ Two stub packages exist suggesting planned integrations:
 2. **Workspace isolation**: Templates scoped to workspaces
 3. **CORS restrictions**: Allow only TinyCommand AI's domain
 
-### Webhook Events to Add
-
-| Event | Payload |
-|:---|:---|
-| `template.created` | `{ templateId, name, workspaceId, timestamp }` |
-| `template.updated` | `{ templateId, name, changes, workspaceId, timestamp }` |
-| `template.deleted` | `{ templateId, workspaceId, timestamp }` |
-| `template.rendered` | `{ templateId, recipientCount, workspaceId, timestamp }` |
-
 ### Embeddable Builder Changes
 
 1. **Add `/embed` route** — Editor without navbar, streamlined for embedding
@@ -1229,7 +1211,6 @@ To build an embedding/knowledge base of TinyEmail capabilities, TinyCommand AI s
 | HTML rendering API | Low | Partially | `renderToStaticMarkup` exists, needs an endpoint |
 | Embedded editor (iframe) | Medium | No | Need `/embed` route + postMessage API |
 | Authentication | Medium | No | Need API key middleware |
-| Webhooks | Medium | No | Need event system + webhook delivery |
 | Sending infrastructure | High | No | Not in scope — use external provider |
 | Contact management | High | No | Not in scope — TinyCommand AI provides this |
 | Analytics/tracking | High | No | Not in scope — external provider handles this |

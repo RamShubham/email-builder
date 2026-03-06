@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { emitWebhook } from '../webhooks.js';
 
 const router = Router();
 
@@ -21,14 +20,6 @@ router.post('/api/templates', async (req, res) => {
 
     const row = result.rows[0];
     const template = formatRow(row);
-
-    emitWebhook('template.created', {
-      templateId: template.id,
-      name: template.name,
-      workspaceId: template.workspaceId || undefined,
-      timestamp: new Date().toISOString(),
-    });
-
     res.status(201).json(template);
   } catch (error: any) {
     console.error('Create template error:', error);
@@ -129,14 +120,6 @@ router.put('/api/templates/:id', async (req, res) => {
     );
 
     const template = formatRow(result.rows[0]);
-
-    emitWebhook('template.updated', {
-      templateId: template.id,
-      name: template.name,
-      workspaceId: template.workspaceId || undefined,
-      timestamp: new Date().toISOString(),
-    });
-
     res.json(template);
   } catch (error: any) {
     console.error('Update template error:', error);
@@ -153,14 +136,6 @@ router.delete('/api/templates/:id', async (req, res) => {
     }
 
     await pool.query('DELETE FROM templates WHERE id = $1', [id]);
-
-    emitWebhook('template.deleted', {
-      templateId: id,
-      name: existing.rows[0].name,
-      workspaceId: existing.rows[0].workspace_id || undefined,
-      timestamp: new Date().toISOString(),
-    });
-
     res.json({ success: true });
   } catch (error: any) {
     console.error('Delete template error:', error);
@@ -196,13 +171,6 @@ router.post('/api/templates/:id/render', async (req, res) => {
         variables[varName] !== undefined ? variables[varName] : `{{${varName}}}`
       );
     }
-
-    emitWebhook('template.rendered', {
-      templateId: id,
-      name: row.name,
-      workspaceId: row.workspace_id || undefined,
-      timestamp: new Date().toISOString(),
-    });
 
     res.json({ html, subject });
   } catch (error: any) {

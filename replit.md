@@ -9,7 +9,6 @@ server/                   # Express AI backend (port 3001)
   index.ts                # Express server entry point
   db.ts                   # PostgreSQL connection pool
   renderHtml.ts           # Server-side template rendering (CSS module shim)
-  webhooks.ts             # Webhook event emitter
   middleware/
     auth.ts               # API key authentication middleware
   routes/
@@ -92,11 +91,6 @@ PostgreSQL with a `templates` table:
 - Keys configured via `TINYEMAIL_API_KEYS` env var (comma-separated)
 - If no keys configured, auth is skipped (dev mode)
 - Public paths (no auth): `/api/health`, `/embed`, `/assets`
-
-### Webhooks
-- When `WEBHOOK_URL` env var is set, fires POST on template events:
-  - `template.created`, `template.updated`, `template.deleted`, `template.rendered`
-- Payload: `{ event, data: { templateId, name, workspaceId, timestamp } }`
 
 ## App Routes
 - `/template?q=<encoded-params>` - Edit/create email template (production auth flow)
@@ -204,7 +198,6 @@ Key variables:
 - `DATABASE_URL` - PostgreSQL connection string (auto-provisioned)
 - `TINYEMAIL_API_KEYS` - Comma-separated API keys for authentication (optional, auth skipped if empty)
 - `TINYCOMMAND_ORIGIN` - Allowed CORS origin for TinyCommand AI (optional)
-- `WEBHOOK_URL` - Webhook endpoint for template events (optional)
 - `RATE_LIMIT_WHITELIST_IPS` - Comma-separated IPs that bypass rate limiting (optional)
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
