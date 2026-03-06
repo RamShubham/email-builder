@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-
-import { Upload, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2, Sparkles, Upload } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+
+import useRequest from '../../../../hook/useRequest';
 
 type AspectRatio = 'landscape' | 'square' | 'portrait';
 
@@ -17,7 +18,7 @@ const STAGE_MESSAGES = [
 ];
 
 const HELPFUL_TIPS = [
-  "Tip: Add art style keywords like 'watercolor' or 'photorealistic' for better results",
+  'Tip: Add art style keywords like \'watercolor\' or \'photorealistic\' for better results',
   'Tip: Describe lighting and mood for more atmospheric images',
   'Tip: Mention specific colors to guide the palette of your image',
   'Tip: Include perspective details like "bird\'s eye view" or "close-up" for composition',
@@ -172,6 +173,14 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
   const [generatedUrl, setGeneratedUrl] = useState('');
   const [error, setError] = useState('');
 
+  const [, generateImageRequest] = useRequest(
+    {
+      method: 'post',
+      url: 'http://localhost:8008/api/image/generate',
+    },
+    { manual: true }
+  );
+
   const resetState = () => {
     setGeneratedPreview('');
     setGeneratedUrl('');
@@ -210,23 +219,22 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
     setError('');
 
     try {
-      const response = await fetch('/api/image/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: aiPrompt.trim(), aspectRatio }),
+      const { data } = await generateImageRequest({
+        data: { prompt: aiPrompt.trim(), aspectRatio },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Failed to generate image');
+      if (!data?.url) {
+        throw new Error(data?.error || 'No image returned');
       }
 
-      if (!data.url) throw new Error('No image returned');
       setGeneratedPreview(data.url);
       setGeneratedUrl(data.url);
     } catch (err: any) {
-      setError(err?.message || 'Failed to generate image. Please try again.');
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        'Failed to generate image. Please try again.';
+      setError(message);
     } finally {
       setIsGenerating(false);
     }
@@ -278,7 +286,10 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
       </div>
 
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent data-testid="inspect-panel-image-picker-dialog" className="sm:max-w-[480px] overflow-hidden">
+        <DialogContent
+          data-testid="inspect-panel-image-picker-dialog"
+          className="sm:max-w-[480px] max-h-[85vh] overflow-y-auto overflow-x-hidden"
+        >
           <DialogHeader>
             <DialogTitle>
               {tab === 'url' ? 'Image URL' : 'Generate Image with AI'}
@@ -287,21 +298,19 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
 
           <div className="flex items-center bg-gray-100/80 rounded-xl p-0.5 gap-0.5 mb-3">
             <button
-              className={`flex-1 h-8 text-xs font-medium rounded-[10px] transition-all ${
-                tab === 'url'
-                  ? 'bg-white shadow-sm text-gray-700'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 h-8 text-xs font-medium rounded-[10px] transition-all ${tab === 'url'
+                ? 'bg-white shadow-sm text-gray-700'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
               onClick={() => setTab('url')}
             >
               URL
             </button>
             <button
-              className={`flex-1 h-8 text-xs font-medium rounded-[10px] transition-all flex items-center justify-center gap-1.5 ${
-                tab === 'ai'
-                  ? 'bg-white shadow-sm text-violet-700'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 h-8 text-xs font-medium rounded-[10px] transition-all flex items-center justify-center gap-1.5 ${tab === 'ai'
+                ? 'bg-white shadow-sm text-violet-700'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
               onClick={() => {
                 setTab('ai');
                 setAspectRatio(detectAspectRatio(currentWidth, currentHeight));
@@ -343,11 +352,10 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
                       <button
                         key={ar.value}
                         onClick={() => setAspectRatio(ar.value)}
-                        className={`flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl border transition-all ${
-                          aspectRatio === ar.value
-                            ? 'border-violet-300 bg-violet-50 text-violet-700'
-                            : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-500'
-                        }`}
+                        className={`flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl border transition-all ${aspectRatio === ar.value
+                          ? 'border-violet-300 bg-violet-50 text-violet-700'
+                          : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-500'
+                          }`}
                       >
                         <AspectRatioIcon w={ar.w} h={ar.h} />
                         <span className="text-[11px] font-medium">{ar.label}</span>
@@ -376,9 +384,11 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {error}
+                <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <p className="min-w-0 whitespace-pre-wrap break-all [overflow-wrap:anywhere]">
+                    {error}
+                  </p>
                 </div>
               )}
 

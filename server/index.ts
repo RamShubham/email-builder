@@ -1,20 +1,23 @@
+import 'dotenv/config';
 import './renderHtml.js';
-import express from 'express';
+
 import cors from 'cors';
+import express from 'express';
+import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import OpenAI from 'openai';
+
 import { chat, chatStream, resetSession } from './ai/templateAgent.js';
+import pool from './db.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import templateRoutes from './routes/templates.js';
-import pool from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = parseInt(process.env.PORT || '8008', 10);
 const startTime = Date.now();
 
 const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
@@ -200,7 +203,7 @@ app.get('/api/health', async (_req, res) => {
   }
 
   result.services.openai = {
-    configured: !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),
+    configured: Boolean(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),
   };
 
   if (result.status === 'healthy' && !result.services.openai.configured) {

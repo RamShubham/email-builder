@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+
 import { SYSTEM_PROMPT } from './systemPrompt.js';
 
 const openai = new OpenAI({
@@ -68,22 +69,22 @@ function trimHistory(history: ChatMessage[]) {
 function extractTemplate(text: string): { content: string; template: Record<string, any> | null } {
   const startMarker = '|||TEMPLATE_START|||';
   const endMarker = '|||TEMPLATE_END|||';
-  
+
   const startIdx = text.indexOf(startMarker);
   const endIdx = text.indexOf(endMarker);
-  
+
   if (startIdx === -1 || endIdx === -1) {
     return { content: text, template: null };
   }
-  
+
   const jsonStr = text.substring(startIdx + startMarker.length, endIdx).trim();
   const contentBefore = text.substring(0, startIdx).trim();
   const contentAfter = text.substring(endIdx + endMarker.length).trim();
   const content = [contentBefore, contentAfter].filter(Boolean).join('\n\n');
-  
+
   try {
     const template = JSON.parse(jsonStr);
-    return { content: content || "Here's your template! Click 'Apply to canvas' to load it into the editor.", template };
+    return { content: content || 'Here\'s your template! Click \'Apply to canvas\' to load it into the editor.', template };
   } catch (e) {
     return { content: text, template: null };
   }
@@ -91,48 +92,48 @@ function extractTemplate(text: string): { content: string; template: Record<stri
 
 export async function chat(sessionId: string, userMessage: string): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
-  
+
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
     { role: 'user', content: userMessage },
   ];
-  
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4.1',
     messages,
     max_tokens: 8192,
     temperature: 0.7,
   });
-  
+
   const assistantMessage = response.choices[0]?.message?.content || '';
-  
+
   history.push({ role: 'user', content: userMessage });
   history.push({ role: 'assistant', content: assistantMessage });
   trimHistory(history);
-  
+
   const { content, template } = extractTemplate(assistantMessage);
-  
+
   if (template) {
     return { type: 'template', content, template };
   }
-  
+
   return { type: 'message', content };
 }
 
 export async function chatStream(
-  sessionId: string, 
+  sessionId: string,
   userMessage: string,
   onChunk: (chunk: string) => void
 ): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
-  
+
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
     { role: 'user', content: userMessage },
   ];
-  
+
   const stream = await openai.chat.completions.create({
     model: 'gpt-4.1',
     messages,
@@ -140,9 +141,9 @@ export async function chatStream(
     temperature: 0.7,
     stream: true,
   });
-  
+
   let fullResponse = '';
-  
+
   for await (const chunk of stream) {
     const content = chunk.choices[0]?.delta?.content || '';
     if (content) {
@@ -150,16 +151,16 @@ export async function chatStream(
       onChunk(content);
     }
   }
-  
+
   history.push({ role: 'user', content: userMessage });
   history.push({ role: 'assistant', content: fullResponse });
   trimHistory(history);
-  
+
   const { content, template } = extractTemplate(fullResponse);
-  
+
   if (template) {
     return { type: 'template', content, template };
   }
-  
+
   return { type: 'message', content: fullResponse };
 }

@@ -1,4 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
+
+import useRequest from '../../hook/useRequest';
 
 export interface ChatMessage {
   id: string;
@@ -8,7 +10,7 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:8008/api';
 
 const TEMPLATE_START = '|||TEMPLATE_START|||';
 const MARKER_PREFIX = '|||';
@@ -33,12 +35,20 @@ export function useAiChat() {
     {
       id: 'greeting',
       role: 'assistant',
-      content: "Hey! I'm your email builder assistant. Tell me about the email you'd like to create — a welcome message, a newsletter, a notification, or something else entirely. I'll help you design it step by step.",
+      content: 'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(`session-${Date.now()}`);
   const abortRef = useRef<AbortController | null>(null);
+
+  const [, resetChatRequest] = useRequest(
+    {
+      method: 'post',
+      url: 'http://localhost:8008/api/chat/reset',
+    },
+    { manual: true }
+  );
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return;
@@ -147,7 +157,7 @@ export function useAiChat() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
-            ? { ...m, content: "Sorry, something went wrong. Please try again.", isStreaming: false }
+            ? { ...m, content: 'Sorry, something went wrong. Please try again.', isStreaming: false }
             : m
         )
       );
@@ -159,23 +169,24 @@ export function useAiChat() {
 
   const resetChat = useCallback(async () => {
     try {
-      await fetch(`${API_BASE}/chat/reset`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sessionIdRef.current }),
+      await resetChatRequest({
+        data: { sessionId: sessionIdRef.current },
       });
-    } catch {}
+    } catch {
+      // ignore reset errors
+    }
 
     sessionIdRef.current = `session-${Date.now()}`;
     setMessages([
       {
         id: 'greeting',
         role: 'assistant',
-        content: "Hey! I'm your email builder assistant. Tell me about the email you'd like to create — a welcome message, a newsletter, a notification, or something else entirely. I'll help you design it step by step.",
+        content:
+          'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
       },
     ]);
     setIsLoading(false);
-  }, []);
+  }, [resetChatRequest]);
 
   return { messages, isLoading, sendMessage, resetChat };
 }

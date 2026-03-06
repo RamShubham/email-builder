@@ -192,13 +192,30 @@ The server includes several resilience layers:
 - **Image generation loading UX**: Multi-stage loading experience with rotating stage messages, helpful prompt tips, and elapsed time counter. Errors surfaced inline in the dialog with specific OpenAI error messages.
 
 ## Environment Variables
-Key variables:
-- `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key (managed by Replit Integrations)
-- `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI base URL (managed by Replit Integrations)
-- `DATABASE_URL` - PostgreSQL connection string (auto-provisioned)
+
+### Backend (.env at repo root)
+Backend env vars are loaded via `dotenv` in `server/index.ts`. When you run `npx tsx server/index.ts` from the repo root, it will read `./.env` in the project root.
+
+Key backend variables:
+- `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI base URL (typically `https://api.openai.com/v1`)
+- `DATABASE_URL` - PostgreSQL connection string
 - `TINYEMAIL_API_KEYS` - Comma-separated API keys for authentication (optional, auth skipped if empty)
 - `TINYCOMMAND_ORIGIN` - Allowed CORS origin for TinyCommand AI (optional)
 - `RATE_LIMIT_WHITELIST_IPS` - Comma-separated IPs that bypass rate limiting (optional)
+
+Example `.env` at the repo root:
+```bash
+AI_INTEGRATIONS_OPENAI_API_KEY=sk-...
+AI_INTEGRATIONS_OPENAI_BASE_URL=https://api.openai.com/v1
+DATABASE_URL=postgres://user:password@host:5432/dbname
+TINYEMAIL_API_KEYS=your-api-key-1,your-api-key-2
+```
+
+### Frontend (`packages/editor-sample/.env`)
+Frontend env vars live in `packages/editor-sample/.env` and must use the `REACT_APP_` prefix so Vite exposes them to the browser.
+
+Key frontend variables:
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
 
