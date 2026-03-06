@@ -9,7 +9,7 @@ import useRequest from '../../../../hook/useRequest';
 
 type AspectRatio = 'landscape' | 'square' | 'portrait';
 
-const API_BASE_URL = process.env.REACT_APP_AI_BASE_URL;
+const API_BASE_URL = `${process.env.REACT_APP_AI_BASE_URL}api/`;
 
 const STAGE_MESSAGES = [
   'Analyzing your prompt...',

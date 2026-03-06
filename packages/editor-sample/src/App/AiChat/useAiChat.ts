@@ -10,7 +10,7 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-const API_BASE_URL = process.env.REACT_APP_AI_BASE_URL;
+const API_BASE_URL = `${process.env.REACT_APP_AI_BASE_URL}api/`;
 
 const TEMPLATE_START = '|||TEMPLATE_START|||';
 const MARKER_PREFIX = '|||';
