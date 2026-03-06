@@ -19,6 +19,7 @@ export interface AgentResponse {
 
 const MAX_SESSIONS = 100;
 const SESSION_TTL = 30 * 60 * 1000;
+const MAX_HISTORY = 40;
 
 interface Session {
   messages: ChatMessage[];
@@ -57,6 +58,13 @@ export function resetSession(sessionId: string): void {
   sessions.delete(sessionId);
 }
 
+function trimHistory(history: ChatMessage[]) {
+  if (history.length > MAX_HISTORY) {
+    const excess = history.length - MAX_HISTORY;
+    history.splice(0, excess);
+  }
+}
+
 function extractTemplate(text: string): { content: string; template: Record<string, any> | null } {
   const startMarker = '|||TEMPLATE_START|||';
   const endMarker = '|||TEMPLATE_END|||';
@@ -84,11 +92,10 @@ function extractTemplate(text: string): { content: string; template: Record<stri
 export async function chat(sessionId: string, userMessage: string): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
   
-  history.push({ role: 'user', content: userMessage });
-  
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
+    { role: 'user', content: userMessage },
   ];
   
   const response = await openai.chat.completions.create({
@@ -100,12 +107,9 @@ export async function chat(sessionId: string, userMessage: string): Promise<Agen
   
   const assistantMessage = response.choices[0]?.message?.content || '';
   
+  history.push({ role: 'user', content: userMessage });
   history.push({ role: 'assistant', content: assistantMessage });
-  
-  if (history.length > 40) {
-    const excess = history.length - 40;
-    history.splice(0, excess);
-  }
+  trimHistory(history);
   
   const { content, template } = extractTemplate(assistantMessage);
   
@@ -123,11 +127,10 @@ export async function chatStream(
 ): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
   
-  history.push({ role: 'user', content: userMessage });
-  
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
+    { role: 'user', content: userMessage },
   ];
   
   const stream = await openai.chat.completions.create({
@@ -148,12 +151,9 @@ export async function chatStream(
     }
   }
   
+  history.push({ role: 'user', content: userMessage });
   history.push({ role: 'assistant', content: fullResponse });
-  
-  if (history.length > 40) {
-    const excess = history.length - 40;
-    history.splice(0, excess);
-  }
+  trimHistory(history);
   
   const { content, template } = extractTemplate(fullResponse);
   

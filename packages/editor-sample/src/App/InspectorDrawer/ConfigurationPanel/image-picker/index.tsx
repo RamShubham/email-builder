@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Upload, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 
@@ -7,6 +7,128 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 
 type AspectRatio = 'landscape' | 'square' | 'portrait';
+
+const STAGE_MESSAGES = [
+  'Analyzing your prompt...',
+  'Creating composition...',
+  'Generating details...',
+  'Adding final touches...',
+  'Almost there...',
+];
+
+const HELPFUL_TIPS = [
+  "Tip: Add art style keywords like 'watercolor' or 'photorealistic' for better results",
+  'Tip: Describe lighting and mood for more atmospheric images',
+  'Tip: Mention specific colors to guide the palette of your image',
+  'Tip: Include perspective details like "bird\'s eye view" or "close-up" for composition',
+  'Tip: Reference a time of day like "golden hour" or "midnight" for lighting effects',
+  'Tip: Add texture descriptions like "glossy", "matte", or "textured" for more detail',
+];
+
+function useRotatingIndex(items: string[], intervalMs: number, active: boolean) {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    if (!active) {
+      setIndex(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setIndex((prev) => (prev + 1) % items.length);
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [active, items.length, intervalMs]);
+  return index;
+}
+
+function useElapsedSeconds(active: boolean) {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    if (!active) {
+      setSeconds(0);
+      return;
+    }
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [active]);
+  return seconds;
+}
+
+function GeneratingAnimation() {
+  return (
+    <div className="relative w-24 h-24 mx-auto">
+      <div
+        className="absolute inset-0 rounded-2xl"
+        style={{
+          background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #a78bfa, #818cf8, #8b5cf6)',
+          backgroundSize: '400% 400%',
+          animation: 'shimmerGradient 3s ease infinite',
+        }}
+      />
+      <div
+        className="absolute inset-1 rounded-xl bg-white/20 backdrop-blur-sm"
+        style={{ animation: 'morphPulse 2s ease-in-out infinite' }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <Sparkles className="w-8 h-8 text-white drop-shadow-lg" style={{ animation: 'sparkleRotate 4s linear infinite' }} />
+      </div>
+      <style>{`
+        @keyframes shimmerGradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes morphPulse {
+          0%, 100% { transform: scale(1); opacity: 0.3; border-radius: 12px; }
+          50% { transform: scale(0.85); opacity: 0.6; border-radius: 20px; }
+        }
+        @keyframes sparkleRotate {
+          0% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(90deg) scale(1.1); }
+          50% { transform: rotate(180deg) scale(1); }
+          75% { transform: rotate(270deg) scale(0.9); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes fadeSlideIn {
+          0% { opacity: 0; transform: translateY(6px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function LoadingExperience() {
+  const stageIndex = useRotatingIndex(STAGE_MESSAGES, 3500, true);
+  const tipIndex = useRotatingIndex(HELPFUL_TIPS, 7000, true);
+  const elapsed = useElapsedSeconds(true);
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-6">
+      <GeneratingAnimation />
+      <div className="flex flex-col items-center gap-1.5 min-h-[44px]">
+        <p
+          key={`stage-${stageIndex}`}
+          className="text-sm font-medium text-gray-700"
+          style={{ animation: 'fadeSlideIn 0.4s ease-out' }}
+        >
+          {STAGE_MESSAGES[stageIndex]}
+        </p>
+        <p className="text-xs text-gray-400 tabular-nums">
+          Generating... {elapsed}s
+        </p>
+      </div>
+      <div className="w-full min-h-[36px] flex items-center justify-center">
+        <p
+          key={`tip-${tipIndex}`}
+          className="text-xs text-gray-400 text-center px-4 leading-relaxed italic"
+          style={{ animation: 'fadeSlideIn 0.5s ease-out' }}
+        >
+          {HELPFUL_TIPS[tipIndex]}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 const ASPECT_RATIOS: { value: AspectRatio; label: string; w: number; h: number }[] = [
   { value: 'landscape', label: 'Landscape', w: 24, h: 16 },
@@ -260,16 +382,7 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
                 </div>
               )}
 
-              {isGenerating && (
-                <div className="flex items-center justify-center py-8">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center animate-pulse">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <p className="text-sm text-gray-500">Creating your image...</p>
-                  </div>
-                </div>
-              )}
+              {isGenerating && <LoadingExperience />}
 
               {generatedPreview && !isGenerating && (
                 <div className="flex flex-col gap-3">

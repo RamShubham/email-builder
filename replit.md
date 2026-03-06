@@ -187,6 +187,16 @@ All editable blocks (`packages/editor-sample/src/documents/blocks/customBlockCom
 ### Server-Side Rendering
 The render endpoint (`POST /api/templates/:id/render`) uses `renderToStaticMarkup` from `@usewaypoint/email-builder` server-side via `tsx`. A CSS module shim in `server/renderHtml.ts` intercepts `.scss`/`.css` imports that `tsx` can't handle natively, returning empty proxy objects instead.
 
+### Backend Resilience
+The server includes several resilience layers:
+- **Global error handler**: Express error-handling middleware at the end of the chain catches unhandled errors (including CORS rejections) and returns clean JSON responses instead of HTML stack traces.
+- **Request timeouts**: 30s default, 60s for image generation, 120s for streaming. Returns 504 on timeout.
+- **Deep health check**: `GET /api/health` verifies database connectivity (`SELECT 1` with latency), OpenAI configuration, and returns `healthy`/`degraded`/`unhealthy` status with HTTP 503 when unhealthy.
+- **Database pool**: Configured with `max: 20`, `idleTimeoutMillis: 30000`, `connectionTimeoutMillis: 5000`.
+- **AI conversation history**: User and assistant messages are only pushed to session history after a successful OpenAI response, preventing orphaned user messages on failure.
+- **IP-based rate limiting**: `server/middleware/rateLimit.ts` — sliding window approach. 60 req/min for general API, 10 req/min for AI endpoints (`/chat`, `/chat/stream`, `/image/generate`). IP whitelist via `RATE_LIMIT_WHITELIST_IPS` env var. Returns 429 with `Retry-After` header.
+- **Image generation loading UX**: Multi-stage loading experience with rotating stage messages, helpful prompt tips, and elapsed time counter. Errors surfaced inline in the dialog with specific OpenAI error messages.
+
 ## Environment Variables
 Key variables:
 - `AI_INTEGRATIONS_OPENAI_API_KEY` - OpenAI API key (managed by Replit Integrations)
@@ -195,6 +205,7 @@ Key variables:
 - `TINYEMAIL_API_KEYS` - Comma-separated API keys for authentication (optional, auth skipped if empty)
 - `TINYCOMMAND_ORIGIN` - Allowed CORS origin for TinyCommand AI (optional)
 - `WEBHOOK_URL` - Webhook endpoint for template events (optional)
+- `RATE_LIMIT_WHITELIST_IPS` - Comma-separated IPs that bypass rate limiting (optional)
 - `REACT_APP_API_BASE_URL` - Backend API URL
 - `REACT_APP_EMAIL_TEMPLATE_SERVER` - Email template server
 

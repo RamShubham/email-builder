@@ -6,13 +6,16 @@ import { fileURLToPath } from 'url';
 import OpenAI from 'openai';
 import { chat, chatStream, resetSession } from './ai/templateAgent.js';
 import { authMiddleware } from './middleware/auth.js';
+import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import templateRoutes from './routes/templates.js';
+import pool from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
+const startTime = Date.now();
 
 const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
 app.use(express.static(distPath));
@@ -38,9 +41,31 @@ const apiCors = cors({
   credentials: true,
 });
 
+function apiTimeout(defaultMs: number) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    let ms = defaultMs;
+    if (req.path === '/image/generate') ms = 60000;
+    if (req.path === '/chat/stream') ms = 120000;
+
+    req.setTimeout(ms);
+
+    const timer = setTimeout(() => {
+      if (!res.headersSent) {
+        res.status(504).json({ error: 'Request timed out' });
+      }
+    }, ms);
+
+    res.on('finish', () => clearTimeout(timer));
+    res.on('close', () => clearTimeout(timer));
+    next();
+  };
+}
+
 app.use('/api', apiCors);
 app.use('/api', express.json({ limit: '50mb' }));
 app.use('/api', authMiddleware);
+app.use('/api', rateLimitMiddleware);
+app.use('/api', apiTimeout(30000));
 app.use(templateRoutes);
 
 const openai = new OpenAI({
@@ -140,8 +165,50 @@ app.post('/api/image/generate', async (req, res) => {
   }
 });
 
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get('/api/health', async (_req, res) => {
+  const result: {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    timestamp: string;
+    uptime: number;
+    services: {
+      database: { status: string; latencyMs?: number; error?: string };
+      openai: { configured: boolean };
+    };
+  } = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor((Date.now() - startTime) / 1000),
+    services: {
+      database: { status: 'unknown' },
+      openai: { configured: false },
+    },
+  };
+
+  try {
+    const dbStart = Date.now();
+    await pool.query('SELECT 1');
+    result.services.database = {
+      status: 'connected',
+      latencyMs: Date.now() - dbStart,
+    };
+  } catch (err: any) {
+    result.services.database = {
+      status: 'disconnected',
+      error: err.message,
+    };
+    result.status = 'unhealthy';
+  }
+
+  result.services.openai = {
+    configured: !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),
+  };
+
+  if (result.status === 'healthy' && !result.services.openai.configured) {
+    result.status = 'degraded';
+  }
+
+  const httpStatus = result.status === 'unhealthy' ? 503 : 200;
+  res.status(httpStatus).json(result);
 });
 
 app.all('/api/{*splat}', (_req, res) => {
@@ -150,6 +217,19 @@ app.all('/api/{*splat}', (_req, res) => {
 
 app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
+});
+
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled error:', err);
+
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
+
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+  });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
