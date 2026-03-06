@@ -10,7 +10,7 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-const API_BASE = 'http://localhost:8008/api';
+const API_BASE_URL = process.env.REACT_APP_AI_BASE_URL;
 
 const TEMPLATE_START = '|||TEMPLATE_START|||';
 const MARKER_PREFIX = '|||';
@@ -45,7 +45,7 @@ export function useAiChat() {
   const [, resetChatRequest] = useRequest(
     {
       method: 'post',
-      url: 'http://localhost:8008/api/chat/reset',
+      url: `${API_BASE_URL}/chat/reset`,
     },
     { manual: true }
   );
@@ -71,7 +71,7 @@ export function useAiChat() {
     abortRef.current = new AbortController();
 
     try {
-      const response = await fetch(`${API_BASE}/chat/stream`, {
+      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
