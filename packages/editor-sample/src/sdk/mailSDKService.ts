@@ -1,4 +1,4 @@
-import Email from './stubs/oute-services-mail-sdk';
+import Email from 'oute-services-mail-sdk';
 
 import getMailSDKConfig from './baseConfig';
 
@@ -9,7 +9,7 @@ type TError = {
 };
 
 const getEmailInstance = () => {
-  return new Email(getMailSDKConfig);
+  return new Email(getMailSDKConfig());
 };
 
 const isErrorWithResult = (error: unknown): error is TError => {
