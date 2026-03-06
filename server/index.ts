@@ -31,6 +31,7 @@ const allowedOrigins = [
   'http://localhost:5000',
   'http://localhost:3001',
   'http://0.0.0.0:5000',
+  'https://email-dev.oute.app',
 ].filter(Boolean) as string[];
 
 const apiCors = cors({
