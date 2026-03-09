@@ -12,6 +12,7 @@ import pool from './db.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import templateRoutes from './routes/templates.js';
+import { generateImageName, uploadImageToCdn } from './uploadImageToCdn.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,7 @@ const allowedOrigins = [
   'https://email-builder-shubhamram2992.replit.app',
   'http://localhost:5000',
   'http://localhost:3001',
+  'http://localhost:8007',
   'http://0.0.0.0:5000',
   'https://email-dev.oute.app',
 ].filter(Boolean) as string[];
@@ -159,12 +161,32 @@ app.post('/api/image/generate', async (req, res) => {
       return res.status(500).json({ error: 'No image data returned' });
     }
 
-    const dataUrl = `data:image/png;base64,${base64}`;
-    res.json({ url: dataUrl });
+    const token = req.headers.token as string | undefined;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Missing token header' });
+    }
+
+    const bytes = Buffer.from(base64, 'base64');
+    const name = generateImageName(prompt);
+
+    const cdnUrl = await uploadImageToCdn(
+      {
+        bytes,
+        mimeType: 'image/png',
+        name,
+      },
+      token
+    );
+
+    res.json({ url: cdnUrl });
   } catch (error: any) {
     console.error('Image generation error:', error);
     const status = error?.status || 500;
-    const message = error?.message || 'Failed to generate image';
+    const message =
+      error?.message && typeof error.message === 'string'
+        ? error.message
+        : 'Failed to generate image';
     res.status(status).json({ error: message });
   }
 });
