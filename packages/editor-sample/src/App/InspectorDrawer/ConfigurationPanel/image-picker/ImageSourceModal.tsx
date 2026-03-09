@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { GenerateFromAITab } from './tabs/GenerateFromAITab';
+import { GenerateFromAITab } from './tabs/GenerateFromAi';
 import { MyGalleryTab } from './tabs/MyGalleryTab';
 import { UnsplashTab } from './tabs/UnsplashTab';
 import { UploadTab } from './tabs/UploadTab';
