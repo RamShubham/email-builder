@@ -92,25 +92,22 @@ export const ButtonPropsSchema = z.object({
 			text: z.string().optional().nullable(),
 			url: z
 				.string()
+				.optional()
+				.nullable()
 				.refine(
-					(val) => {
-						if (!val) return true; // Allow empty/null values
-						// Check if it's a valid URL
-						try {
-							new URL(val);
-							return true;
-						} catch {
-							// If not a URL, check if it's a template variable pattern like {{variable}}
-							return /^{{[^}]+}}$/.test(val);
-						}
+					(value) => {
+						if (!value) return true;
+
+						const isUrl = z.string().url().safeParse(value).success;
+						const isVariable = /^\{\{[a-zA-Z0-9_]+\}\}$/.test(value);
+
+						return isUrl || isVariable;
 					},
 					{
 						message:
-							'Must be a valid URL or template variable (e.g., {{name}})',
+							'Must be a valid URL or a variable like {{profile_url}}',
 					}
-				)
-				.optional()
-				.nullable(),
+				),
 		})
 		.optional()
 		.nullable(),
