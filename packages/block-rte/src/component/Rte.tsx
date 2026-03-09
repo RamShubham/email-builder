@@ -32,6 +32,11 @@ function onError(error) {
 const initialConfig = {
         namespace: 'MyEditor',
         theme: {
+                text: {
+                        bold: styles.bold,
+                        italic: styles.italic,
+                        underline: styles.underline,
+                },
                 list: {
                         ul: 'list-disc pl-4',
                         ol: 'list-decimal pl-4',
