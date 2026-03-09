@@ -14,6 +14,7 @@
 		"dotenv": "^16.4.7",
 		"express": "^5.2.1",
 		"openai": "^6.25.0",
+		"oute-services-track-sdk": "^0.0.48",
 		"pg": "^8.19.0"
 	},
 	"devDependencies": {

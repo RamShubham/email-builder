@@ -13,6 +13,8 @@ import { authMiddleware } from './middleware/auth.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import templateRoutes from './routes/templates.js';
 import { generateImageName, uploadImageToCdn } from './uploadImageToCdn.js';
+import { CreditService } from './services/credits/creditService.js';
+import { getToken, requireWorkspaceId } from './utils/requestContext.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,7 +89,32 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    const token = getToken(req);
+    if (!token) {
+      return res.status(401).json({ error: 'Missing token header' });
+    }
+
+    const workspaceId = requireWorkspaceId(req, res);
+    if (!workspaceId) return;
+
+    const credits = await CreditService.getCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
+
+    const availableCredits = credits?.data?.availableCredits || 0;
+
+    if (availableCredits <= 0) {
+      return res.status(400).json({ error: 'No credits available' });
+    }
+
     const response = await chat(sessionId, message);
+
+    await CreditService.deductCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
+
     res.json(response);
   } catch (error: any) {
     console.error('Chat error:', error);
@@ -103,6 +130,25 @@ app.post('/api/chat/stream', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    const token = getToken(req);
+    if (!token) {
+      return res.status(401).json({ error: 'Missing token header' });
+    }
+
+    const workspaceId = requireWorkspaceId(req, res);
+    if (!workspaceId) return;
+
+    const credits = await CreditService.getCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
+
+    const availableCredits = credits?.data?.availableCredits || 0;
+
+    if (availableCredits <= 0) {
+      return res.status(400).json({ error: 'No credits available' });
+    }
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -111,7 +157,19 @@ app.post('/api/chat/stream', async (req, res) => {
       res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
     });
 
-    res.write(`data: ${JSON.stringify({ type: 'done', responseType: result.type, content: result.content, template: result.template })}\n\n`);
+    await CreditService.deductCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
+
+    res.write(
+      `data: ${JSON.stringify({
+        type: 'done',
+        responseType: result.type,
+        content: result.content,
+        template: result.template,
+      })}\n\n`
+    );
     res.end();
   } catch (error: any) {
     console.error('Chat stream error:', error);
@@ -132,13 +190,21 @@ app.post('/api/chat/reset', (req, res) => {
 
 app.post('/api/image/generate', async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, workspaceId, aspectRatio = 'landscape' } = req.body;
 
     if (!prompt || typeof prompt !== 'string') {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const { aspectRatio = 'landscape' } = req.body;
+    if (!workspaceId || typeof workspaceId !== 'string') {
+      return res.status(400).json({ error: 'Missing workspace_id parameter' });
+    }
+
+    const token = getToken(req);
+
+    if (!token) {
+      return res.status(401).json({ error: 'Missing token header' });
+    }
     const sizeMap: Record<string, string> = {
       square: '1024x1024',
       landscape: '1536x1024',
@@ -147,6 +213,17 @@ app.post('/api/image/generate', async (req, res) => {
     const size = sizeMap[aspectRatio] || sizeMap.landscape;
 
     console.log(`Generating image for prompt: "${prompt.substring(0, 80)}..." (${size})`);
+
+    const credits = await CreditService.getCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
+
+    const availableCredits = credits?.data?.availableCredits || 0;
+
+    if (availableCredits <= 0) {
+      return res.status(400).json({ error: 'No credits available' });
+    }
 
     const response = await openai.images.generate({
       model: 'gpt-image-1',
@@ -161,12 +238,6 @@ app.post('/api/image/generate', async (req, res) => {
       return res.status(500).json({ error: 'No image data returned' });
     }
 
-    const token = req.headers.token as string | undefined;
-
-    if (!token) {
-      return res.status(401).json({ error: 'Missing token header' });
-    }
-
     const bytes = Buffer.from(base64, 'base64');
     const name = generateImageName(prompt);
 
@@ -178,6 +249,11 @@ app.post('/api/image/generate', async (req, res) => {
       },
       token
     );
+
+    await CreditService.deductCredits({
+      access_token: token,
+      workspace_id: workspaceId,
+    });
 
     res.json({ url: cdnUrl });
   } catch (error: any) {
