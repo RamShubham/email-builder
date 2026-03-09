@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { BUTTONS } from '../../../../../constant/buttons';
 import { TEditorBlock } from '../../../../editor/core';
@@ -11,6 +11,9 @@ type BlocksMenuProps = {
   onSelect: (block: TEditorBlock) => void;
 };
 
+const menuWidth = 320;
+
+
 export default function BlocksMenu({ anchorEl, setAnchorEl, onSelect }: BlocksMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -22,12 +25,12 @@ export default function BlocksMenu({ anchorEl, setAnchorEl, onSelect }: BlocksMe
     setAnchorEl(null);
   };
 
+
   useEffect(() => {
     if (!anchorEl) return;
 
     const updatePosition = () => {
       const rect = anchorEl.getBoundingClientRect();
-      const menuWidth = 280;
       const menuHeight = menuRef.current?.offsetHeight || 160;
       let left = rect.left + rect.width / 2 - menuWidth / 2;
       left = Math.max(8, Math.min(left, window.innerWidth - menuWidth - 8));
@@ -46,7 +49,7 @@ export default function BlocksMenu({ anchorEl, setAnchorEl, onSelect }: BlocksMe
     let openFrame: number | null = null;
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
-          !anchorEl.contains(e.target as Node)) {
+        !anchorEl.contains(e.target as Node)) {
         onClose();
       }
     };
@@ -73,7 +76,7 @@ export default function BlocksMenu({ anchorEl, setAnchorEl, onSelect }: BlocksMe
       style={{
         top: position.top,
         left: position.left,
-        width: 280,
+        width: menuWidth,
       }}
     >
       <div className="grid grid-cols-4 gap-1">
