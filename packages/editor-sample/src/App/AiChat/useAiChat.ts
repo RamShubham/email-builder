@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
+import { useIds } from '../../documents/editor/EditorContext';
 import useRequest from '../../hook/useRequest';
 
 export interface ChatMessage {
@@ -41,6 +42,7 @@ export function useAiChat() {
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(`session-${Date.now()}`);
   const abortRef = useRef<AbortController | null>(null);
+  const { workspaceId } = useIds();
 
   const [, resetChatRequest] = useRequest(
     {
@@ -77,6 +79,7 @@ export function useAiChat() {
         body: JSON.stringify({
           message: content.trim(),
           sessionId: sessionIdRef.current,
+          workspaceId,
         }),
         signal: abortRef.current.signal,
       });
@@ -170,7 +173,7 @@ export function useAiChat() {
   const resetChat = useCallback(async () => {
     try {
       await resetChatRequest({
-        data: { sessionId: sessionIdRef.current },
+        data: { sessionId: sessionIdRef.current, workspaceId },
       });
     } catch {
       // ignore reset errors

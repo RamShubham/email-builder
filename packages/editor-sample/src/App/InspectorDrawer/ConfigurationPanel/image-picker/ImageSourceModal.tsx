@@ -72,6 +72,7 @@ export function ImageSourceModal({
                 currentAlt={currentAlt ?? undefined}
                 currentWidth={currentWidth}
                 currentHeight={currentHeight}
+                workspaceId={workspaceId}
               />
             </TabsContent>
           </div>

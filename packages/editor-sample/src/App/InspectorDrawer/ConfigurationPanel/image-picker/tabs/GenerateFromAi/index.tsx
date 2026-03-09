@@ -27,6 +27,7 @@ type GenerateFromAITabProps = {
   currentAlt?: string | null;
   currentWidth?: number | null;
   currentHeight?: number | null;
+  workspaceId: string | null;
 };
 
 export function GenerateFromAITab({
@@ -34,6 +35,7 @@ export function GenerateFromAITab({
   currentAlt,
   currentWidth,
   currentHeight,
+  workspaceId,
 }: GenerateFromAITabProps) {
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('landscape');
@@ -65,7 +67,7 @@ export function GenerateFromAITab({
     setError('');
     try {
       const { data } = await generateImageRequest({
-        data: { prompt: prompt.trim(), aspectRatio },
+        data: { prompt: prompt.trim(), aspectRatio, workspaceId },
       });
 
       if (!data?.url) {
