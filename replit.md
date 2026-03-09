@@ -5,7 +5,7 @@ A React/Vite email template builder application built as a pnpm monorepo. This i
 
 ## Project Structure
 ```
-server/                   # Express AI backend (port 3001)
+server/                   # Express AI backend (port 8008)
   index.ts                # Express server entry point
   db.ts                   # PostgreSQL connection pool
   renderHtml.ts           # Server-side template rendering (CSS module shim)
@@ -50,9 +50,9 @@ packages/
 ## Running the App
 Two workflows run simultaneously:
 1. **Start application**: `pnpm --filter @usewaypoint/editor-sample run vitedev` — Vite dev server on port 5000
-2. **AI Server**: `npx tsx server/index.ts` — Express AI backend on port 3001
+2. **AI Server**: `npx tsx server/index.ts` — Express AI backend on port 8008
 
-Vite proxies `/api` requests to the Express server on port 3001.
+Vite proxies `/api` requests to the Express server on port 8008.
 
 For development testing, navigate to `/dev` to bypass auth.
 
@@ -149,8 +149,13 @@ All Material UI and oute-ds-* packages have been completely removed. All UI uses
 - shadcn/ui components for interactive elements (Radix UI under the hood)
 - Lucide React for icons
 
-### SDK Stub
-`oute-services-mail-sdk` is a private package. It's stubbed at `src/sdk/stubs/oute-services-mail-sdk.ts`. The stub throws errors on API calls, which are caught and handled gracefully (errors logged, loading dismissed).
+### Private Registry Packages
+Several private packages are sourced from a custom npm registry (`https://npm.gofo.app`), configured via `.npmrc` with an auth token:
+- `oute-services-mail-sdk`, `oute-services-search-sdk`, `oute-services-user-photos-sdk`, `oute-services-utility-sdk` — used in the editor for mail, image search/gallery, and utility functions
+- `oute-services-track-sdk` — used in the server for tracking
+
+### Auth Stub
+`@oute/oute-ds.common.molecule.tiny-auth` is kept as a local workspace stub (`packages/stub-oute-tiny-auth`) because the real package requires a Keycloak server that isn't available in Replit. The stub in `packages/editor-sample/src/auth/tiny-auth-wrapper/index.js` imports from the stub package to bypass authentication and render the editor directly.
 
 ### Legacy Archive
 `src_legacy/` contains the complete original MUI/ODS codebase for reference. Never delete it.
