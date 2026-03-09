@@ -60,7 +60,9 @@ export async function uploadImageToCdn(
         'Content-Type': mimeType,
         ...(token ? { token: String(token) } : {}),
       },
-      body: bytes,
+      // Node's fetch expects a BodyInit; Buffer is a Uint8Array subclass at runtime,
+      // but its TypeScript type is not assignable, so we cast here.
+      body: bytes as unknown as BodyInit,
     });
 
     if (!uploadResponse.ok) {
