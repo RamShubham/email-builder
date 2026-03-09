@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "postgresql-16"]
+modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
 integrations = ["javascript_openai_ai_integrations:2.0.0"]
@@ -17,6 +17,10 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 8008
+externalPort = 8008
 
 [workflows]
 runButton = "Project"
@@ -50,13 +54,13 @@ outputType = "webview"
 name = "AI Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npx tsx server/index.ts"
-waitForPort = 3001
-
-[workflows.workflow.metadata]
-outputType = "console"
+waitForPort = 8008
 
 [deployment]
 deploymentTarget = "autoscale"
