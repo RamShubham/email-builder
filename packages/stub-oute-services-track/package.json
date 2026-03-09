@@ -1,0 +1,11 @@
+{
+  "name": "oute-services-track-sdk",
+  "version": "0.0.1",
+  "main": "./src/index.tsx",
+  "exports": {
+    ".": {
+      "import": "./src/index.tsx",
+      "require": "./src/index.tsx"
+    }
+  }
+}
