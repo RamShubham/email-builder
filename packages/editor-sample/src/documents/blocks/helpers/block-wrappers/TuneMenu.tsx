@@ -1,10 +1,10 @@
 import cloneDeep from 'lodash/cloneDeep';
-import React from 'react';
-
 import { Copy, Trash2 } from 'lucide-react';
+import React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import generateId from '../../../../utils/generateId';
 import { TEditorBlock } from '../../../editor/core';
 import {
@@ -49,16 +49,22 @@ export default function TuneMenu({ blockId }: Props) {
           };
           break;
         case 'ColumnsContainer': {
-          const cols = (block as TEditorBlock & { data: ColumnsContainerProps }).data.columns;
+          const data = (block as TEditorBlock & { data: ColumnsContainerProps }).data;
+          const props = data.props;
+          const cols = props?.columns;
           if (!cols) break;
+
           nDocument[id] = {
             ...block,
             data: {
-              ...block.data,
-              columns: cols.map((col: any) => ({
-                ...col,
-                childrenIds: filterChildrenIds(col.childrenIds),
-              })),
+              ...data,
+              props: {
+                ...props,
+                columns: cols.map((col: any) => ({
+                  ...col,
+                  childrenIds: filterChildrenIds(col.childrenIds),
+                })),
+              },
             },
           };
           break;

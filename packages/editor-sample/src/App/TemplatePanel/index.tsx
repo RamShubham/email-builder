@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-
 import { Monitor, Smartphone } from 'lucide-react';
-import { Reader } from '@usewaypoint/email-builder';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Reader } from '@usewaypoint/email-builder';
+
 import {
   resetDocument,
   resetVariables,
@@ -13,10 +13,10 @@ import {
   useSelectedScreenSize,
 } from '../../documents/editor/EditorContext';
 import getGlobalVariables from '../../utils/getGlobalVariables';
-import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
-import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 import AiChatOverlay from '../AiChat/AiChatOverlay';
 import { useAiChat } from '../AiChat/useAiChat';
+import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
+import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 
 import CustomEditorBlock, { AiPromptIsland } from './CustomEditorBlock';
 import DownloadJson from './DownloadJson';
@@ -59,7 +59,7 @@ export default function TemplatePanel() {
     const boxStyle: React.CSSProperties =
       selectedScreenSize === 'mobile'
         ? { maxWidth: 400, margin: '0 auto' }
-        : {};
+        : { height: '100%' };
 
     switch (selectedMainTab) {
       case 'editor':
@@ -95,11 +95,10 @@ export default function TemplatePanel() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${
-                        selectedScreenSize === 'desktop'
-                          ? 'bg-white shadow-sm text-gray-700'
-                          : 'text-gray-400 hover:text-gray-600'
-                      }`}
+                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'desktop'
+                        ? 'bg-white shadow-sm text-gray-700'
+                        : 'text-gray-400 hover:text-gray-600'
+                        }`}
                       onClick={() => setSelectedScreenSize('desktop')}
                     >
                       <Monitor className="h-3.5 w-3.5" />
@@ -110,11 +109,10 @@ export default function TemplatePanel() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${
-                        selectedScreenSize === 'mobile'
-                          ? 'bg-white shadow-sm text-gray-700'
-                          : 'text-gray-400 hover:text-gray-600'
-                      }`}
+                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'mobile'
+                        ? 'bg-white shadow-sm text-gray-700'
+                        : 'text-gray-400 hover:text-gray-600'
+                        }`}
                       onClick={() => setSelectedScreenSize('mobile')}
                     >
                       <Smartphone className="h-3.5 w-3.5" />
