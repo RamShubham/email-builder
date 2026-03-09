@@ -40,16 +40,18 @@ function DataPanel() {
 
 	useEffect(() => {
 		const updatedVariables = findVariable({ globalVariables, document });
+
 		if (!isEqual(globalVariables, updatedVariables)) {
 			updateVariables(updatedVariables);
-			const rowsData: RowObj[] = Object.entries(updatedVariables).map(
-				([varKey, value]) => ({
-					variable: varKey,
-					defaultValue: String(value),
-				})
-			);
-			setRows(() => rowsData);
 		}
+
+		const rowsData: RowObj[] = Object.entries(updatedVariables).map(
+			([varKey, value]) => ({
+				variable: varKey,
+				defaultValue: String(value),
+			})
+		);
+		setRows(() => rowsData);
 	}, [document, globalVariables]);
 
 	return (
