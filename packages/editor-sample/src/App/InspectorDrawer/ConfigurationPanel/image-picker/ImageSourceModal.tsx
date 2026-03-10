@@ -53,20 +53,20 @@ export function ImageSourceModal({
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden mt-4 max-h-[520px] ">
-            <TabsContent value="unsplash" className="mt-0" data-testid="image-source-content-unsplash">
+          <div className="mt-4 h-[520px] flex flex-col min-h-0">
+            <TabsContent value="unsplash" className="mt-0 h-full" data-testid="image-source-content-unsplash">
               <UnsplashTab onImageSelected={handleImageSelected} />
             </TabsContent>
 
-            <TabsContent value="gallery" className="mt-0" data-testid="image-source-content-gallery">
+            <TabsContent value="gallery" className="mt-0 h-full" data-testid="image-source-content-gallery">
               <MyGalleryTab workspaceId={workspaceId} onImageSelected={handleImageSelected} />
             </TabsContent>
 
-            <TabsContent value="upload" className="mt-0" data-testid="image-source-content-upload">
+            <TabsContent value="upload" className="mt-0 h-full" data-testid="image-source-content-upload">
               <UploadTab onImageSelected={handleImageSelected} workspaceId={workspaceId} />
             </TabsContent>
 
-            <TabsContent value="ai" className="mt-0" data-testid="image-source-content-ai">
+            <TabsContent value="ai" className="mt-0 h-full" data-testid="image-source-content-ai">
               <GenerateFromAITab
                 onImageSelected={handleImageSelected}
                 currentAlt={currentAlt ?? undefined}

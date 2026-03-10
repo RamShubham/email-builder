@@ -83,12 +83,12 @@ export function MyGalleryTab({ workspaceId, onImageSelected }: MyGalleryTabProps
 
       {images.length > 0 && (
         <>
-          <div className="grid grid-cols-2 gap-2 max-h-[420px] overflow-y-auto">
+          <div className="flex flex-wrap justify-between gap-2 flex-1 overflow-y-auto">
             {images.map((img) => (
               <button
                 key={img._id}
                 type="button"
-                className="relative aspect-video rounded-md overflow-hidden border border-gray-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                className="relative w-[49%] aspect-video rounded-md overflow-hidden border border-gray-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
                 onClick={() => onImageSelected(img.url)}
                 data-testid={`gallery-image-${img._id}`}
               >
