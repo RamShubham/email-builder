@@ -14,7 +14,7 @@ function AppRouter() {
                                 <Route path="/asset" element={<AuthRoute component={App} />} />
                                 <Route path="/dev" element={<App />} />
                                 <Route path="/embed" element={<EmbedEditor />} />
-                                <Route path="/" element={<App />} />
+                                {/* <Route path="/" element={<App />} /> */}
                                 <Route path="*" element={<Redirect url={process.env.REACT_APP_WC_LANDING_URL} />} />
                         </Routes>
                 </BrowserRouter>
