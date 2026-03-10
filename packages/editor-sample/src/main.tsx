@@ -18,16 +18,16 @@ initFbPixel();
 initGoogleAds();
 
 root.render(
-	<TinyCommandAuthController
-		loginUrl={process.env.REACT_APP_LOGIN_URL}
-		clientId={process.env.REACT_APP_KEYCLOAK_RESOURCE}
-		realm={process.env.REACT_APP_KEYCLOAK_REALM}
-		serverUrl={process.env.REACT_APP_KEYCLOAK_AUTH_SERVER_URL}
-		assetServerUrl={process.env.REACT_APP_OUTE_SERVER}
-	>
-		<TooltipProvider>
-			<AppRouter />
-			<Toaster position="top-right" richColors />
-		</TooltipProvider>
-	</TinyCommandAuthController>
+	// <TinyCommandAuthController
+	// 	loginUrl={process.env.REACT_APP_LOGIN_URL}
+	// 	clientId={process.env.REACT_APP_KEYCLOAK_RESOURCE}
+	// 	realm={process.env.REACT_APP_KEYCLOAK_REALM}
+	// 	serverUrl={process.env.REACT_APP_KEYCLOAK_AUTH_SERVER_URL}
+	// 	assetServerUrl={process.env.REACT_APP_OUTE_SERVER}
+	// >
+	<TooltipProvider>
+		<AppRouter />
+		<Toaster position="top-right" richColors />
+	</TooltipProvider>
+	// </TinyCommandAuthController>
 );
