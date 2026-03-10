@@ -1,28 +1,28 @@
 {
-        "name": "email-builder-backend",
-        "version": "0.0.1",
-        "private": true,
-        "type": "module",
-        "main": "dist/index.js",
-        "scripts": {
-                "dev": "tsx index.ts",
-                "build": "tsc -p .",
-                "start": "node dist/index.js"
-        },
-        "dependencies": {
-                "cors": "^2.8.6",
-                "dotenv": "^16.4.7",
-                "express": "^5.2.1",
-                "openai": "^6.25.0",
-                "oute-services-track-sdk": "^0.0.48",
-                "pg": "^8.19.0"
-        },
-        "devDependencies": {
-                "@types/cors": "^2.8.19",
-                "@types/express": "^5.0.6",
-                "@types/node": "^20.12.0",
-                "@types/pg": "^8.18.0",
-                "tsx": "^4.21.0",
-                "typescript": "^5.3.3"
-        }
+	"name": "email-builder-backend",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"dev": "tsx index.ts",
+		"build": "tsc -p .",
+		"start": "tsc -p . && node ./dist/index.js"
+	},
+	"dependencies": {
+		"cors": "^2.8.6",
+		"dotenv": "^16.4.7",
+		"express": "^5.2.1",
+		"openai": "^6.25.0",
+		"oute-services-track-sdk": "^0.0.48",
+		"pg": "^8.19.0"
+	},
+	"devDependencies": {
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.6",
+		"@types/node": "^20.12.0",
+		"@types/pg": "^8.18.0",
+		"tsx": "^4.21.0",
+		"typescript": "^5.3.3"
+	}
 }
