@@ -18,6 +18,14 @@
 		"server:build": "cd server && npm run build",
 		"server:start": "cd server && npm start"
 	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@parcel/watcher",
+			"@swc/core",
+			"esbuild",
+			"msgpackr-extract"
+		]
+	},
 	"author": "carlos@usewaypoint.com",
 	"license": "MIT",
 	"devDependencies": {

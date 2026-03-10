@@ -10,6 +10,7 @@ import React from 'react';
     return (
       <button
         className="absolute top-[-12px] left-1/2 -translate-x-1/2 z-50 w-6 h-6 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={(ev) => {
           ev.stopPropagation();
           onClick();
