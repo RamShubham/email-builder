@@ -64,7 +64,8 @@ function formatContent(content: string): React.ReactNode {
 
 export default function ChatMessage({ message, onApplyTemplate }: ChatMessageProps) {
   const isUser = message.role === 'user';
-  const isStreaming = message.isStreaming && !message.content;
+  const isStreaming = message.isStreaming;
+  const hasContent = Boolean(message.content);
 
   return (
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -82,7 +83,8 @@ export default function ChatMessage({ message, onApplyTemplate }: ChatMessagePro
               : 'bg-gray-100/80 text-gray-800 rounded-2xl rounded-bl-md'
           }`}
         >
-          {isStreaming ? <TypingIndicator /> : formatContent(message.content)}
+          {hasContent ? formatContent(message.content) : null}
+          {isStreaming && <TypingIndicator />}
         </div>
 
         {message.template && onApplyTemplate && (
