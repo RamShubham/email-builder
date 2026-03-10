@@ -9,8 +9,6 @@ import useRequest from '../../../../hook/useRequest';
 
 type AspectRatio = 'landscape' | 'square' | 'portrait';
 
-const API_BASE_URL = `${process.env.REACT_APP_AI_BASE_URL}api/`;
-
 const STAGE_MESSAGES = [
   'Analyzing your prompt...',
   'Creating composition...',
@@ -178,7 +176,7 @@ function ImagePickerPanel({ onChange, currentAlt, currentWidth, currentHeight }:
   const [, generateImageRequest] = useRequest(
     {
       method: 'post',
-      url: `${API_BASE_URL}image/generate`,
+      url: '/api/image/generate',
     },
     { manual: true }
   );

@@ -11,8 +11,6 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-const API_BASE_URL = `${process.env.REACT_APP_AI_BASE_URL}api/`;
-
 const TEMPLATE_START = '|||TEMPLATE_START|||';
 const MARKER_PREFIX = '|||';
 
@@ -46,7 +44,7 @@ export function useAiChat() {
   const [, resetChatRequest] = useRequest(
     {
       method: 'post',
-      url: `${API_BASE_URL}chat/reset`,
+      url: '/api/chat/reset',
     },
     { manual: true }
   );
@@ -55,7 +53,7 @@ export function useAiChat() {
     {
       method: 'post',
       // Use full URL so we can target the AI base URL while still benefiting from the axios interceptors
-      url: `${API_BASE_URL}chat`,
+      url: '/api/chat',
     },
     { manual: true }
   );

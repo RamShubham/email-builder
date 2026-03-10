@@ -10,8 +10,6 @@ import AspectRatioIcon from './AspectRatioIcon';
 import { ASPECT_RATIOS, type AspectRatio } from './constant';
 import LoadingExperience from './LoadingExperience';
 
-const API_BASE_URL = `${process.env.REACT_APP_AI_BASE_URL ?? ''}api/`;
-
 function detectAspectRatio(width?: number | null, height?: number | null): AspectRatio {
   if (width && height) {
     const ratio = width / height;
@@ -47,7 +45,7 @@ export function GenerateFromAITab({
   const [, generateImageRequest] = useRequest(
     {
       method: 'post',
-      url: `${API_BASE_URL}image/generate`,
+      url: '/api/image/generate',
     },
     { manual: true }
   );
