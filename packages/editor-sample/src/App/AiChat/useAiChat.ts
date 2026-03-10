@@ -41,13 +41,21 @@ export function useAiChat() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(`session-${Date.now()}`);
-  const abortRef = useRef<AbortController | null>(null);
   const { workspaceId } = useIds();
 
   const [, resetChatRequest] = useRequest(
     {
       method: 'post',
       url: `${API_BASE_URL}chat/reset`,
+    },
+    { manual: true }
+  );
+
+  const [, chatRequest] = useRequest(
+    {
+      method: 'post',
+      // Use full URL so we can target the AI base URL while still benefiting from the axios interceptors
+      url: `${API_BASE_URL}chat`,
     },
     { manual: true }
   );
@@ -70,93 +78,35 @@ export function useAiChat() {
     ]);
     setIsLoading(true);
 
-    abortRef.current = new AbortController();
-
     try {
-      const response = await fetch(`${API_BASE_URL}chat/stream`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data } = await chatRequest({
+        data: {
           message: content.trim(),
           sessionId: sessionIdRef.current,
           workspaceId,
-        }),
-        signal: abortRef.current.signal,
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+      const responseType = data?.type as 'message' | 'template' | undefined;
+      const rawContent: string = data?.content ?? '';
+      const templateData: Record<string, any> | undefined =
+        responseType === 'template' && data?.template ? data.template : undefined;
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('No response body');
+      const finalContent = stripTemplateContent(rawContent);
 
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let fullContent = '';
-      let templateData: Record<string, any> | undefined;
-      let hitTemplateMarker = false;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-
-          try {
-            const event = JSON.parse(line.slice(6));
-
-            if (event.type === 'chunk') {
-              fullContent += event.content;
-
-              if (!hitTemplateMarker) {
-                const displayContent = stripTemplateContent(fullContent);
-                if (displayContent !== fullContent) {
-                  hitTemplateMarker = true;
-                }
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantId ? { ...m, content: displayContent || 'Building your template...' } : m
-                  )
-                );
-              }
-            } else if (event.type === 'done') {
-              if (event.responseType === 'template' && event.template) {
-                templateData = event.template;
-              }
-              const finalContent = event.content || stripTemplateContent(fullContent);
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId
-                    ? { ...m, content: finalContent, template: templateData, isStreaming: false }
-                    : m
-                )
-              );
-            } else if (event.type === 'error') {
-              throw new Error(event.error);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+              ...m,
+              content: finalContent || 'Sorry, something went wrong. Please try again.',
+              template: templateData,
+              isStreaming: false,
             }
-          } catch (e) {
-            if (e instanceof SyntaxError) continue;
-            throw e;
-          }
-        }
-      }
-
-      if (!templateData) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, isStreaming: false } : m
-          )
-        );
-      }
-    } catch (error: any) {
-      if (error.name === 'AbortError') return;
-
+            : m
+        )
+      );
+    } catch {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
@@ -166,9 +116,8 @@ export function useAiChat() {
       );
     } finally {
       setIsLoading(false);
-      abortRef.current = null;
     }
-  }, [isLoading]);
+  }, [chatRequest, isLoading, workspaceId]);
 
   const resetChat = useCallback(async () => {
     try {
@@ -189,7 +138,7 @@ export function useAiChat() {
       },
     ]);
     setIsLoading(false);
-  }, [resetChatRequest]);
+  }, [resetChatRequest, workspaceId]);
 
   return { messages, isLoading, sendMessage, resetChat };
 }
