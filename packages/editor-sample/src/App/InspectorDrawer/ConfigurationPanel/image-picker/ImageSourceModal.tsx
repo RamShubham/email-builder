@@ -63,7 +63,7 @@ export function ImageSourceModal({
             </TabsContent>
 
             <TabsContent value="upload" className="mt-0" data-testid="image-source-content-upload">
-              <UploadTab onImageSelected={handleImageSelected} />
+              <UploadTab onImageSelected={handleImageSelected} workspaceId={workspaceId} />
             </TabsContent>
 
             <TabsContent value="ai" className="mt-0" data-testid="image-source-content-ai">

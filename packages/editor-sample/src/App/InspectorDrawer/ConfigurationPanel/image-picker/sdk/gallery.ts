@@ -43,3 +43,28 @@ export async function listImages({
 
   return response?.result as GalleryListResult;
 }
+
+export async function saveImage({
+  name,
+  url,
+  workspace_id,
+}: {
+  name: string;
+  url: string;
+  workspace_id: string;
+}) {
+  const client = getUserPhotosClient();
+  const response = await client.save({
+    name,
+    url,
+    workspace_id,
+  });
+
+  if (!response || response.status !== 'success') {
+    // eslint-disable-next-line no-console
+    console.error('Gallery save error:', response);
+    throw new Error(response?.result?.message || 'Failed to save image');
+  }
+
+  return response;
+}

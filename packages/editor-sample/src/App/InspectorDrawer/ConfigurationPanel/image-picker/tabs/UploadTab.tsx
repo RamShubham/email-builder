@@ -5,15 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { uploadFile } from '../api/upload';
+import { saveImage } from '../sdk/gallery';
 
 const MAX_FILE_MB = 4;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 type UploadTabProps = {
   onImageSelected: (url: string) => void;
+  workspaceId: string | null;
 };
 
-export function UploadTab({ onImageSelected }: UploadTabProps) {
+export function UploadTab({ onImageSelected, workspaceId }: UploadTabProps) {
   const [url, setUrl] = useState('');
   const [urlError, setUrlError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -26,13 +28,24 @@ export function UploadTab({ onImageSelected }: UploadTabProps) {
     setUrlError(null);
     const img = new Image();
     img.onload = () => {
+      if (workspaceId) {
+        const nameFromUrl = trimmed.split('?')[0].split('/').pop() || 'Image';
+        void saveImage({
+          name: nameFromUrl,
+          url: trimmed,
+          workspace_id: workspaceId,
+        }).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to save image metadata from URL', error);
+        });
+      }
       onImageSelected(trimmed);
     };
     img.onerror = () => {
       setUrlError('Invalid URL');
     };
     img.src = trimmed;
-  }, [url, onImageSelected]);
+  }, [url, onImageSelected, workspaceId]);
 
   const handleFile = useCallback(
     async (file: File | null) => {
@@ -50,6 +63,16 @@ export function UploadTab({ onImageSelected }: UploadTabProps) {
       setUploading(true);
       try {
         const cdnUrl = await uploadFile(file);
+        if (workspaceId) {
+          void saveImage({
+            name: file.name || 'Image',
+            url: cdnUrl,
+            workspace_id: workspaceId,
+          }).catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error('Failed to save uploaded image metadata', error);
+          });
+        }
         onImageSelected(cdnUrl);
       } catch (err) {
         setUploadError(err instanceof Error ? err.message : 'Upload failed');
@@ -57,7 +80,7 @@ export function UploadTab({ onImageSelected }: UploadTabProps) {
         setUploading(false);
       }
     },
-    [onImageSelected]
+    [onImageSelected, workspaceId]
   );
 
   const onDrop = useCallback(
