@@ -67,6 +67,7 @@ When the user confirms, you MUST respond with a valid JSON template wrapped in a
 - data.style.textAlign: "left" | "center" | "right"
 - data.style.padding: { top: number, bottom: number, left: number, right: number }
 - data.props.text: string
+- data.props.markdown: boolean
 
 ### Button
 - data.style.backgroundColor: string | null
