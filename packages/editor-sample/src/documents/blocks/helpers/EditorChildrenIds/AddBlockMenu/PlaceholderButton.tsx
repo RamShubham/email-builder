@@ -8,6 +8,7 @@ type Props = {
 export default function PlaceholderButton({ onClick }: Props) {
   return (
     <button
+      onMouseDown={(e) => e.preventDefault()}
       onClick={(ev) => {
         ev.stopPropagation();
         onClick();
