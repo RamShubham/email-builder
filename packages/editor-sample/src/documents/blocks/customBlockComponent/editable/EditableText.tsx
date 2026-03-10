@@ -81,8 +81,12 @@ function EditableText(props: any) {
     );
   }
 
-  const hasVariables = /\{\{.*?\}\}/.test(currentText);
-  if (hasVariables) {
+  const templateText = props.template?.text ?? '';
+  const resolvedText = props.props?.text ?? '';
+  const hasUnresolvedVariables = /{{.*?}}/.test(resolvedText);
+
+  if (hasUnresolvedVariables) {
+    const pillSourceText = resolvedText || templateText;
     const blockUrl = props.template?.url ?? props.props?.url;
     const content = (
       <div
@@ -103,12 +107,21 @@ function EditableText(props: any) {
           wordBreak: 'break-word',
         }}
       >
-        {renderTextWithVariables(currentText)}
+        {renderTextWithVariables(pillSourceText)}
       </div>
     );
+
     if (blockUrl) {
-      return <a href={blockUrl} style={{ textDecoration: 'none', color: 'inherit' }}>{content}</a>;
+      return (
+        <a
+          href={blockUrl}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          {content}
+        </a>
+      );
     }
+
     return content;
   }
 

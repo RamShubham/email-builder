@@ -97,8 +97,15 @@ function EditableHeading(props: any) {
     );
   }
 
-  const hasVariables = /\{\{.*?\}\}/.test(currentText);
-  if (hasVariables) {
+  const templateText = props.template?.text ?? '';
+  const resolvedText = props.props?.text ?? '';
+  const hasUnresolvedVariables = /{{.*?}}/.test(resolvedText);
+
+  // If there are unresolved variables (no defaults), show variable pills.
+  // Use the resolved text so variables that DO have defaults render as plain text,
+  // and only unresolved variables remain as pills.
+  if (hasUnresolvedVariables) {
+    const pillSourceText = resolvedText || templateText;
     const blockUrl = props.template?.url ?? props.props?.url;
     const content = (
       <div
@@ -111,21 +118,35 @@ function EditableHeading(props: any) {
           paddingRight: padding?.right ? `${padding.right}px` : 0,
           fontSize: getFontSize(level),
           fontWeight: fontWeight ?? 'bold',
-          fontFamily: FONT_FAMILY_MAPPING[fontFamily as keyof typeof FONT_FAMILY_MAPPING] || 'inherit',
+          fontFamily:
+            FONT_FAMILY_MAPPING[
+              fontFamily as keyof typeof FONT_FAMILY_MAPPING
+            ] || 'inherit',
           color: color || 'inherit',
           textAlign: textAlign || 'left',
           lineHeight: 1.3,
         }}
       >
-        {renderTextWithVariables(currentText)}
+        {renderTextWithVariables(pillSourceText)}
       </div>
     );
+
     if (blockUrl) {
-      return <a href={blockUrl} style={{ textDecoration: 'none', color: 'inherit' }}>{content}</a>;
+      return (
+        <a
+          href={blockUrl}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          {content}
+        </a>
+      );
     }
+
     return content;
   }
 
+  // If all variables have defaults (or there are no variables),
+  // render via Heading so text uses resolved props.
   return <Heading {...headingProps} />;
 }
 
