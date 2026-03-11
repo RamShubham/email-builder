@@ -1,5 +1,6 @@
 import type { ZodError } from 'zod';
 import React, { useState } from 'react';
+import { Info } from 'lucide-react';
 
   import EmailLayoutPropsSchema, {
     EmailLayoutProps,
@@ -25,6 +26,12 @@ import React, { useState } from 'react';
 
     return (
       <BaseSidebarPanel title="Global">
+        <div className="flex gap-2.5 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+          <Info className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+          <p className="text-[12px] text-indigo-600 leading-relaxed">
+            These styles apply globally to the entire email template. To change styles for a specific block, select that block and use the <strong>Inspect</strong> tab.
+          </p>
+        </div>
         <ColorInput
           label="Backdrop color"
           defaultValue={data.backdropColor ?? '#F5F5F5'}
