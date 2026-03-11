@@ -12,6 +12,23 @@ yarn-error.log*
 
 dist
 
+# tsc build output (compiled inline next to .ts/.tsx sources)
+*.d.ts.map
+*.js.map
+
+# Ignore tsc-generated .js and .d.ts in all package directories
+packages/**/*.js
+packages/**/*.d.ts
+# But keep actual .js source files already tracked by git
+!packages/block-html/src/constant/purify.js
+!packages/editor/src/auth/**/*.js
+!packages/editor/postcss.config.js
+!packages/editor/tailwind.config.js
+
+# Root tsc artifacts
+jest.config.d.ts
+jest.config.js
+
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
