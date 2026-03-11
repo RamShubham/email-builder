@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import './renderHtml.js';
 
 import cors from 'cors';
 import express from 'express';
@@ -8,10 +7,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { chat, chatStream, resetSession } from './ai/templateAgent.js';
-import pool from './db.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
-import templateRoutes from './routes/templates.js';
 import { generateImageName, uploadImageToCdn } from './uploadImageToCdn.js';
 import { CreditService } from './services/credits/creditService.js';
 import { getToken, requireWorkspaceId } from './utils/requestContext.js';
@@ -36,6 +33,7 @@ const allowedOrigins = [
   'http://localhost:8007',
   'http://0.0.0.0:5000',
   'https://email-dev.oute.app',
+  'https://email.oute.app',
 ].filter(Boolean) as string[];
 
 const apiCors = cors({
@@ -74,7 +72,6 @@ app.use('/api', express.json({ limit: '50mb' }));
 app.use('/api', authMiddleware);
 app.use('/api', rateLimitMiddleware);
 app.use('/api', apiTimeout(30000));
-app.use(templateRoutes);
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -267,7 +264,7 @@ app.post('/api/image/generate', async (req, res) => {
   }
 });
 
-app.get('/api/health', async (_req, res) => {
+app.get('/health', async (_req, res) => {
   const result: {
     status: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: string;
@@ -286,20 +283,6 @@ app.get('/api/health', async (_req, res) => {
     },
   };
 
-  try {
-    const dbStart = Date.now();
-    await pool.query('SELECT 1');
-    result.services.database = {
-      status: 'connected',
-      latencyMs: Date.now() - dbStart,
-    };
-  } catch (err: any) {
-    result.services.database = {
-      status: 'disconnected',
-      error: err.message,
-    };
-    result.status = 'unhealthy';
-  }
 
   result.services.openai = {
     configured: Boolean(process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL),

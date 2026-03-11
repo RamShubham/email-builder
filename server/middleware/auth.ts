@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 
-const PUBLIC_PREFIXES = ['/api/health', '/embed', '/assets'];
+const PUBLIC_PREFIXES = ['/health', '/embed', '/assets'];
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   if (PUBLIC_PREFIXES.some((p) => req.path.startsWith(p))) return next();
