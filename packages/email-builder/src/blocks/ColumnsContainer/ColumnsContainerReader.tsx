@@ -8,7 +8,7 @@ import { ColumnsContainerProps } from './ColumnsContainerPropsSchema';
 
 export default function ColumnsContainerReader({ style, props }: ColumnsContainerProps) {
   const { columns, ...restProps } = props ?? {};
-  let cols = undefined;
+  let cols: (JSX.Element[])[] | undefined = undefined;
   if (columns) {
     cols = columns.map((col) => col.childrenIds.map((childId) => <ReaderBlock key={childId} id={childId} />));
   }

@@ -6,6 +6,6 @@ import { Html } from '.';
 
 describe('block-html', () => {
   it('renders with default values', () => {
-    expect(render(<Html />).asFragment()).toMatchSnapshot();
+    expect(render(<Html isHtmlPanel={false} />).asFragment()).toMatchSnapshot();
   });
 });

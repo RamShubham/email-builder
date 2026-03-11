@@ -18,5 +18,5 @@
 		"allowSyntheticDefaultImports": true,
 		"noImplicitAny": false
 	},
-	"exclude": ["dist", "server"]
+	"exclude": ["dist", "server", "packages/editor", "packages/block-rte"]
 }
