@@ -1,5 +1,5 @@
 {
-	"name": "@usewaypoint/editor-sample",
+	"name": "@usewaypoint/editor",
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
