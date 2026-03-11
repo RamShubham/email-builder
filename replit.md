@@ -1,7 +1,7 @@
 # Email Builder JS (Oute Email Editor)
 
 ## Overview
-A React/Vite email template builder application built as a pnpm monorepo. This is the "editor-sample" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages. Features a conversational AI assistant that helps users design email templates through natural chat. Includes a TinyCommand AI integration layer with embeddable editor, postMessage API, template CRUD, and server-side rendering.
+A React/Vite email template builder application built as a pnpm monorepo. This is the "editor" package, rebuilt with Tailwind CSS + shadcn/ui + Lucide React — zero MUI, zero ODS packages. Features a conversational AI assistant that helps users design email templates through natural chat. Includes a TinyCommand AI integration layer with embeddable editor, postMessage API, template CRUD, and server-side rendering.
 
 ## Project Structure
 ```
@@ -17,7 +17,7 @@ server/                   # Express AI backend (port 8008)
     templateAgent.ts      # OpenAI-powered conversational agent
     systemPrompt.ts       # System prompt with block schema + examples
 packages/
-  editor-sample/          # Main React/Vite frontend app (port 5000)
+  editor/          # Main React/Vite frontend app (port 5000)
     src/                  # New Tailwind+shadcn UI (rebuilt)
       App/AiChat/         # AI chat overlay components
         AiChatOverlay.tsx  # Full-screen chat overlay
@@ -49,7 +49,7 @@ packages/
 
 ## Running the App
 Two workflows run simultaneously:
-1. **Start application**: `pnpm --filter @usewaypoint/editor-sample run vitedev` — Vite dev server on port 5000
+1. **Start application**: `pnpm --filter @usewaypoint/editor run vitedev` — Vite dev server on port 5000
 2. **AI Server**: `npx tsx server/index.ts` — Express AI backend on port 8008
 
 Vite proxies `/api` requests to the Express server on port 8008.
@@ -155,7 +155,7 @@ Several private packages are sourced from a custom npm registry (`https://npm.go
 - `oute-services-track-sdk` — used in the server for tracking
 
 ### Auth Stub
-`@oute/oute-ds.common.molecule.tiny-auth` is kept as a local workspace stub (`packages/stub-oute-tiny-auth`) because the real package requires a Keycloak server that isn't available in Replit. The stub in `packages/editor-sample/src/auth/tiny-auth-wrapper/index.js` imports from the stub package to bypass authentication and render the editor directly.
+`@oute/oute-ds.common.molecule.tiny-auth` is kept as a local workspace stub (`packages/stub-oute-tiny-auth`) because the real package requires a Keycloak server that isn't available in Replit. The stub in `packages/editor/src/auth/tiny-auth-wrapper/index.js` imports from the stub package to bypass authentication and render the editor directly.
 
 ### Legacy Archive
 `src_legacy/` contains the complete original MUI/ODS codebase for reference. Never delete it.
@@ -177,7 +177,7 @@ The editor supports merge variables (`{{variableName}}`) in text fields:
 - **VariablePill component**: `src/components/VariablePill.tsx` — renders styled inline pill + `renderTextWithVariables()` utility for splitting text into pills and plain segments.
 
 ### Editable Block Components
-All editable blocks (`packages/editor-sample/src/documents/blocks/customBlockComponent/editable/`) preserve full visual styling in edit mode:
+All editable blocks (`packages/editor/src/documents/blocks/customBlockComponent/editable/`) preserve full visual styling in edit mode:
 - **EditableHeading**: Wraps input in styled container with padding/bg/borderRadius; applies explicit fontSize from level (h1=32, h2=24, h3=20), fontFamily, fontWeight, color, textAlign.
 - **EditableText**: Applies padding, fontSize, fontFamily, fontWeight, textAlign, color, backgroundColor, borderRadius to textarea.
 - **EditableButton**: Two-layer structure matching base Button — outer wrapper with padding/bg/textAlign, inner div with buttonBackgroundColor/borderRadius/size-dependent padding, input with buttonTextColor/fontWeight. Supports fullWidth and all button sizes.
@@ -217,8 +217,8 @@ DATABASE_URL=postgres://user:password@host:5432/dbname
 TINYEMAIL_API_KEYS=your-api-key-1,your-api-key-2
 ```
 
-### Frontend (`packages/editor-sample/.env`)
-Frontend env vars live in `packages/editor-sample/.env` and must use the `REACT_APP_` prefix so Vite exposes them to the browser.
+### Frontend (`packages/editor/.env`)
+Frontend env vars live in `packages/editor/.env` and must use the `REACT_APP_` prefix so Vite exposes them to the browser.
 
 Key frontend variables:
 - `REACT_APP_API_BASE_URL` - Backend API URL
@@ -226,7 +226,7 @@ Key frontend variables:
 
 ## Deployment
 Autoscale deployment using the Express server:
-- Build: `pnpm --filter @usewaypoint/editor-sample run vitebuild`
+- Build: `pnpm --filter @usewaypoint/editor run vitebuild`
 - Run: `npx tsx server/index.ts` (serves API + static frontend with SPA fallback)
 - In production, the server uses `PORT` env var (defaults to 3001 in dev)
-- The Express server serves static files from `packages/editor-sample/dist` and falls back to `index.html` for all unmatched routes (SPA routing)
+- The Express server serves static files from `packages/editor/dist` and falls back to `index.html` for all unmatched routes (SPA routing)

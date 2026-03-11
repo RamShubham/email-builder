@@ -38,7 +38,7 @@
 │       └── systemPrompt.ts          # System prompt with block schema + examples
 │
 ├── packages/
-│   ├── editor-sample/               # Main React/Vite frontend app (port 5000)
+│   ├── editor/               # Main React/Vite frontend app (port 5000)
 │   │   ├── src/
 │   │   │   ├── App/                 # Top-level app components
 │   │   │   │   ├── AiChat/          # AI chat overlay (streaming, template apply)
@@ -91,9 +91,9 @@
 ### Deployment
 
 - **Development**: Two concurrent processes managed by Replit Workflows:
-  1. `Start application`: `pnpm --filter @usewaypoint/editor-sample run vitedev` (port 5000)
+  1. `Start application`: `pnpm --filter @usewaypoint/editor run vitedev` (port 5000)
   2. `AI Server`: `npx tsx server/index.ts` (port 3001)
-- **Production**: Static site deployment — `pnpm --filter @usewaypoint/editor-sample run vitebuild` outputs to `packages/editor-sample/dist`
+- **Production**: Static site deployment — `pnpm --filter @usewaypoint/editor run vitebuild` outputs to `packages/editor/dist`
 - **Proxy**: Vite proxies `/api/*` requests from port 5000 → port 3001
 
 ### External Services
@@ -721,7 +721,7 @@ type PaddingObject = {
 | Subscription Receipt | Transactional | `subscription-receipt.ts` |
 | Empty Email | Starter | `empty-email-message.ts` |
 
-Templates are loaded via `packages/editor-sample/src/getConfiguration/index.tsx` using URL hash routing (e.g., `#sample/welcome`).
+Templates are loaded via `packages/editor/src/getConfiguration/index.tsx` using URL hash routing (e.g., `#sample/welcome`).
 
 ### A/B Testing, Thumbnails, Size Limits
 
@@ -1170,7 +1170,7 @@ To build an embedding/knowledge base of TinyEmail capabilities, TinyCommand AI s
 2. **The system prompt** (`server/ai/systemPrompt.ts`) — Contains the exact JSON format the AI should generate
 3. **All block schemas** — The Zod schemas from each `block-*` package define valid configurations
 4. **Sample templates** — The 9 pre-built templates demonstrate real-world patterns
-5. **FontFamily mapping** — `packages/editor-sample/src/constant/fontFamily.ts`
+5. **FontFamily mapping** — `packages/editor/src/constant/fontFamily.ts`
 
 ### Key Integration Architecture
 

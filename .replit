@@ -47,7 +47,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pnpm --filter @usewaypoint/editor-sample run vitedev"
+args = "pnpm --filter @usewaypoint/editor run vitedev"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -64,8 +64,8 @@ waitForPort = 8008
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["pnpm", "--filter", "@usewaypoint/editor-sample", "run", "vitebuild"]
-publicDir = "packages/editor-sample/dist"
+build = ["pnpm", "--filter", "@usewaypoint/editor", "run", "vitebuild"]
+publicDir = "packages/editor/dist"
 run = ["npx", "tsx", "server/index.ts"]
 
 [userenv]

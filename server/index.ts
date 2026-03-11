@@ -20,7 +20,7 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '8008', 10);
 const startTime = Date.now();
 
-const distPath = path.resolve(__dirname, '../packages/editor-sample/dist');
+const distPath = path.resolve(__dirname, '../packages/editor/dist');
 app.use(express.static(distPath));
 
 const allowedOrigins = [
@@ -29,6 +29,7 @@ const allowedOrigins = [
   process.env.REPLIT_DEPLOYMENT_URL ? `https://${process.env.REPLIT_DEPLOYMENT_URL}` : null,
   'https://email-builder-shubhamram2992.replit.app',
   'http://localhost:5000',
+  'http://localhost:5001',
   'http://localhost:3001',
   'http://localhost:8007',
   'http://0.0.0.0:5000',
