@@ -91,13 +91,13 @@ export function GenerateFromAITab({
   };
 
   return (
-    <div className="flex flex-col gap-4 min-h-[420px]" data-testid="image-source-content-ai">
+    <div className="flex flex-col gap-4 h-full overflow-y-auto" data-testid="image-source-content-ai">
       <textarea
         placeholder="Describe the image you want to generate..."
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         rows={3}
-        className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300"
+        className="w-full shrink-0 resize-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300"
         data-testid="ai-prompt-input"
       />
 
