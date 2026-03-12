@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { type GalleryImage, listImages } from '../sdk/gallery';
 
@@ -16,26 +17,35 @@ export function MyGalleryTab({ workspaceId, onImageSelected }: MyGalleryTabProps
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [pendingSkeletonCount, setPendingSkeletonCount] = useState(0);
 
-  const loadPage = useCallback(async (wsId: string, p: number, append: boolean) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { docs, has_next_page } = await listImages({
-        workspace_id: wsId,
-        page: p,
-        limit: 20,
-      });
-      setImages((prev) => (append ? [...prev, ...docs] : docs));
-      setHasMore(has_next_page);
-      setHasLoadedOnce(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load gallery');
-      if (!append) setImages([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const loadPage = useCallback(
+    async (wsId: string, p: number, append: boolean) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const { docs, has_next_page } = await listImages({
+          workspace_id: wsId,
+          page: p,
+          limit: 20,
+        });
+        setImages((prev) => (append ? [...prev, ...docs] : docs));
+        setHasMore(has_next_page);
+        setHasLoadedOnce(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load gallery');
+        if (!append) setImages([]);
+      } finally {
+        setIsLoading(false);
+        if (append) {
+          setPendingSkeletonCount(0);
+        }
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (!workspaceId) {
@@ -50,9 +60,22 @@ export function MyGalleryTab({ workspaceId, onImageSelected }: MyGalleryTabProps
   const loadMore = () => {
     if (!workspaceId || isLoading || !hasMore) return;
     const nextPage = page + 1;
+    setPendingSkeletonCount(4);
     setPage(nextPage);
     loadPage(workspaceId, nextPage, true);
   };
+
+  const hasImages = images.length > 0;
+  const isInitialLoad = isLoading && !hasImages;
+
+  useEffect(() => {
+    if (pendingSkeletonCount > 0) {
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }
+    }
+  }, [pendingSkeletonCount]);
 
   if (!workspaceId) {
     return (
@@ -69,52 +92,67 @@ export function MyGalleryTab({ workspaceId, onImageSelected }: MyGalleryTabProps
           {error}
         </p>
       )}
-      {isLoading && images.length === 0 && (
-        <div className="flex items-center justify-center py-10 h-[420px]" data-testid="gallery-loading">
-          <p className="text-sm text-muted-foreground">Loading images...</p>
-        </div>
-      )}
-
-      {!isLoading && images.length === 0 && !error && (
-        <p className="text-sm text-muted-foreground text-center py-6" data-testid="gallery-empty">
-          {hasLoadedOnce ? 'No images in gallery yet.' : 'Loading images...'}
-        </p>
-      )}
-
-      {images.length > 0 && (
-        <>
-          <div className="flex flex-wrap justify-between gap-2 flex-1 overflow-y-auto">
-            {images.map((img) => (
-              <button
-                key={img._id}
-                type="button"
-                className="relative w-[49%] aspect-video rounded-md overflow-hidden border border-gray-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
-                onClick={() => onImageSelected(img.url)}
-                data-testid={`gallery-image-${img._id}`}
-              >
-                <img
-                  src={img.url}
-                  alt={img.name ?? ''}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
+      <div className="flex-1 min-h-0 flex flex-col gap-3">
+        {isInitialLoad && (
+          <div className="flex items-center justify-center flex-1" data-testid="gallery-loading">
+            <p className="text-sm text-muted-foreground">Loading images...</p>
           </div>
-          {hasMore && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={loadMore}
-              disabled={isLoading}
-              className="w-full"
-              data-testid="gallery-load-more"
-            >
-              {isLoading ? 'Loading...' : 'Load more'}
-            </Button>
-          )}
-        </>
-      )}
+        )}
+
+        {!isInitialLoad && !isLoading && !hasImages && !error && (
+          <p className="text-sm text-muted-foreground text-center py-6" data-testid="gallery-empty">
+            {hasLoadedOnce ? 'No images in gallery yet.' : 'Loading images...'}
+          </p>
+        )}
+
+        {hasImages && (
+          <div className="flex flex-col h-full gap-3">
+            <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollContainerRef}>
+              <div className="grid grid-cols-2 gap-2">
+                {images.map((img) => (
+                  <button
+                    key={img._id}
+                    type="button"
+                    className="relative aspect-video rounded-md overflow-hidden border border-gray-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                    onClick={() => onImageSelected(img.url)}
+                    data-testid={`gallery-image-${img._id}`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.name ?? ''}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+                {pendingSkeletonCount > 0 &&
+                  Array.from({ length: pendingSkeletonCount }).map((_, index) => (
+                    <div
+                      key={`gallery-skeleton-${index}`}
+                      className="relative aspect-video rounded-md overflow-hidden border border-muted-foreground/30 bg-background"
+                      data-testid={`gallery-skeleton-${index}`}
+                    >
+                      <Skeleton className="h-full w-full" />
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {hasMore && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={loadMore}
+                disabled={isLoading}
+                className="w-full flex-shrink-0"
+                data-testid="gallery-load-more"
+              >
+                {isLoading ? 'Loading...' : 'Load more'}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

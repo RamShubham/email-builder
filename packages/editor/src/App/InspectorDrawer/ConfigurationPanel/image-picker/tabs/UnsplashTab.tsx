@@ -1,9 +1,10 @@
 import debounce from 'lodash/debounce';
 import { Search } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { getImagesFromUnsplash, type UnsplashImage } from '../sdk/unsplash';
 
@@ -21,16 +22,19 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [pendingSkeletonCount, setPendingSkeletonCount] = useState(0);
+
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
 
   const loadPage = useCallback(async (q: string, p: number, append: boolean) => {
-    if (!q.trim()) {
-      setImages([]);
-      return;
-    }
+    const normalized = q.trim();
+    const effectiveQuery = normalized || INITIAL_QUERY;
+
     setIsLoading(true);
     setError(null);
     try {
-      const results = await getImagesFromUnsplash({ query: q, page: p });
+      const results = await getImagesFromUnsplash({ query: effectiveQuery, page: p });
       setImages((prev) => (append ? [...prev, ...results] : results));
       setHasMore(results.length >= 20);
     } catch (err) {
@@ -38,6 +42,9 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
       if (!append) setImages([]);
     } finally {
       setIsLoading(false);
+      if (append) {
+        setPendingSkeletonCount(0);
+      }
     }
   }, []);
 
@@ -60,8 +67,9 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
   }, [debouncedSearch, loadPage]);
 
   const loadMore = () => {
-    if (isLoading || !hasMore || !query.trim()) return;
+    if (isLoading || !hasMore) return;
     const nextPage = page + 1;
+    setPendingSkeletonCount(4);
     setPage(nextPage);
     loadPage(query, nextPage, true);
   };
@@ -71,8 +79,17 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
     if (url) onImageSelected(url);
   };
 
-  const hasQuery = query.trim().length > 0;
   const hasImages = images.length > 0;
+  const isInitialLoad = isLoading && !hasImages;
+
+  useEffect(() => {
+    if (pendingSkeletonCount > 0) {
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }
+    }
+  }, [pendingSkeletonCount]);
 
   return (
     <div className="flex flex-col gap-3 h-full" data-testid="image-source-content-unsplash">
@@ -98,13 +115,13 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
       )}
 
       <div className="flex-1 min-h-0 flex flex-col gap-3">
-        {isLoading && (
+        {isInitialLoad && (
           <div className="flex items-center justify-center flex-1" data-testid="unsplash-loading">
             <p className="text-sm text-muted-foreground">Loading images...</p>
           </div>
         )}
 
-        {!isLoading && hasQuery && !hasImages && !error && (
+        {!isInitialLoad && !isLoading && !hasImages && !error && (
           <div className="flex items-center justify-center flex-1">
             <p className="text-sm text-muted-foreground text-center py-6" data-testid="unsplash-no-results">
               No images found. Try a different keyword.
@@ -112,9 +129,9 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
           </div>
         )}
 
-        {!isLoading && hasQuery && hasImages && (
+        {hasImages && (
           <div className="flex flex-col h-full gap-3">
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollContainerRef}>
               <div className="grid grid-cols-2 gap-2">
                 {images.map((img) => (
                   <button
@@ -131,8 +148,20 @@ export function UnsplashTab({ onImageSelected }: UnsplashTabProps) {
                     />
                   </button>
                 ))}
+                {pendingSkeletonCount > 0 &&
+                  Array.from({ length: pendingSkeletonCount }).map((_, index) => (
+                    <div
+                      key={`unsplash-skeleton-${index}`}
+                      className="relative aspect-video rounded-md overflow-hidden border border-muted-foreground/30 bg-background"
+                      data-testid={`unsplash-skeleton-${index}`}
+                    >
+                      <Skeleton className="h-full w-full bg-[#dcdcdc]" />
+                    </div>
+                  ))}
               </div>
             </div>
+
+
 
             {hasMore && (
               <Button
