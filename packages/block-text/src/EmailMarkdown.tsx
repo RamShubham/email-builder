@@ -99,6 +99,8 @@ function renderMarkdownString(str: string): string {
   return sanitizer(html);
 }
 
+export { renderMarkdownString };
+
 type Props = {
   style: CSSProperties;
   markdown: string;

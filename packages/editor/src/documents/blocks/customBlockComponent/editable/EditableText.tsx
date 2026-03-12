@@ -1,10 +1,13 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 
-import { Text } from '@usewaypoint/block-text';
+import { renderMarkdownString, Text } from '@usewaypoint/block-text';
 
 import FONT_FAMILY_MAPPING from '../../../../constant/fontFamily';
 import { replaceTemplateVariables } from '../../../../utils/replaceTemplateVariables';
-import { renderTextWithVariables } from '../../../../components/VariablePill';
+import {
+  replaceVariablesWithPillHtml,
+  renderTextWithVariables,
+} from '../../../../components/VariablePill';
 import { useCurrentBlockId } from '../../../editor/EditorBlock';
 import {
   setDocument,
@@ -84,32 +87,43 @@ function EditableText(props: any) {
   const templateText = props.template?.text ?? '';
   const resolvedText = props.props?.text ?? '';
   const hasUnresolvedVariables = /{{.*?}}/.test(resolvedText);
+  const markdownEnabled = !!(props.template?.markdown ?? props.props?.markdown);
 
   if (hasUnresolvedVariables) {
     const pillSourceText = resolvedText || templateText;
-    console.log('pillSourceText >>', pillSourceText);
     const blockUrl = props.template?.url ?? props.props?.url;
+    const wrapperStyle = {
+      fontFamily: FONT_FAMILY_MAPPING[fontFamily] || 'inherit',
+      fontSize: fontSize ? `${fontSize}px` : 'inherit',
+      fontWeight: fontWeight || 'normal',
+      textAlign: textAlign || 'left',
+      color: color || 'inherit',
+      backgroundColor: backgroundColor ?? undefined,
+      borderRadius: borderRadius ? `${borderRadius}px` : undefined,
+      paddingTop: padding?.top ? `${padding.top}px` : 0,
+      paddingBottom: padding?.bottom ? `${padding.bottom}px` : 0,
+      paddingLeft: padding?.left ? `${padding.left}px` : 0,
+      paddingRight: padding?.right ? `${padding.right}px` : 0,
+      lineHeight: 1.5,
+      wordBreak: 'break-word' as const,
+    };
+
     const content = (
-      <div
-        style={{
-          fontFamily: FONT_FAMILY_MAPPING[fontFamily] || 'inherit',
-          fontSize: fontSize ? `${fontSize}px` : 'inherit',
-          fontWeight: fontWeight || 'normal',
-          textAlign: textAlign || 'left',
-          color: color || 'inherit',
-          backgroundColor: backgroundColor ?? undefined,
-          borderRadius: borderRadius ? `${borderRadius}px` : undefined,
-          paddingTop: padding?.top ? `${padding.top}px` : 0,
-          paddingBottom: padding?.bottom ? `${padding.bottom}px` : 0,
-          paddingLeft: padding?.left ? `${padding.left}px` : 0,
-          paddingRight: padding?.right ? `${padding.right}px` : 0,
-          lineHeight: 1.5,
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-        }}
-      >
-        {renderTextWithVariables(pillSourceText)}
-      </div>
+      markdownEnabled ? (
+        <div
+          className="email-markdown"
+          style={wrapperStyle}
+          dangerouslySetInnerHTML={{
+            __html: renderMarkdownString(
+              replaceVariablesWithPillHtml(pillSourceText)
+            ),
+          }}
+        />
+      ) : (
+        <div style={{ ...wrapperStyle, whiteSpace: 'pre-wrap' }}>
+          {renderTextWithVariables(pillSourceText)}
+        </div>
+      )
     );
 
     if (blockUrl) {

@@ -41,3 +41,21 @@ export function renderTextWithVariables(text: string): React.ReactNode {
     return part;
   });
 }
+
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+const VARIABLE_TOKEN_REGEX = /\{\{([a-zA-Z0-9_]+)\}\}/g;
+
+export function replaceVariablesWithPillHtml(text: string): string {
+  return text.replace(VARIABLE_TOKEN_REGEX, (_, variableName: string) => {
+    const safeName = escapeHtml(variableName);
+    return `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 6px;margin:0 1px;background-color:#ede9fe;color:#6d28d9;border-radius:4px;font-size:0.85em;font-family:ui-monospace,SFMono-Regular,&quot;SF Mono&quot;,Menlo,monospace;font-weight:500;line-height:1.4;white-space:nowrap;vertical-align:baseline;">${safeName}</span>`;
+  });
+}

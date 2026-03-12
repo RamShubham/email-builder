@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { z } from 'zod';
 
-import EmailMarkdown from './EmailMarkdown';
+import EmailMarkdown, { renderMarkdownString } from './EmailMarkdown';
 
 const FONT_FAMILY_SCHEMA = z
 	.enum([
@@ -111,6 +111,7 @@ export const TextPropsSchema = z.object({
 });
 
 export type TextProps = z.infer<typeof TextPropsSchema>;
+export { renderMarkdownString };
 
 export const TextPropsDefaults = {
 	text: '',
