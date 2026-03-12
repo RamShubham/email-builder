@@ -15,7 +15,14 @@ function RteSidebarPanel({ data, setData }) {
 	return (
 		<BaseSidebarPanel title="RTE block">
 			<MultiStylePropertyPanel
-				names={['borderRadius', 'backgroundColor', 'padding']}
+				names={[
+					'borderRadius',
+					'color',
+					'backgroundColor',
+					'fontFamily',
+					'textAlign',
+					'padding',
+				]}
 				value={data.style}
 				onChange={(style) => updateData({ ...data, style })}
 			/>
