@@ -90,38 +90,37 @@ export default function TemplatePanel() {
           </div>
 
           <div className="flex items-center gap-1 px-1">
-            {selectedMainTab === 'editor' && (
-              <div className="flex items-center bg-gray-100/80 rounded-xl p-0.5 gap-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'desktop'
-                        ? 'bg-white shadow-sm text-gray-700'
-                        : 'text-gray-400 hover:text-gray-600'
-                        }`}
-                      onClick={() => setSelectedScreenSize('desktop')}
-                    >
-                      <Monitor className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Desktop</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'mobile'
-                        ? 'bg-white shadow-sm text-gray-700'
-                        : 'text-gray-400 hover:text-gray-600'
-                        }`}
-                      onClick={() => setSelectedScreenSize('mobile')}
-                    >
-                      <Smartphone className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Mobile</TooltipContent>
-                </Tooltip>
-              </div>
-            )}
+            <div className="flex items-center bg-gray-100/80 rounded-xl p-0.5 gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'desktop'
+                      ? 'bg-white shadow-sm text-gray-700'
+                      : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                    onClick={() => setSelectedScreenSize('desktop')}
+                  >
+                    <Monitor className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Desktop</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className={`h-7 w-7 flex items-center justify-center rounded-[10px] transition-all ${selectedScreenSize === 'mobile'
+                      ? 'bg-white shadow-sm text-gray-700'
+                      : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                    onClick={() => setSelectedScreenSize('mobile')}
+                  >
+                    <Smartphone className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Mobile</TooltipContent>
+              </Tooltip>
+            </div>
+
             <ImportJson />
             <DownloadJson />
             <ToggleInspectorPanelButton />
