@@ -87,6 +87,7 @@ function EditableText(props: any) {
 
   if (hasUnresolvedVariables) {
     const pillSourceText = resolvedText || templateText;
+    console.log('pillSourceText >>', pillSourceText);
     const blockUrl = props.template?.url ?? props.props?.url;
     const content = (
       <div
