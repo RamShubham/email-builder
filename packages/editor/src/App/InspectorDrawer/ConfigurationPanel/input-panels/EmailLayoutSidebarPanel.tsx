@@ -67,6 +67,7 @@ export default function EmailLayoutSidebarFields({ data, setData }: EmailLayoutS
         defaultValue={data.fontFamily ?? 'MODERN_SANS'}
         onChange={(fontFamily) => updateData({ ...data, fontFamily })}
         dataTestId="styles-panel-font-family"
+        isRoot
       />
       <ColorInput
         label="Text color"
