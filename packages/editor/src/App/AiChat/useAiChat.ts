@@ -37,11 +37,10 @@ export function useAiChat() {
       content: 'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
     },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(`session-${Date.now()}`);
   const { workspaceId } = useIds();
 
-  const [, resetChatRequest] = useRequest(
+  const [{ loading: isResetLoading }, resetChatRequest] = useRequest(
     {
       method: 'post',
       url: '/api/chat/reset',
@@ -49,10 +48,9 @@ export function useAiChat() {
     { manual: true }
   );
 
-  const [, chatRequest] = useRequest(
+  const [{ loading: isLoading }, chatRequest] = useRequest(
     {
       method: 'post',
-      // Use full URL so we can target the AI base URL while still benefiting from the axios interceptors
       url: '/api/chat',
     },
     { manual: true }
@@ -74,7 +72,6 @@ export function useAiChat() {
       userMsg,
       { id: assistantId, role: 'assistant', content: '', isStreaming: true },
     ]);
-    setIsLoading(true);
 
     try {
       const { data } = await chatRequest({
@@ -112,8 +109,6 @@ export function useAiChat() {
             : m
         )
       );
-    } finally {
-      setIsLoading(false);
     }
   }, [chatRequest, isLoading, workspaceId]);
 
@@ -135,8 +130,10 @@ export function useAiChat() {
           'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
       },
     ]);
-    setIsLoading(false);
   }, [resetChatRequest, workspaceId]);
 
-  return { messages, isLoading, sendMessage, resetChat };
+
+  console.log('messages >>', messages);
+
+  return { messages, isLoading: isLoading || isResetLoading, sendMessage, resetChat };
 }
