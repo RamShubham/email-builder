@@ -17,24 +17,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = parseInt(process.env.PORT || '8008', 10);
 const startTime = Date.now();
 
 const distPath = path.resolve(__dirname, '../packages/editor/dist');
 app.use(express.static(distPath));
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const allowedOrigins = [
   process.env.TINYCOMMAND_ORIGIN,
   process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null,
   process.env.REPLIT_DEPLOYMENT_URL ? `https://${process.env.REPLIT_DEPLOYMENT_URL}` : null,
   'https://email-builder-shubhamram2992.replit.app',
-  'http://localhost:5000',
-  'http://localhost:5001',
-  'http://localhost:3001',
-  'http://localhost:8007',
-  'http://0.0.0.0:5000',
   'https://email-dev.oute.app',
   'https://email.oute.app',
+  ...(isDev ? ['http://localhost:5000'] : []),
 ].filter(Boolean) as string[];
 
 const apiCors = cors({
@@ -116,7 +115,7 @@ app.post('/api/chat', async (req, res) => {
     res.json(response);
   } catch (error: any) {
     console.error('Chat error:', error);
-    res.status(500).json({ error: 'Failed to process message', details: error.message });
+    res.status(500).json({ error: 'Failed to process message' });
   }
 });
 
@@ -172,7 +171,7 @@ app.post('/api/chat/stream', async (req, res) => {
   } catch (error: any) {
     console.error('Chat stream error:', error);
     if (res.headersSent) {
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Failed to process message' })}\n\n`);
       res.end();
     } else {
       res.status(500).json({ error: 'Failed to process message' });
@@ -257,11 +256,7 @@ app.post('/api/image/generate', async (req, res) => {
   } catch (error: any) {
     console.error('Image generation error:', error);
     const status = error?.status || 500;
-    const message =
-      error?.message && typeof error.message === 'string'
-        ? error.message
-        : 'Failed to generate image';
-    res.status(status).json({ error: message });
+    res.status(status).json({ error: 'Failed to generate image' });
   }
 });
 
