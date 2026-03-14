@@ -45,9 +45,9 @@ export default function TemplatePanel() {
     if (chatOpen && pendingMessage.current) {
       const msg = pendingMessage.current;
       pendingMessage.current = undefined;
-      sendMessage(msg);
+      sendMessage(msg, document as Record<string, any>);
     }
-  }, [chatOpen, sendMessage]);
+  }, [chatOpen, sendMessage, document]);
 
   const handleApplyTemplate = useCallback((template: Record<string, any>) => {
     resetDocument(template as any);
@@ -137,12 +137,16 @@ export default function TemplatePanel() {
           onApplyTemplate={handleApplyTemplate}
           messages={messages}
           isLoading={isLoading}
-          onSendMessage={sendMessage}
+          onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
           onResetChat={resetChat}
         />
       </div>
 
-      {selectedMainTab === 'editor' && !chatOpen && <AiPromptIsland onActivate={handleActivateChat} />}
+      {selectedMainTab === 'editor' && (
+        <div className={chatOpen ? 'invisible' : undefined}>
+          <AiPromptIsland onActivate={handleActivateChat} />
+        </div>
+      )}
     </div>
   );
 }

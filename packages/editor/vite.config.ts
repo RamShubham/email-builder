@@ -36,8 +36,19 @@ export default defineConfig({
                 allowedHosts: true,
                 proxy: {
                         '/api': {
-                                target: 'http://localhost:8008',
+                                target: 'http://localhost:3040',
                                 changeOrigin: true,
+                                configure: (proxy) => {
+                                        proxy.on('proxyReq', (proxyReq, req) => {
+                                                console.log(`[vite-proxy] --> ${req.method} ${req.url} → http://localhost:3040${req.url}`);
+                                        });
+                                        proxy.on('proxyRes', (proxyRes, req) => {
+                                                console.log(`[vite-proxy] <-- ${req.method} ${req.url} status=${proxyRes.statusCode}`);
+                                        });
+                                        proxy.on('error', (err, req) => {
+                                                console.error(`[vite-proxy] ERROR ${req.method} ${req.url}:`, err.message);
+                                        });
+                                },
                         },
                 },
         },

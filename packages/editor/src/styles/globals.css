@@ -144,32 +144,48 @@
 /* AI chat panel — bottom-anchored */
 .ai-chat-panel {
   box-shadow:
-    0 -2px 16px 0 rgba(0, 0, 0, 0.06),
+    0 -4px 24px 0 rgba(0, 0, 0, 0.08),
     0 -1px 4px 0 rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .chat-overlay-enter {
-    animation: none;
-  }
+/* Backdrop fades in without sliding */
+.ai-backdrop-enter {
+  animation: ai-backdrop-fade 0.2s ease forwards;
 }
 
-/* Chat overlay animations */
-.chat-overlay-enter {
-  animation: chat-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+@keyframes ai-backdrop-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-@keyframes chat-slide-up {
+/* Only the panel slides up — stable width/height, no layout shift */
+.ai-panel-enter {
+  animation: ai-panel-slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ai-panel-slide-up {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-backdrop-enter,
+  .ai-panel-enter {
+    animation: none;
+  }
+}
+
+/* Streaming cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 /* Typing indicator */

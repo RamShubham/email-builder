@@ -29,6 +29,7 @@ export class CreditService {
 
   static async getCredits({ access_token, workspace_id }: GetCreditsPayload) {
     try {
+      console.log("access_token", access_token)
       const creditsInstance = this.getCreditsInstance({ access_token });
 
       const query = {

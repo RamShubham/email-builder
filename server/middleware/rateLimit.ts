@@ -59,10 +59,11 @@ export function rateLimitMiddleware(req: Request, res: Response, next: NextFunct
 
   entry.timestamps = entry.timestamps.filter((t) => t > cutoff);
 
+  console.log(`[rateLimit] path="${req.path}" ip="${clientIP}" count=${entry.timestamps.length}/${limit}`);
   if (entry.timestamps.length >= limit) {
     const oldestInWindow = entry.timestamps[0];
     const retryAfter = Math.ceil((oldestInWindow + WINDOW_MS - now) / 1000);
-
+    console.log(`[rateLimit] 429 - limit exceeded for ${clientIP}`);
     res.setHeader('Retry-After', String(retryAfter));
     return res.status(429).json({
       error: 'Rate limit exceeded',
