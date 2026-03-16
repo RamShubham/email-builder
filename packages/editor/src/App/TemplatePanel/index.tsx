@@ -35,9 +35,6 @@ export default function TemplatePanel() {
   const { messages, isLoading, sendMessage, resetChat } = useAiChat();
 
   const handleActivateChat = useCallback((text?: string) => {
-    if (text) {
-      pendingMessage.current = text;
-    }
     setChatOpen(true);
   }, []);
 
@@ -78,8 +75,8 @@ export default function TemplatePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-2.5">
-      <div className="island flex flex-col flex-1 min-h-0 overflow-hidden relative">
+    <div className="flex flex-col h-full gap-2.5 relative">
+      <div className="island flex flex-col flex-1 min-h-0 overflow-hidden ">
         <div className="flex items-center px-2 py-1.5 flex-shrink-0">
           <div className="flex items-center px-1">
             <ToggleNavigatorPanelButton />
@@ -131,22 +128,27 @@ export default function TemplatePanel() {
           {renderMainPanel()}
         </div>
 
-        <AiChatOverlay
-          open={chatOpen}
-          onClose={() => setChatOpen(false)}
-          onApplyTemplate={handleApplyTemplate}
-          messages={messages}
-          isLoading={isLoading}
-          onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
-          onResetChat={resetChat}
-        />
+
       </div>
 
       {selectedMainTab === 'editor' && (
-        <div className={chatOpen ? 'invisible' : undefined}>
-          <AiPromptIsland onActivate={handleActivateChat} />
-        </div>
-      )}
-    </div>
+        <>
+          <div className={`island max-w-[560px] mx-auto w-full`}>
+            <AiChatOverlay
+              open={chatOpen}
+              onClose={() => setChatOpen(false)}
+              onApplyTemplate={handleApplyTemplate}
+              messages={messages}
+              isLoading={isLoading}
+              onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
+              onResetChat={resetChat}
+            />
+
+            <AiPromptIsland onActivate={handleActivateChat} />
+          </div>
+        </>
+      )
+      }
+    </div >
   );
 }
