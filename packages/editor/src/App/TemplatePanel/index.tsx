@@ -13,12 +13,12 @@ import {
   useSelectedScreenSize,
 } from '../../documents/editor/EditorContext';
 import getGlobalVariables from '../../utils/getGlobalVariables';
-import AiChatOverlay from '../AiChat/AiChatOverlay';
+import AiChatIsland, { ISLAND_HEIGHT } from '../AiChat/AiChatIsland';
 import { useAiChat } from '../AiChat/useAiChat';
 import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
 import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 
-import CustomEditorBlock, { AiPromptIsland } from './CustomEditorBlock';
+import CustomEditorBlock from './CustomEditorBlock';
 import DownloadJson from './DownloadJson';
 import HtmlPanel from './HtmlPanel';
 import ImportJson from './ImportJson';
@@ -35,9 +35,6 @@ export default function TemplatePanel() {
   const { messages, isLoading, sendMessage, resetChat } = useAiChat();
 
   const handleActivateChat = useCallback((text?: string) => {
-    if (text) {
-      pendingMessage.current = text;
-    }
     setChatOpen(true);
   }, []);
 
@@ -45,9 +42,9 @@ export default function TemplatePanel() {
     if (chatOpen && pendingMessage.current) {
       const msg = pendingMessage.current;
       pendingMessage.current = undefined;
-      sendMessage(msg);
+      sendMessage(msg, document as Record<string, any>);
     }
-  }, [chatOpen, sendMessage]);
+  }, [chatOpen, sendMessage, document]);
 
   const handleApplyTemplate = useCallback((template: Record<string, any>) => {
     resetDocument(template as any);
@@ -78,8 +75,8 @@ export default function TemplatePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-2.5">
-      <div className="island flex flex-col flex-1 min-h-0 overflow-hidden relative">
+    <div className="flex flex-col h-full gap-2.5 relative">
+      <div className="island flex flex-col flex-1 min-h-0 overflow-hidden ">
         <div className="flex items-center px-2 py-1.5 flex-shrink-0">
           <div className="flex items-center px-1">
             <ToggleNavigatorPanelButton />
@@ -131,18 +128,23 @@ export default function TemplatePanel() {
           {renderMainPanel()}
         </div>
 
-        <AiChatOverlay
-          open={chatOpen}
-          onClose={() => setChatOpen(false)}
-          onApplyTemplate={handleApplyTemplate}
-          messages={messages}
-          isLoading={isLoading}
-          onSendMessage={sendMessage}
-          onResetChat={resetChat}
-        />
+
       </div>
 
-      {selectedMainTab === 'editor' && !chatOpen && <AiPromptIsland onActivate={handleActivateChat} />}
-    </div>
+      {selectedMainTab === 'editor' && (
+        <div style={{ height: `${ISLAND_HEIGHT}px`, flexShrink: 0 }}>
+          <AiChatIsland
+            open={chatOpen}
+            onOpen={handleActivateChat}
+            onClose={() => setChatOpen(false)}
+            onApplyTemplate={handleApplyTemplate}
+            messages={messages}
+            isLoading={isLoading}
+            onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
+            onResetChat={resetChat}
+          />
+        </div>
+      )}
+    </div >
   );
 }

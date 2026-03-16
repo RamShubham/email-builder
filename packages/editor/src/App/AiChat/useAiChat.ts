@@ -37,26 +37,16 @@ export function useAiChat() {
       content: 'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
     },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(`session-${Date.now()}`);
   const { workspaceId } = useIds();
 
   const [{ loading: isResetLoading }, resetChatRequest] = useRequest(
-    {
-      method: 'post',
-      url: '/api/chat/reset',
-    },
+    { method: 'post', url: '/api/chat/reset' },
     { manual: true }
   );
 
-  const [{ loading: isLoading }, chatRequest] = useRequest(
-    {
-      method: 'post',
-      url: '/api/chat',
-    },
-    { manual: true }
-  );
-
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, currentDocument?: Record<string, any>) => {
     if (!content.trim() || isLoading) return;
 
     const userMsg: ChatMessage = {
@@ -64,9 +54,9 @@ export function useAiChat() {
       role: 'user',
       content: content.trim(),
     };
-
     const assistantId = `assistant-${Date.now()}`;
 
+    setIsLoading(true);
     setMessages((prev) => [
       ...prev,
       userMsg,
@@ -74,33 +64,66 @@ export function useAiChat() {
     ]);
 
     try {
-      const { data } = await chatRequest({
-        data: {
-          message: content.trim(),
-          sessionId: sessionIdRef.current,
-          workspaceId,
+      const token = (window as any).accessToken || '';
+      const backendUrl = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+      const response = await fetch(`${backendUrl}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'token': token,
         },
+        body: JSON.stringify({ message: content.trim(), sessionId: sessionIdRef.current, workspaceId, currentDocument }),
       });
 
-      const responseType = data?.type as 'message' | 'template' | undefined;
-      const rawContent: string = data?.content ?? '';
-      const templateData: Record<string, any> | undefined =
-        responseType === 'template' && data?.template ? data.template : undefined;
 
-      const finalContent = stripTemplateContent(rawContent);
+      if (!response.ok || !response.body) {
+        const errorText = await response.text();
+        console.error('[useAiChat] request failed, body:', errorText);
+        throw new Error(`Stream request failed: ${response.status} ${errorText}`);
+      }
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId
-            ? {
-              ...m,
-              content: finalContent || 'Sorry, something went wrong. Please try again.',
-              template: templateData,
-              isStreaming: false,
-            }
-            : m
-        )
-      );
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = JSON.parse(line.slice(6));
+
+          if (data.type === 'chunk') {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? { ...m, content: stripTemplateContent(m.content + data.content) }
+                  : m
+              )
+            );
+          } else if (data.type === 'done') {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId
+                  ? {
+                    ...m,
+                    content: data.content || 'Sorry, something went wrong. Please try again.',
+                    template: data.template ?? undefined,
+                    isStreaming: false,
+                  }
+                  : m
+              )
+            );
+          } else if (data.type === 'error') {
+            throw new Error(data.error);
+          }
+        }
+      }
     } catch {
       setMessages((prev) =>
         prev.map((m) =>
@@ -109,8 +132,10 @@ export function useAiChat() {
             : m
         )
       );
+    } finally {
+      setIsLoading(false);
     }
-  }, [chatRequest, isLoading, workspaceId]);
+  }, [isLoading, workspaceId]);
 
   const resetChat = useCallback(async () => {
     try {
@@ -126,14 +151,10 @@ export function useAiChat() {
       {
         id: 'greeting',
         role: 'assistant',
-        content:
-          'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
+        content: 'Hey! I\'m your email builder assistant. Tell me about the email you\'d like to create — a welcome message, a newsletter, a notification, or something else entirely. I\'ll help you design it step by step.',
       },
     ]);
   }, [resetChatRequest, workspaceId]);
 
-
-  console.log('messages >>', messages);
-
-  return { messages, isLoading: isLoading || isResetLoading, sendMessage, resetChat };
+  return { messages, isLoading: isLoading || isResetLoading, sendMessage, resetChat } as const;
 }

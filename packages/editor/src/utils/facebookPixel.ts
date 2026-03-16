@@ -2,7 +2,7 @@
 import ReactPixel from 'react-facebook-pixel';
 
 export const initFbPixel = () => {
-	if (process.env.REACT_APP_NODE_ENV !== 'PROD') {
+	if (process.env.NODE_ENV !== 'production') {
 		return;
 	}
 

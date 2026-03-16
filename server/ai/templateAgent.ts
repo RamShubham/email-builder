@@ -90,12 +90,17 @@ function extractTemplate(text: string): { content: string; template: Record<stri
   }
 }
 
-export async function chat(sessionId: string, userMessage: string): Promise<AgentResponse> {
+export async function chat(sessionId: string, userMessage: string, currentDocument?: Record<string, any>): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
+
+  const contextNote = currentDocument
+    ? `[CURRENT CANVAS STATE - This is the live template the user currently has in the editor. Use this as your base when making any modifications, not your previous output.]\n${JSON.stringify(currentDocument)}\n[END CURRENT CANVAS STATE]`
+    : null;
 
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
+    ...(contextNote ? [{ role: 'user' as const, content: contextNote }, { role: 'assistant' as const, content: 'Understood. I can see the current canvas state and will use it as the base for any modifications.' }] : []),
     { role: 'user', content: userMessage },
   ];
 
@@ -124,13 +129,19 @@ export async function chat(sessionId: string, userMessage: string): Promise<Agen
 export async function chatStream(
   sessionId: string,
   userMessage: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  currentDocument?: Record<string, any>
 ): Promise<AgentResponse> {
   const history = getOrCreateSession(sessionId);
+
+  const contextNote = currentDocument
+    ? `[CURRENT CANVAS STATE - This is the live template the user currently has in the editor. Use this as your base when making any modifications, not your previous output.]\n${JSON.stringify(currentDocument)}\n[END CURRENT CANVAS STATE]`
+    : null;
 
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history,
+    ...(contextNote ? [{ role: 'user' as const, content: contextNote }, { role: 'assistant' as const, content: 'Understood. I can see the current canvas state and will use it as the base for any modifications.' }] : []),
     { role: 'user', content: userMessage },
   ];
 

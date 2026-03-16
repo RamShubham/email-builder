@@ -1,3 +1,4 @@
+import posthog from 'posthog-js';
 import './styles/globals.css';
 
 import { createRoot } from 'react-dom/client';
@@ -8,6 +9,19 @@ import TinyCommandAuthController from './auth/tiny-auth-wrapper';
 import { TooltipProvider } from './components/ui/tooltip';
 import { initFbPixel } from './utils/facebookPixel';
 import { initGoogleAds } from './utils/googleAds';
+
+if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_POSTHOG_KEY) {
+	posthog.init(process.env.REACT_APP_POSTHOG_KEY, {
+		api_host: process.env.REACT_APP_POSTHOG_HOST,
+		autocapture: true,
+		capture_pageview: true,
+		session_recording: {
+			maskAllInputs: true,
+		},
+	});
+}
+
+console.log('NODE_ENV', process.env.NODE_ENV);
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Root element not found');

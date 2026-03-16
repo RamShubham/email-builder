@@ -1,3 +1,10 @@
+import * as Sentry from "@sentry/node";
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || "development",
+  tracesSampleRate: 1.0,
+});
+
 import 'dotenv/config';
 
 import cors from 'cors';
@@ -33,11 +40,12 @@ const allowedOrigins = [
   'https://email-builder-shubhamram2992.replit.app',
   'https://email-dev.oute.app',
   'https://email.oute.app',
-  ...(isDev ? ['http://localhost:5000'] : []),
+  ...(isDev ? ['http://localhost:5000', 'http://localhost:8007'] : []),
 ].filter(Boolean) as string[];
 
 const apiCors = cors({
   origin: (origin, callback) => {
+    console.log(`[CORS] origin="${origin}" allowed=${!origin || allowedOrigins.includes(origin)} allowedList=${JSON.stringify(allowedOrigins)}`);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -80,7 +88,7 @@ const openai = new OpenAI({
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, sessionId = 'default' } = req.body;
+    const { message, sessionId = 'default', currentDocument } = req.body;
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Message is required' });
@@ -94,87 +102,88 @@ app.post('/api/chat', async (req, res) => {
     const workspaceId = requireWorkspaceId(req, res);
     if (!workspaceId) return;
 
-    const credits = await CreditService.getCredits({
-      access_token: token,
-      workspace_id: workspaceId,
-    });
-
-    const availableCredits = credits?.data?.availableCredits || 0;
-
-    if (availableCredits <= 0) {
-      return res.status(400).json({ error: 'No credits available' });
+    try {
+      const credits = await CreditService.getCredits({ access_token: token, workspace_id: workspaceId });
+      const availableCredits = credits?.data?.availableCredits || 0;
+      if (availableCredits <= 0) {
+        return res.status(400).json({ error: 'No credits available' });
+      }
+    } catch (creditError: any) {
+      console.warn('Credit check failed, continuing:', creditError?.message);
     }
 
-    const response = await chat(sessionId, message);
+    const response = await chat(sessionId, message, currentDocument);
 
-    await CreditService.deductCredits({
-      access_token: token,
-      workspace_id: workspaceId,
-    });
+    CreditService.deductCredits({ access_token: token, workspace_id: workspaceId }).catch((e: any) =>
+      console.warn('Credit deduction failed:', e?.message)
+    );
 
     res.json(response);
   } catch (error: any) {
     console.error('Chat error:', error);
-    res.status(500).json({ error: 'Failed to process message' });
+    res.status(500).json({ error: error?.message || 'Failed to process message' });
   }
 });
 
 app.post('/api/chat/stream', async (req, res) => {
+  console.log('[stream] >>> request received');
   try {
-    const { message, sessionId = 'default' } = req.body;
+    const { message, sessionId = 'default', currentDocument } = req.body;
+    console.log(`[stream] message="${message?.slice(0, 60)}" sessionId="${sessionId}" workspaceId="${req.body?.workspaceId}" hasDoc=${!!currentDocument}`);
 
     if (!message || typeof message !== 'string') {
+      console.log('[stream] 400 - missing message');
       return res.status(400).json({ error: 'Message is required' });
     }
 
     const token = getToken(req);
+    console.log(`[stream] token present=${!!token}`);
     if (!token) {
       return res.status(401).json({ error: 'Missing token header' });
     }
 
     const workspaceId = requireWorkspaceId(req, res);
+    console.log(`[stream] workspaceId="${workspaceId}"`);
     if (!workspaceId) return;
 
-    const credits = await CreditService.getCredits({
-      access_token: token,
-      workspace_id: workspaceId,
-    });
-
-    const availableCredits = credits?.data?.availableCredits || 0;
-
-    if (availableCredits <= 0) {
-      return res.status(400).json({ error: 'No credits available' });
+    try {
+      console.log('[stream] checking credits...');
+      const credits = await CreditService.getCredits({ access_token: token, workspace_id: workspaceId });
+      const availableCredits = credits?.data?.availableCredits || 0;
+      console.log(`[stream] availableCredits=${availableCredits}`);
+      if (availableCredits <= 0) {
+        return res.status(400).json({ error: 'No credits available' });
+      }
+    } catch (creditError: any) {
+      console.warn('[stream] credit check failed (continuing):', creditError?.message);
     }
 
+    console.log('[stream] flushing SSE headers...');
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
 
+    console.log('[stream] calling chatStream...');
     const result = await chatStream(sessionId, message, (chunk) => {
       res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
-    });
+    }, currentDocument);
+    console.log(`[stream] chatStream done, type="${result.type}" templatePresent=${!!result.template}`);
 
-    await CreditService.deductCredits({
-      access_token: token,
-      workspace_id: workspaceId,
-    });
-
-    res.write(
-      `data: ${JSON.stringify({
-        type: 'done',
-        responseType: result.type,
-        content: result.content,
-        template: result.template,
-      })}\n\n`
+    CreditService.deductCredits({ access_token: token, workspace_id: workspaceId }).catch((e: any) =>
+      console.warn('[stream] credit deduction failed:', e?.message)
     );
+
+    res.write(`data: ${JSON.stringify({ type: 'done', responseType: result.type, content: result.content, template: result.template })}\n\n`);
     res.end();
+    console.log('[stream] done, response ended');
   } catch (error: any) {
-    console.error('Chat stream error:', error);
+    console.error('[stream] CAUGHT ERROR:', error?.message, error?.stack);
     if (res.headersSent) {
-      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Failed to process message' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: error?.message || 'Failed to process message' })}\n\n`);
       res.end();
     } else {
-      res.status(500).json({ error: 'Failed to process message' });
+      res.status(500).json({ error: error?.message || 'Failed to process message' });
     }
   }
 });
@@ -299,6 +308,8 @@ app.all('/api/{*splat}', (_req, res) => {
 app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
+
+app.use(Sentry.expressErrorHandler());
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error:', err);

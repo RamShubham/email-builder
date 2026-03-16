@@ -1,10 +1,12 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { X, RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import ChatMessageComponent from './ChatMessage';
 import ChatInput from './ChatInput';
 import type { ChatMessage } from './useAiChat';
+
+const EXIT_DURATION = 220;
 
 interface AiChatOverlayProps {
   open: boolean;
@@ -26,12 +28,37 @@ export default function AiChatOverlay({
   onResetChat,
 }: AiChatOverlayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
+
+  const [isRendered, setIsRendered] = useState(open);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (open) {
+      setIsClosing(false);
+      setIsRendered(true);
+    } else if (isRendered) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, EXIT_DURATION);
+      return () => clearTimeout(timer);
     }
+  }, [open]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !isNearBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    isNearBottomRef.current = distanceFromBottom < 80;
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -42,24 +69,43 @@ export default function AiChatOverlay({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (open) {
+      isNearBottomRef.current = true;
+      setTimeout(() => {
+        const el = scrollRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      }, 50);
+    }
+  }, [open]);
+
   const handleApply = (template: Record<string, any>) => {
     onApplyTemplate(template);
     onClose();
   };
 
-  if (!open) return null;
+  if (!isRendered) return null;
+
+  const backdropClass = isClosing ? 'ai-backdrop-exit' : 'ai-backdrop-enter';
+  const panelClass = isClosing ? 'ai-panel-exit' : 'ai-panel-enter';
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-end chat-overlay-enter">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-end">
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-white/40 backdrop-blur-[6px] rounded-[1rem]"
-        onClick={onClose}
+        className={`absolute inset-0 bg-white/50 backdrop-blur-[6px] rounded-[1rem] ${backdropClass}`}
+        onClick={isClosing ? undefined : onClose}
       />
 
-      <div className="relative w-full max-w-[520px] h-[55%] min-h-[320px] flex flex-col bg-white rounded-t-2xl overflow-hidden ai-chat-panel mb-0">
+      {/* Panel */}
+      <div
+        className={`relative w-full max-w-[520px] flex flex-col bg-white rounded-t-2xl overflow-hidden ai-chat-panel ${panelClass}`}
+        style={{ height: 'min(600px, calc(100% - 48px))' }}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm">
               <Sparkles className="w-3 h-3 text-white" />
             </div>
             <span className="text-[13px] font-semibold text-gray-800">AI Email Builder</span>
@@ -96,15 +142,24 @@ export default function AiChatOverlay({
           </div>
         </div>
 
-        <div className="w-full h-px bg-gray-100" />
+        <div className="w-full h-px bg-gray-100 flex-shrink-0" />
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
-          {messages.map((msg) => (
-            <ChatMessageComponent key={msg.id} message={msg} onApplyTemplate={handleApply} />
-          ))}
+        {/* Messages */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 py-3 min-h-0"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          <div className="flex flex-col gap-3">
+            {messages.map((msg) => (
+              <ChatMessageComponent key={msg.id} message={msg} onApplyTemplate={handleApply} />
+            ))}
+          </div>
         </div>
 
-        <div className="flex-shrink-0 px-4 pb-3 pt-1.5">
+        {/* Input */}
+        <div className="flex-shrink-0">
           <ChatInput onSend={onSendMessage} disabled={isLoading} />
         </div>
       </div>

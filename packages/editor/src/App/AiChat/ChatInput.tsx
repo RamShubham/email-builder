@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Square } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -10,11 +10,11 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSend, disabled, initialValue = '', autoFocus = true }: ChatInputProps) {
   const [value, setValue] = useState(initialValue);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
+    if (autoFocus && textareaRef.current) {
+      textareaRef.current.focus();
     }
   }, [autoFocus]);
 
@@ -22,10 +22,26 @@ export default function ChatInput({ onSend, disabled, initialValue = '', autoFoc
     if (initialValue) setValue(initialValue);
   }, [initialValue]);
 
+  const adjustHeight = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    adjustHeight();
+  };
+
   const handleSubmit = () => {
     if (!value.trim() || disabled) return;
     onSend(value.trim());
     setValue('');
+    // Reset height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -35,29 +51,36 @@ export default function ChatInput({ onSend, disabled, initialValue = '', autoFoc
     }
   };
 
+  const canSend = value.trim().length > 0;
+
   return (
-    <div className="relative">
+    <div className="mx-3 mb-3 flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-50/60 px-3 py-2 focus-within:border-violet-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-violet-100 transition-all duration-200 w-auto">
       <textarea
-        ref={inputRef}
+        ref={textareaRef}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder="Describe your email..."
+        placeholder="Describe your email…"
         rows={1}
-        className="w-full resize-none rounded-2xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300 transition-all"
-        style={{ minHeight: '44px', maxHeight: '120px' }}
-        onInput={(e) => {
-          const target = e.target as HTMLTextAreaElement;
-          target.style.height = '44px';
-          target.style.height = Math.min(target.scrollHeight, 120) + 'px';
-        }}
+        disabled={disabled}
+        className="flex-1 resize-none bg-transparent text-[13.5px] text-gray-800 placeholder:text-gray-400 focus:outline-none leading-relaxed disabled:opacity-60"
+        style={{ minHeight: '24px', maxHeight: '120px' }}
       />
       <button
         onClick={handleSubmit}
-        disabled={!value.trim() || disabled}
-        className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-gray-900 hover:bg-gray-800 text-white"
+        disabled={!canSend && !disabled}
+        className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-150 ${disabled
+          ? 'bg-violet-100 text-violet-400 cursor-default'
+          : canSend
+            ? 'bg-gray-900 text-white hover:bg-gray-700 active:scale-90'
+            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
       >
-        <ArrowUp className="w-4 h-4" />
+        {disabled ? (
+          <Square className="w-3 h-3 fill-current" />
+        ) : (
+          <ArrowUp className="w-3.5 h-3.5" />
+        )}
       </button>
     </div>
   );
