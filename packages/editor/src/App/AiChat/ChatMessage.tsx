@@ -159,11 +159,10 @@ export default function ChatMessage({ message, onApplyTemplate }: ChatMessagePro
 
       <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`} style={{ maxWidth: 'calc(100% - 36px)' }}>
         <div
-          className={`px-3.5 py-2.5 ${
-            isUser
-              ? 'bg-gray-900 text-white rounded-2xl rounded-br-sm text-[13.5px] leading-relaxed'
-              : 'text-gray-800 rounded-2xl rounded-bl-sm'
-          }`}
+          className={`px-3.5 py-2.5 ${isUser
+            ? 'bg-gray-900 text-white rounded-2xl rounded-br-sm text-[13.5px] leading-relaxed'
+            : 'bg-gray-100 text-gray-800 rounded-2xl rounded-bl-sm'
+            }`}
         >
           {isUser ? (
             <span className="text-[13.5px] leading-relaxed whitespace-pre-wrap">{message.content}</span>
