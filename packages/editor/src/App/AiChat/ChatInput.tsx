@@ -54,7 +54,7 @@ export default function ChatInput({ onSend, disabled, initialValue = '', autoFoc
   const canSend = value.trim().length > 0;
 
   return (
-    <div className="mx-3 flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-50/60 px-3 py-2 focus-within:border-violet-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-violet-100 transition-all duration-200">
+    <div className="mx-3 mb-3 flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-50/60 px-3 py-2 focus-within:border-violet-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-violet-100 transition-all duration-200 w-auto">
       <textarea
         ref={textareaRef}
         value={value}
@@ -69,13 +69,12 @@ export default function ChatInput({ onSend, disabled, initialValue = '', autoFoc
       <button
         onClick={handleSubmit}
         disabled={!canSend && !disabled}
-        className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-150 mb-0.5 ${
-          disabled
-            ? 'bg-violet-100 text-violet-400 cursor-default'
-            : canSend
+        className={`flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-150 ${disabled
+          ? 'bg-violet-100 text-violet-400 cursor-default'
+          : canSend
             ? 'bg-gray-900 text-white hover:bg-gray-700 active:scale-90'
             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-        }`}
+          }`}
       >
         {disabled ? (
           <Square className="w-3 h-3 fill-current" />

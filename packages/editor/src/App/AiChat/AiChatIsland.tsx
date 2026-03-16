@@ -6,7 +6,7 @@ import ChatMessageComponent from './ChatMessage';
 import ChatInput from './ChatInput';
 import type { ChatMessage } from './useAiChat';
 
-export const ISLAND_HEIGHT = 52;
+export const ISLAND_HEIGHT = 60;
 
 interface AiChatIslandProps {
   open: boolean;
@@ -174,16 +174,21 @@ export default function AiChatIsland({
         </div>
 
         {/* ── Bottom section: morphs between island pill and chat input ── */}
-        <div style={{ flexShrink: 0, height: ISLAND_HEIGHT, position: 'relative' }}>
+        <div
+          style={{
+            flexShrink: 0,
+            minHeight: ISLAND_HEIGHT,
+            position: 'relative',
+          }}
+        >
           {/* Chat input — shown when open */}
           <div
             style={{
-              position: 'absolute', inset: 0,
+              flex: 1,
               opacity: open ? 1 : 0,
               pointerEvents: open ? 'auto' : 'none',
               transition: open ? 'opacity 0.18s ease 0.12s' : 'opacity 0.1s ease 0s',
-              display: 'flex',
-              alignItems: 'center',
+              display: open ? 'block' : 'none',
             }}
           >
             <ChatInput onSend={onSendMessage} disabled={isLoading} />
@@ -192,8 +197,12 @@ export default function AiChatIsland({
           {/* Island pill — shown when closed */}
           <div
             style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px',
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '0 12px',
               cursor: 'text',
               opacity: open ? 0 : 1,
               pointerEvents: open ? 'none' : 'auto',
@@ -203,9 +212,14 @@ export default function AiChatIsland({
           >
             <div
               style={{
-                flexShrink: 0, width: 28, height: 28, borderRadius: 10,
+                flexShrink: 0,
+                width: 28,
+                height: 28,
+                borderRadius: 10,
                 background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Sparkles style={{ width: 12, height: 12, color: 'white' }} />
@@ -214,8 +228,13 @@ export default function AiChatIsland({
               type="text"
               placeholder="Ask AI to build your email…"
               style={{
-                flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                fontSize: 13.5, color: '#1f2937', lineHeight: 1.5,
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: 13.5,
+                color: '#1f2937',
+                lineHeight: 1.5,
               }}
               onClick={(e) => e.stopPropagation()}
               onFocus={() => onOpen()}
