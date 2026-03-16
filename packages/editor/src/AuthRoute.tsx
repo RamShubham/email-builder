@@ -39,14 +39,14 @@ function AuthRoute({ component: Component }) {
 
 	useEffect(() => {
 		if (!searchParams.get(QUERY_KEY)) {
-			// if (isReplit) {
+			if (isReplit) {
 
-			searchParams.set(QUERY_KEY, HARD_CODED_QUERY_PARAM);
-			navigate(`${window.location.pathname}?${searchParams.toString()}`);
-			window.accessToken = HARD_CODED_ACCESS_TOKEN;
-			// } else {
-			// 	navigate('/redirect-to-home');
-			// }
+				searchParams.set(QUERY_KEY, HARD_CODED_QUERY_PARAM);
+				navigate(`${window.location.pathname}?${searchParams.toString()}`);
+				window.accessToken = HARD_CODED_ACCESS_TOKEN;
+			} else {
+				navigate('/redirect-to-home');
+			}
 		}
 	}, [navigate, searchParams]);
 
