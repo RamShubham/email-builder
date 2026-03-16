@@ -175,9 +175,37 @@
   }
 }
 
+/* Exit — backdrop fades out */
+.ai-backdrop-exit {
+  animation: ai-backdrop-fade-out 0.2s ease forwards;
+}
+
+@keyframes ai-backdrop-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Exit — panel slides back down */
+.ai-panel-exit {
+  animation: ai-panel-slide-down 0.22s ease-in forwards;
+}
+
+@keyframes ai-panel-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-backdrop-enter,
-  .ai-panel-enter {
+  .ai-panel-enter,
+  .ai-backdrop-exit,
+  .ai-panel-exit {
     animation: none;
   }
 }

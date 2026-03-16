@@ -9,7 +9,6 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ onSend, disabled, initialValue = '', autoFocus = true }: ChatInputProps) {
-  console.log('[ChatInput v2] render — disabled:', disabled);
   const [value, setValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 

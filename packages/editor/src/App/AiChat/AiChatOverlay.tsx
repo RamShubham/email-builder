@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { X, RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import ChatMessageComponent from './ChatMessage';
 import ChatInput from './ChatInput';
 import type { ChatMessage } from './useAiChat';
+
+const EXIT_DURATION = 220;
 
 interface AiChatOverlayProps {
   open: boolean;
@@ -25,9 +27,25 @@ export default function AiChatOverlay({
   onSendMessage,
   onResetChat,
 }: AiChatOverlayProps) {
-  console.log('[AiChatOverlay v2] render — open:', open, 'msgs:', messages.length);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
+
+  const [isRendered, setIsRendered] = useState(open);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsClosing(false);
+      setIsRendered(true);
+    } else if (isRendered) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, EXIT_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -51,7 +69,6 @@ export default function AiChatOverlay({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose]);
 
-  // Scroll to bottom when first opened
   useEffect(() => {
     if (open) {
       isNearBottomRef.current = true;
@@ -67,19 +84,22 @@ export default function AiChatOverlay({
     onClose();
   };
 
-  if (!open) return null;
+  if (!isRendered) return null;
+
+  const backdropClass = isClosing ? 'ai-backdrop-exit' : 'ai-backdrop-enter';
+  const panelClass = isClosing ? 'ai-panel-exit' : 'ai-panel-enter';
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-end">
-      {/* Backdrop — fades in separately, no slide */}
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-white/50 backdrop-blur-[6px] rounded-[1rem] ai-backdrop-enter"
-        onClick={onClose}
+        className={`absolute inset-0 bg-white/50 backdrop-blur-[6px] rounded-[1rem] ${backdropClass}`}
+        onClick={isClosing ? undefined : onClose}
       />
 
-      {/* Panel — slides up independently */}
+      {/* Panel */}
       <div
-        className="relative w-full max-w-[520px] flex flex-col bg-white rounded-t-2xl overflow-hidden ai-chat-panel ai-panel-enter"
+        className={`relative w-full max-w-[520px] flex flex-col bg-white rounded-t-2xl overflow-hidden ai-chat-panel ${panelClass}`}
         style={{ height: 'min(600px, calc(100% - 48px))' }}
       >
         {/* Header */}
@@ -138,11 +158,8 @@ export default function AiChatOverlay({
           </div>
         </div>
 
-        {/* Input area — wrapper has zero height overhead so total = ChatInput height = island height */}
-        <div
-          className="flex-shrink-0"
-          ref={(el) => { if (el) console.log('[ChatPanel input section] height:', el.getBoundingClientRect().height, 'px  top:', el.getBoundingClientRect().top); }}
-        >
+        {/* Input */}
+        <div className="flex-shrink-0">
           <ChatInput onSend={onSendMessage} disabled={isLoading} />
         </div>
       </div>

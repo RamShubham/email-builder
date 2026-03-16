@@ -144,7 +144,7 @@ export default function TemplatePanel() {
               onResetChat={resetChat}
             />
 
-            <AiPromptIsland onActivate={handleActivateChat} />
+            <AiPromptIsland onActivate={handleActivateChat} chatOpen={chatOpen} />
           </div>
         </>
       )

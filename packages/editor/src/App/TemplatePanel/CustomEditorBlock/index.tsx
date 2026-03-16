@@ -1,7 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-
+import React from 'react';
 import { Sparkles } from 'lucide-react';
-
 import EditorBlock from '../../../documents/editor/EditorBlock';
 
 function CustomEditorBlock({ mainBoxStyle }: { mainBoxStyle?: React.CSSProperties }) {
@@ -20,23 +18,16 @@ export default CustomEditorBlock;
 
 interface AiPromptIslandProps {
   onActivate: (text?: string) => void;
+  chatOpen?: boolean;
 }
 
-export function AiPromptIsland({ onActivate }: AiPromptIslandProps) {
-  // console.log('[AiPromptIsland v2] render');
-  // const rootRef = useRef<HTMLDivElement>(null);
-  // useEffect(() => {
-  //   if (rootRef.current) {
-  //     const r = rootRef.current.getBoundingClientRect();
-  //     console.log('[AiPromptIsland] height:', r.height, 'px  top:', r.top);
-  //   }
-  // });
-
-
+export function AiPromptIsland({ onActivate, chatOpen }: AiPromptIslandProps) {
   return (
     <div
-      // ref={rootRef}
-      className="flex-shrink-0 flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50/60 px-3 py-2 cursor-text hover:border-violet-300 hover:bg-white transition-all duration-200"
+      className={`flex-shrink-0 flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50/60 px-3 py-2 cursor-text hover:border-violet-300 hover:bg-white transition-all duration-200 ${
+        chatOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}
+      style={{ transition: 'opacity 150ms ease, border-color 200ms, background-color 200ms' }}
       data-testid="prompt-island"
       onClick={() => onActivate()}
     >
