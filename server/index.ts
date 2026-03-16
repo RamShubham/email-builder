@@ -1,3 +1,10 @@
+import * as Sentry from "@sentry/node";
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || "development",
+  tracesSampleRate: 1.0,
+});
+
 import 'dotenv/config';
 
 import cors from 'cors';
@@ -301,6 +308,8 @@ app.all('/api/{*splat}', (_req, res) => {
 app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
+
+app.use(Sentry.expressErrorHandler());
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error:', err);

@@ -53,6 +53,7 @@
 		"oute-services-search-sdk": "^0.0.87",
 		"oute-services-user-photos-sdk": "^0.0.85",
 		"oute-services-utility-sdk": "^0.0.135",
+		"posthog-js": "^1.360.2",
 		"prettier": "^3.2.5",
 		"react": "^18.2.0",
 		"react-colorful": "^5.6.1",
