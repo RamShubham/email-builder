@@ -75,7 +75,6 @@ export function useAiChat() {
         body: JSON.stringify({ message: content.trim(), sessionId: sessionIdRef.current, workspaceId, currentDocument }),
       });
 
-      console.log('[useAiChat] response status:', response.status, 'ok:', response.ok, 'headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok || !response.body) {
         const errorText = await response.text();

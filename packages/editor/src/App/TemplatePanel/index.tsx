@@ -13,12 +13,12 @@ import {
   useSelectedScreenSize,
 } from '../../documents/editor/EditorContext';
 import getGlobalVariables from '../../utils/getGlobalVariables';
-import AiChatOverlay from '../AiChat/AiChatOverlay';
+import AiChatIsland, { ISLAND_HEIGHT } from '../AiChat/AiChatIsland';
 import { useAiChat } from '../AiChat/useAiChat';
 import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
 import ToggleNavigatorPanelButton from '../NavigatorDrawer/ToggleNavigatorPanelButton';
 
-import CustomEditorBlock, { AiPromptIsland } from './CustomEditorBlock';
+import CustomEditorBlock from './CustomEditorBlock';
 import DownloadJson from './DownloadJson';
 import HtmlPanel from './HtmlPanel';
 import ImportJson from './ImportJson';
@@ -132,23 +132,19 @@ export default function TemplatePanel() {
       </div>
 
       {selectedMainTab === 'editor' && (
-        <>
-          <div className={`island max-w-[560px] mx-auto w-full`}>
-            <AiChatOverlay
-              open={chatOpen}
-              onClose={() => setChatOpen(false)}
-              onApplyTemplate={handleApplyTemplate}
-              messages={messages}
-              isLoading={isLoading}
-              onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
-              onResetChat={resetChat}
-            />
-
-            <AiPromptIsland onActivate={handleActivateChat} chatOpen={chatOpen} />
-          </div>
-        </>
-      )
-      }
+        <div style={{ height: `${ISLAND_HEIGHT}px`, flexShrink: 0 }}>
+          <AiChatIsland
+            open={chatOpen}
+            onOpen={handleActivateChat}
+            onClose={() => setChatOpen(false)}
+            onApplyTemplate={handleApplyTemplate}
+            messages={messages}
+            isLoading={isLoading}
+            onSendMessage={(msg) => sendMessage(msg, document as Record<string, any>)}
+            onResetChat={resetChat}
+          />
+        </div>
+      )}
     </div >
   );
 }

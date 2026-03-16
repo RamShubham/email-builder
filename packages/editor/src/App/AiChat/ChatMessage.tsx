@@ -145,7 +145,6 @@ function MarkdownContent({ content }: { content: string }) {
 }
 
 export default function ChatMessage({ message, onApplyTemplate }: ChatMessageProps) {
-  console.log('[ChatMessage v2] id:', message.id, 'role:', message.role, 'streaming:', message.isStreaming);
   const isUser = message.role === 'user';
   const isStreaming = message.isStreaming;
   const hasContent = Boolean(message.content);
