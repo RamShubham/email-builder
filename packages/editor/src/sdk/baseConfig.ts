@@ -8,7 +8,7 @@ const getMailSDKConfig = () => {
   return {
     url: MAIL_BASE_URL,
     token: getToken(),
-    enable_encoding: ['PROD'].includes(process.env.REACT_APP_NODE_ENV || ''),
+    enable_encoding: ['production'].includes(process.env.NODE_ENV || ''),
   };
 };
 

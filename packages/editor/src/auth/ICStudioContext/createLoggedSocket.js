@@ -1,7 +1,4 @@
-
-
-
-const SOCKET_LOGGING_ENABLED = process.env.REACT_APP_NODE_ENV === 'DEV';
+const SOCKET_LOGGING_ENABLED = process.env.NODE_ENV === 'development';
 
 const safeStringify = (data) => {
   try {

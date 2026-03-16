@@ -1,5 +1,5 @@
 export const initGoogleAds = () => {
-	if (process.env.REACT_APP_NODE_ENV !== 'prod') {
+	if (process.env.NODE_ENV !== 'production') {
 		return;
 	}
 
